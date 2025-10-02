@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Mono } from "next/font/google";
+import React from "react";
+
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const spaceMono = Space_Mono({
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
   subsets: ["latin"],
 });
 
@@ -16,16 +14,10 @@ export const metadata: Metadata = { title: "Dailies" };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>): React.ReactNode {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+      <body className={`${spaceMono.className} antialiased`}>{children}</body>
     </html>
   );
 }
