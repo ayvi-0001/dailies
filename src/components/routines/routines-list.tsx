@@ -1,11 +1,11 @@
 "use client";
 
+import { Routine } from "@/types/routines";
 import { invoke } from "@tauri-apps/api/core";
 import React from "react";
 import { useEffect, useState } from "react";
 
 import RoutineCard from "./routine-card";
-import { Routine } from "./routine-card";
 import RoutineSection from "./routine-section";
 import { Section } from "./routine-section";
 
@@ -29,14 +29,7 @@ export default function RoutineList({
     <main>
       <RoutineSection title={title} />
       {routines.map((value, index) => (
-        <RoutineCard
-          key={index}
-          name={value.name}
-          group={value.group}
-          type_={value.type_}
-          max_value={value.max_value}
-          value={value.value}
-        />
+        <RoutineCard key={index} routine={value} />
       ))}
     </main>
   );

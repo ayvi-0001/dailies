@@ -13,7 +13,10 @@ pub fn run() {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![routines::get_routines])
+        .invoke_handler(tauri::generate_handler![
+            routines::get_routines,
+            routines::handle_value_change
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
