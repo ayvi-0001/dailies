@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   // See https://nextjs.org/docs/messages/export-image-api for different workarounds.
   images: {
     unoptimized: true,
+    qualities: [100],
   },
   // Configure assetPrefix or else the server won't properly resolve your assets.
   assetPrefix: isProd ? undefined : `http://${internalHost}:3002`,
