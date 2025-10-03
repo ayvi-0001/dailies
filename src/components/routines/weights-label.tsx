@@ -26,10 +26,9 @@ export default function WeightsLabel({
         className="bg-transparent"
         rings={[
           {
-            progress: 10,
+            progress: routine.weight * 10, // TEMP
             progressClassName: "text-black",
             trackClassName: "bg-black text-black/20",
-            className: "",
           },
         ]}
       />

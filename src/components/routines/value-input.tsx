@@ -15,7 +15,7 @@ export default function ValueInput({
 }: {
   routine: Routine;
 }): React.ReactNode {
-  const [inputValue, setInputValue] = useState<number>(routine.value);
+  const [inputValue, setInputValue] = useState<number | null>(routine.value);
   // TODO(ayvi) add alert on invalid value http://ayvi:3000/ayvi/dailies/issues/2
   const [_showError, setShowError] = useState<boolean>(false);
 

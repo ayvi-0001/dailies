@@ -3,11 +3,11 @@ export interface Routine {
   group: string;
   type: string;
   maxValue: number;
-  value: number;
+  value: number | null;
   weight: number;
-  weightedValue: number;
-  timeMin: string;
-  timeMax: string;
+  weightedValue: number | null;
+  timeMin: string | null;
+  timeMax: string | null;
 }
 
 export interface Section {
