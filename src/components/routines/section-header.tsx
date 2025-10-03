@@ -2,7 +2,7 @@ import React from "react";
 
 import type { Section } from "../../types/routines";
 
-export default function RoutineSection({ title }: Section): React.ReactNode {
+export default function SectionHeader({ title }: Section): React.ReactNode {
   return (
     <div className="select-none w-auto h-10 m-5 bg-[#6B6C76] z-5 relative opacity-90 bg-blend-overlay">
       <div className="bg-yellow-400 box-content size-10 aspect-square shadow-md">

@@ -6,8 +6,8 @@ import { useEffect, useState } from "react";
 
 import type { Routine } from "../../types/routines";
 import type { Section } from "../../types/routines";
-import RoutineCard from "./routine-card";
-import RoutineSection from "./routine-section";
+import RoutineCard from "./card";
+import SectionHeader from "./section-header";
 
 interface RoutineListProps extends Section {}
 
@@ -27,7 +27,7 @@ export default function RoutineList({
 
   return (
     <main>
-      <RoutineSection title={title} />
+      <SectionHeader title={title} />
       {routines.map((value, index) => (
         <RoutineCard key={index} routine={value} />
       ))}
