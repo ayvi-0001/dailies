@@ -5,7 +5,8 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 
 import type { Routine } from "../../types/routines";
-import { ValueInput } from "./value-input";
+import ValueInput from "./value-input";
+import WeightsLabel from "./weights-label";
 
 export default function RoutineCard({
   routine,
@@ -47,10 +48,13 @@ export default function RoutineCard({
               </Button>
             </div>
           </div>
-          <p className="font-bold text-black ">type: {routine.type}</p>
+          <p className="font-bold text-black">type: {routine.type}</p>
         </div>
-        <div className="absolute bottom-0 right-0 mr-10 mb-5 flex flex-col">
+        <div className="absolute bottom-0 right-0 mr-6 mb-5 flex flex-col">
           <ValueInput routine={routine} />
+        </div>
+        <div className="absolute top-0 right-0 mr-6 mt-3">
+          <WeightsLabel routine={routine} />
         </div>
       </div>
     </div>

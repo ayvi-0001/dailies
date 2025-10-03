@@ -10,7 +10,11 @@ import { Input } from "@/components/ui/input";
 
 import type { Routine } from "../../types/routines";
 
-export function ValueInput({ routine }: { routine: Routine }): React.ReactNode {
+export default function ValueInput({
+  routine,
+}: {
+  routine: Routine;
+}): React.ReactNode {
   const [inputValue, setInputValue] = useState<number>(routine.value);
   // TODO(ayvi) add alert on invalid value http://ayvi:3000/ayvi/dailies/issues/2
   const [_showError, setShowError] = useState<boolean>(false);

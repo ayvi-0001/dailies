@@ -6,6 +6,8 @@ pub struct Routine {
     pub r#type: String,
     pub max_value: i64,
     pub value: i64,
+    pub weight: i64,
+    pub weighted_value: i64,
 }
 
 #[tauri::command]
@@ -19,6 +21,8 @@ pub fn get_routines() -> Vec<Routine> {
             r#type: "r-d-b".to_owned(),
             max_value: 1,
             value: 1,
+            weight: 1,
+            weighted_value: 1,
         })
     }
 
