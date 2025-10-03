@@ -1,32 +1,24 @@
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Routine {
     pub name: String,
     pub group: String,
     pub r#type: String,
     pub max_value: i64,
-    pub value: i64,
-    pub weight: i64,
-    pub weighted_value: i64,
+    pub value: f64,
+    pub weight: f64,
+    pub weighted_value: f64,
 }
 
 #[tauri::command]
 pub fn get_routines() -> Vec<Routine> {
-    let mut routines: Vec<Routine> = vec![];
+    let current_file: std::path::PathBuf = file!().into();
 
-    for n in 1..=10 {
-        routines.push(Routine {
-            name: format!("name-{n}").to_owned(),
-            group: "rg1".to_owned(),
-            r#type: "r-d-b".to_owned(),
-            max_value: 1,
-            value: 1,
-            weight: 1,
-            weighted_value: 1,
-        })
-    }
+    let mut file_path: std::path::PathBuf = current_file.parent().unwrap().to_path_buf();
 
-    routines
+    file_path.push("routines.json");
+
+    serde_json::from_str(&std::fs::read_to_string(file_path).unwrap()).unwrap()
 }
 
 #[tauri::command(rename_all = "snake_case")]
