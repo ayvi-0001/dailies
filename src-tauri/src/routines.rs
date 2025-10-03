@@ -1,5 +1,9 @@
+use chrono::NaiveTime;
+use serde_with::serde_as;
+
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[serde_as]
 pub struct Routine {
     pub name: String,
     pub group: String,
@@ -8,6 +12,10 @@ pub struct Routine {
     pub value: Option<f64>,
     pub weight: f64,
     pub weighted_value: Option<f64>,
+    #[serde_as(as = "Option<NaiveTime>")]
+    pub time_min: Option<NaiveTime>,
+    #[serde_as(as = "Option<NaiveTime>")]
+    pub time_max: Option<NaiveTime>,
 }
 
 #[tauri::command]

@@ -6,6 +6,8 @@ export interface Routine {
   value: number;
   weight: number;
   weightedValue: number;
+  timeMin: string;
+  timeMax: string;
 }
 
 export interface Section {
