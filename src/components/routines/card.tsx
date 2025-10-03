@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -71,6 +72,8 @@ export default function RoutineCard({
     </div>
   );
 
+  const [inputValue, setInputValue] = useState<number | null>(routine.value);
+
   return (
     <div
       className="select-none box-content border-yellow-400/80 m-5 py-1 isolate bg-white/78 shadow-lg ring-1 ring-black/5 relative size-auto transition-all duration-300 ease-in-out hover:border-yellow/40 hover:translate-y-[-1px] hover:shadow-lg border-4"
@@ -85,10 +88,18 @@ export default function RoutineCard({
       </div>
       <Notes />
       <div className="absolute bottom-0 right-0 mr-6 mb-4">
-        <ValueInput routine={routine} />
+        <ValueInput
+          routine={routine}
+          inputValue={inputValue}
+          setInputValueAction={setInputValue}
+        />
       </div>
       <div className="absolute top-0 right-0 mr-6 mt-4">
-        <WeightsLabel routine={routine} />
+        <WeightsLabel
+          routine={routine}
+          inputValue={inputValue}
+          setInputValueAction={setInputValue}
+        />
       </div>
     </div>
   );

@@ -5,27 +5,29 @@ import RingChart from "../animata/graphs/ring-chart";
 
 export default function WeightsLabel({
   routine,
+  inputValue,
+  setInputValueAction,
 }: {
   routine: Routine;
+  inputValue: number | null;
+  setInputValueAction: React.Dispatch<React.SetStateAction<number | null>>;
 }): React.ReactNode {
   const WeightLabel = () => (
     <div className="flex flex-row justify-self-end">
       <p className="font-bold text-black">weight:</p>
-      <div className="empty:w-1"></div>
-      <p className="font-bold text-black decoration-2 underline-offset-2 underline decoration-blue-500/30">
+      <p className="empty:w-3 font-bold text-black decoration-2 underline-offset-2 underline decoration-blue-500/30">
         {routine.weight}
       </p>
     </div>
   );
 
   const WeightedValueLabel = () => {
-    if (routine.value !== null) {
+    if (inputValue !== null) {
       return (
         <div className="flex flex-row justify-self-end">
           {/* TODO(ayvi) recalculate weighted value onChange http://ayvi:3000/ayvi/dailies/issues/5 */}
           <p className="font-bold text-black">weighted value:</p>
-          <div className="empty:w-1"></div>
-          <p className="font-bold text-black decoration-2 underline-offset-2 underline decoration-blue-500/30">
+          <p className="empty:w-3 font-bold text-black decoration-2 underline-offset-2 underline decoration-blue-500/30">
             {routine.weightedValue}
           </p>
         </div>

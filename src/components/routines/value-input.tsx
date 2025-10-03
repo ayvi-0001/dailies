@@ -12,10 +12,13 @@ import type { Routine } from "../../types/routines";
 
 export default function ValueInput({
   routine,
+  inputValue,
+  setInputValueAction,
 }: {
   routine: Routine;
+  inputValue: number | null;
+  setInputValueAction: React.Dispatch<React.SetStateAction<number | null>>;
 }): React.ReactNode {
-  const [inputValue, setInputValue] = useState<number | null>(routine.value);
   // TODO(ayvi) add alert on invalid value http://ayvi:3000/ayvi/dailies/issues/2
   const [_showError, setShowError] = useState<boolean>(false);
 
@@ -26,7 +29,7 @@ export default function ValueInput({
     let value = parseInt(event.target.value, 10);
     if (!Number.isNaN(value)) {
       if (value <= routine.maxValue) {
-        setInputValue(value);
+        setInputValueAction(value);
         routine.value = value;
         await invoke<Routine[]>("handle_value_change", { routine: routine });
       }
