@@ -57,6 +57,18 @@ export default function ValueInput({
     }
   };
 
+  const onKeyDown = async (event: React.KeyboardEvent) => {
+    if (["Backspace", "Delete"].includes(event.key)) {
+      setInputValueAction(null);
+      routine.value = null;
+      await invoke<Routine[]>("handle_value_change", { routine: routine });
+    } else if (["Enter", "Escape"].includes(event.key)) {
+      if (inputRef.current) {
+        inputRef.current.blur();
+      }
+    }
+  };
+
   // These strings must be fully defined or tailwind won't compile all options
   let border_color: string =
     routine.value === null
@@ -88,12 +100,12 @@ export default function ValueInput({
           <Input
             // TODO(ayvi) must allow float values http://ayvi:3000/ayvi/dailies/issues/1
             maxLength={String(routine.maxValue).length}
-            // TODO(ayvi) hide max value if value is null http://ayvi:3000/ayvi/dailies/issues/7
             value={`${inputValue ?? ""}`}
             ref={inputRef}
             className={`${text_color} border-none text-lg gap-2 has-disabled:opacity-50 data-[active=true]:border-ring data-[active=true]:ring-ring/50 data-[active=true]:aria-invalid:ring-destructive/20 dark:data-[active=true]:aria-invalid:ring-destructive/40 aria-invalid:border-destructive data-[active=true]:aria-invalid:border-destructive dark:bg-input/30 relative flex h-9 w-9 items-center justify-center border-y border-r shadow-xs transition-all outline-none first:rounded-l-md first:border-l last:rounded-r-md data-[active=true]:z-10 data-[active=true]:ring-[3px]`}
             onChange={handleOnChange}
             onClick={handleInputClick}
+            onKeyDown={onKeyDown}
           />
           <div className={`mr-2 ml-1`}>
             <p className={`${text_color}`}>/</p>
