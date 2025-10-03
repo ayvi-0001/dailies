@@ -66,36 +66,29 @@ export default function RoutineCard({
 
   const Notes = () => (
     /* TODO(ayvi): clip notes text if too long http://ayvi:3000/ayvi/dailies/issues/10 */
-    <div className="absolute inset-x-60 top-0 ml-50 m-5 w-5/10">
+    <div className="absolute inset-x-60 top-0 ml-50 m-3 w-5/10">
       <p className="overflow-hidden text-ellipsis">{routine.notes}</p>
     </div>
   );
 
   return (
     <div
-      className="shadow-[0px_20px_207px_10px_rgba(255,_255,_255,_0.2)]"
-      style={{
-        background: "radial-gradient(circle at top, #1c1c1c, #000000)",
-      }}
+      className="select-nonebox-content border-yellow-400/80 m-5 py-1 isolate bg-white/78 shadow-lg ring-1 ring-black/5 relative size-auto transition-all duration-300 ease-in-out hover:border-yellow/40 hover:translate-y-[-1px] hover:shadow-lg border-4"
+      style={{ height: 150 }}
     >
-      <div
-        className="select-none border-4 box-content border-yellow-400/80 m-5 py-1 isolate bg-white/78 shadow-lg ring-1 ring-black/5 relative size-auto"
-        style={{ height: 150 }}
-      >
-        <GroupLabel />
-        <div className="absolute top-0 left-0 pl-14 flex flex-col">
-          <Header />
-        </div>
-        <div className="absolute bottom-0 left-0 ml-14 mb-2 flex flex-row">
-          <Details />
-        </div>
-        <Notes />
-        <div className="absolute bottom-0 right-0 mr-6 mb-4">
-          <ValueInput routine={routine} />
-        </div>
-        <div className="absolute top-0 right-0 mr-6 mt-4">
-          <WeightsLabel routine={routine} />
-        </div>
+      <GroupLabel />
+      <div className="absolute top-0 left-0 pl-14 flex flex-col">
+        <Header />
+      </div>
+      <div className="absolute bottom-0 left-0 ml-14 mb-2 flex flex-row">
+        <Details />
+      </div>
+      <Notes />
+      <div className="absolute bottom-0 right-0 mr-6 mb-4">
+        <ValueInput routine={routine} />
+      </div>
+      <div className="absolute top-0 right-0 mr-6 mt-4">
+        <WeightsLabel routine={routine} />
       </div>
     </div>
   );
