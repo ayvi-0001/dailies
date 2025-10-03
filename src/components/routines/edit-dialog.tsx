@@ -30,7 +30,7 @@ export default function EditDialog({
             edit
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] bg-black text-white">
           <DialogHeader>
             <DialogTitle>{routine.name}</DialogTitle>
             <DialogDescription></DialogDescription>
@@ -129,8 +129,8 @@ export default function EditDialog({
             </div>
           </div>
           <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">cancel</Button>
+            <DialogClose asChild className="text-black">
+              <Button variant="ghost">cancel</Button>
             </DialogClose>
             <DialogClose asChild>
               {/* TODO(ayvi) send data to tauri */}

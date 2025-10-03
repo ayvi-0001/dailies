@@ -15,6 +15,7 @@ export default function WeightsLabel({
   const WeightLabel = () => (
     <div className="flex flex-row justify-self-end">
       <p className="font-bold text-black">weight:</p>
+      <div className="w-5"></div>
       <p className="empty:w-3 font-bold text-black decoration-2 underline-offset-2 underline decoration-blue-500/30">
         {routine.weight}
       </p>
@@ -27,6 +28,7 @@ export default function WeightsLabel({
         <div className="flex flex-row justify-self-end">
           {/* TODO(ayvi) recalculate weighted value onChange http://ayvi:3000/ayvi/dailies/issues/5 */}
           <p className="font-bold text-black">weighted value:</p>
+          <div className="w-5"></div>
           <p className="empty:w-3 font-bold text-black decoration-2 underline-offset-2 underline decoration-blue-500/30">
             {routine.weightedValue}
           </p>
