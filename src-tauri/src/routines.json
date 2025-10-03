@@ -31,7 +31,7 @@
     "group": "rg1",
     "type": "r-ln-b",
     "maxValue": 1,
-    "value": 1,
+    "value": null,
     "weight": 1,
     "weightedValue": 1
   },

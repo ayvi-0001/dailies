@@ -22,8 +22,9 @@ export default function ValueInput({
   const handleOnChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ): Promise<void> => {
+    // TODO(ayvi) set null values http://ayvi:3000/ayvi/dailies/issues/8
     let value = parseInt(event.target.value, 10);
-    if (typeof value === "number" && !Number.isNaN(value) && value >= 0) {
+    if (!Number.isNaN(value)) {
       if (value <= routine.maxValue) {
         setInputValue(value);
         routine.value = value;
@@ -75,10 +76,12 @@ export default function ValueInput({
         onClick={handleOuterDivClick}
       >
         <div className="flex items-center mr-30 ml-30 mt-1 mb-1 text-lg font-semibold">
+          {/* TODO(ayvi) input more than 1 char http://ayvi:3000/ayvi/dailies/issues/9 */}
           <Input
             // TODO(ayvi) must allow float values http://ayvi:3000/ayvi/dailies/issues/1
             maxLength={String(routine.maxValue).length}
-            value={`${inputValue}`}
+            // TODO(ayvi) hide max value if value is null http://ayvi:3000/ayvi/dailies/issues/7
+            value={`${inputValue ?? ""}`}
             ref={inputRef}
             className={`${text_color} border-none text-lg gap-2 has-disabled:opacity-50 data-[active=true]:border-ring data-[active=true]:ring-ring/50 data-[active=true]:aria-invalid:ring-destructive/20 dark:data-[active=true]:aria-invalid:ring-destructive/40 aria-invalid:border-destructive data-[active=true]:aria-invalid:border-destructive dark:bg-input/30 relative flex h-9 w-9 items-center justify-center border-y border-r shadow-xs transition-all outline-none first:rounded-l-md first:border-l last:rounded-r-md data-[active=true]:z-10 data-[active=true]:ring-[3px]`}
             onChange={handleOnChange}
