@@ -26,7 +26,7 @@ export default function RoutineCard({
 
   const Buttons = () => (
     <div className="flex flex-wrap items-center md:flex-row gap-4">
-      {["edit", "history", "notes"].map((buttonLabel, index) => (
+      {["edit", "history"].map((buttonLabel, index) => (
         <Button key={index} variant="default" size="sm">
           {buttonLabel}
         </Button>
@@ -63,6 +63,13 @@ export default function RoutineCard({
     );
   };
 
+  const Notes = () => (
+    /* TODO(ayvi): clip notes text if too long http://ayvi:3000/ayvi/dailies/issues/10 */
+    <div className="absolute inset-x-60 top-0 ml-50 m-5 w-5/10">
+      <p className="overflow-hidden text-ellipsis">{routine.notes}</p>
+    </div>
+  );
+
   return (
     <div
       className="shadow-[0px_20px_207px_10px_rgba(255,_255,_255,_0.2)]"
@@ -78,9 +85,10 @@ export default function RoutineCard({
         <div className="absolute top-0 left-0 pl-14 flex flex-col">
           <Header />
         </div>
-        <div className="absolute bottom-0 left-0 ml-14 mb-2 flex flex-col">
+        <div className="absolute bottom-0 left-0 ml-14 mb-2 flex flex-row">
           <Details />
         </div>
+        <Notes />
         <div className="absolute bottom-0 right-0 mr-6 mb-4">
           <ValueInput routine={routine} />
         </div>

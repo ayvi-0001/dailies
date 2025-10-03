@@ -16,6 +16,7 @@ pub struct Routine {
     pub time_min: Option<NaiveTime>,
     #[serde_as(as = "Option<NaiveTime>")]
     pub time_max: Option<NaiveTime>,
+    pub notes: Option<String>,
 }
 
 #[tauri::command]

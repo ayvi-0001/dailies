@@ -8,6 +8,7 @@ export interface Routine {
   weightedValue: number | null;
   timeMin: string | null;
   timeMax: string | null;
+  notes: string | null;
 }
 
 export interface Section {

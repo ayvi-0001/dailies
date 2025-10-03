@@ -8,7 +8,8 @@
     "weight": 2,
     "weightedValue": 2,
     "timeMin": "07:00:00",
-    "timeMax": "12:00:00"
+    "timeMax": "12:00:00",
+    "notes": "example daily #1"
   },
   {
     "name": "name-2",
@@ -19,7 +20,8 @@
     "weight": 1.77,
     "weightedValue": 1.23,
     "timeMin": null,
-    "timeMax": null
+    "timeMax": null,
+    "notes": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt."
   },
   {
     "name": "name-3",
@@ -30,7 +32,8 @@
     "weight": 2.1,
     "weightedValue": 1,
     "timeMin": null,
-    "timeMax": null
+    "timeMax": null,
+    "notes": ""
   },
   {
     "name": "name-4",
@@ -41,7 +44,8 @@
     "weight": 1,
     "weightedValue": null,
     "timeMin": null,
-    "timeMax": null
+    "timeMax": null,
+    "notes": ""
   },
   {
     "name": "name-5",
@@ -52,7 +56,8 @@
     "weight": 1.34,
     "weightedValue": 1,
     "timeMin": null,
-    "timeMax": null
+    "timeMax": null,
+    "notes": ""
   },
   {
     "name": "name-6",
@@ -63,6 +68,7 @@
     "weight": 2.7,
     "weightedValue": 3.21,
     "timeMin": null,
-    "timeMax": null
+    "timeMax": null,
+    "notes": ""
   }
 ]
