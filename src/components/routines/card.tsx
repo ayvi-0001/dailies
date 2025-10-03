@@ -3,6 +3,7 @@
 import React from "react";
 import { useState } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import type { Routine } from "../../types/routines";
@@ -47,7 +48,6 @@ export default function RoutineCard({
   );
 
   const Details = () => {
-    let typeDetail: string | null = `type: ${routine.type}`;
     let timeDetail: string | null =
       routine.timeMin !== null
         ? `time: ${routine.timeMin} ~ ${routine.timeMax}`
@@ -59,11 +59,17 @@ export default function RoutineCard({
 
     return (
       <div className="flex flex-col">
-        {[typeDetail, timeDetail, daysDetail].map((detail, index) => (
-          <div key={index} className="empty:h-6">
-            {detail}
-          </div>
-        ))}
+        <div>
+          type:{" "}
+          <Badge
+            className="bg-slate-400 border-yellow-600 font-bold h-5 min-w-5 rounded-full px-1 font-mono tabular-nums"
+            variant={"outline"}
+          >
+            {routine.type}
+          </Badge>
+        </div>
+        <div className="empty:h-6">{timeDetail}</div>
+        <div className="empty:h-6">{daysDetail}</div>
       </div>
     );
   };
