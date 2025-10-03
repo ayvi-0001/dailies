@@ -1,13 +1,13 @@
 "use client";
 
-import { Routine } from "@/types/routines";
 import { invoke } from "@tauri-apps/api/core";
 import React from "react";
 import { useEffect, useState } from "react";
 
+import type { Routine } from "../../types/routines";
+import type { Section } from "../../types/routines";
 import RoutineCard from "./routine-card";
 import RoutineSection from "./routine-section";
-import { Section } from "./routine-section";
 
 interface RoutineListProps extends Section {}
 

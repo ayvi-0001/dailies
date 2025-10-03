@@ -1,6 +1,5 @@
 "use client";
 
-import { Routine } from "@/types/routines";
 import { invoke } from "@tauri-apps/api/core";
 import { TextCursorInput } from "lucide-react";
 import React from "react";
@@ -8,6 +7,8 @@ import { useRef, useState } from "react";
 
 import CursorTracker from "@/components/animata/container/cursor-tracker";
 import { Input } from "@/components/ui/input";
+
+import type { Routine } from "../../types/routines";
 
 export function ValueInput({ routine }: { routine: Routine }): React.ReactNode {
   const [inputValue, setInputValue] = useState<number>(routine.value);

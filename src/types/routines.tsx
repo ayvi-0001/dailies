@@ -5,3 +5,7 @@ export interface Routine {
   maxValue: number;
   value: number;
 }
+
+export interface Section {
+  title: string;
+}

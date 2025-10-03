@@ -1,10 +1,10 @@
 "use client";
 
-import { Routine } from "@/types/routines";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
 
+import type { Routine } from "../../types/routines";
 import { ValueInput } from "./value-input";
 
 export default function RoutineCard({

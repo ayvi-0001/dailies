@@ -1,8 +1,6 @@
 import React from "react";
 
-export interface Section {
-  title: string;
-}
+import type { Section } from "../../types/routines";
 
 export default function RoutineSection({ title }: Section): React.ReactNode {
   return (
