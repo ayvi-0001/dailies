@@ -36,7 +36,7 @@ export default function RoutineCard({
   );
 
   const GroupLabel = () => (
-    <div className="w-8 h-full ml-2 bg-yellow-400 border-yellow-500 border-2">
+    <div className="w-8 h-full ml-4 bg-yellow-400 border-yellow-500 border-2">
       <div className="flex justify-center items-center w-full h-full">
         <p className="text-black font-mono font-medium text-xl rotate-180 [writing-mode:vertical-rl]">
           {routine.group}
@@ -66,21 +66,21 @@ export default function RoutineCard({
 
   const Notes = () => (
     /* TODO(ayvi): clip notes text if too long http://ayvi:3000/ayvi/dailies/issues/10 */
-    <div className="absolute inset-x-60 top-0 ml-50 m-3 w-5/10">
+    <div className="absolute inset-x-60 top-0 ml-50 m-5 w-5/10">
       <p className="overflow-hidden text-ellipsis">{routine.notes}</p>
     </div>
   );
 
   return (
     <div
-      className="select-nonebox-content border-yellow-400/80 m-5 py-1 isolate bg-white/78 shadow-lg ring-1 ring-black/5 relative size-auto transition-all duration-300 ease-in-out hover:border-yellow/40 hover:translate-y-[-1px] hover:shadow-lg border-4"
+      className="select-none box-content border-yellow-400/80 m-5 py-1 isolate bg-white/78 shadow-lg ring-1 ring-black/5 relative size-auto transition-all duration-300 ease-in-out hover:border-yellow/40 hover:translate-y-[-1px] hover:shadow-lg border-4"
       style={{ height: 150 }}
     >
       <GroupLabel />
-      <div className="absolute top-0 left-0 pl-14 flex flex-col">
+      <div className="absolute top-0 left-0 ml-16">
         <Header />
       </div>
-      <div className="absolute bottom-0 left-0 ml-14 mb-2 flex flex-row">
+      <div className="absolute bottom-0 left-0 ml-16 mb-2">
         <Details />
       </div>
       <Notes />

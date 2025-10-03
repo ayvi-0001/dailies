@@ -54,19 +54,24 @@ export default function ValueInput({
     }
   };
 
+  // These strings must be fully defined or tailwind won't compile all options
   let border_color: string =
-    routine.value == 0
-      ? "border-red-700"
-      : routine.value == routine.maxValue
-        ? "border-green-700"
-        : "border-blue-700";
+    routine.value === null
+      ? "border-transparent"
+      : routine.value == 0
+        ? "border-red-700"
+        : routine.value == routine.maxValue
+          ? "border-green-700"
+          : "border-blue-700";
 
   let text_color: string =
-    routine.value == 0
-      ? "text-red-700"
-      : routine.value == routine.maxValue
-        ? "text-green-700"
-        : "text-blue-700";
+    routine.value === null
+      ? "text-transparent"
+      : routine.value == 0
+        ? "text-red-700"
+        : routine.value == routine.maxValue
+          ? "text-green-700"
+          : "text-blue-700";
 
   return (
     <CursorTracker>
