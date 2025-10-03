@@ -5,6 +5,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 
 import type { Routine } from "../../types/routines";
+import EditDialog from "./edit-dialog";
 import ValueInput from "./value-input";
 import WeightsLabel from "./weights-label";
 
@@ -26,11 +27,11 @@ export default function RoutineCard({
 
   const Buttons = () => (
     <div className="flex flex-wrap items-center md:flex-row gap-4">
-      {["edit", "history"].map((buttonLabel, index) => (
-        <Button key={index} variant="default" size="sm">
-          {buttonLabel}
-        </Button>
-      ))}
+      <EditDialog routine={routine} />
+      {/* TODO(ayvi): editable history http://ayvi:3000/ayvi/dailies/issues/14 */}
+      <Button variant="default" size="sm">
+        history
+      </Button>
     </div>
   );
 
