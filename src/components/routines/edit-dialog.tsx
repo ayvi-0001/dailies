@@ -77,6 +77,16 @@ export default function EditDialog({
               />
             </div>
             <div className="grid gap-3">
+              <Label htmlFor="maxValue-1">maxValue</Label>
+              <Input
+                autoComplete="false"
+                aria-autocomplete="none"
+                id="maxValue-1"
+                name="maxValue"
+                defaultValue={routine.maxValue}
+              />
+            </div>
+            <div className="grid gap-3">
               <Label htmlFor="timeMin-1">timeMin</Label>
               <Input
                 autoComplete="false"
@@ -104,6 +114,17 @@ export default function EditDialog({
                 id="notes-1"
                 name="notes"
                 defaultValue={routine.notes ?? ""}
+              />
+            </div>
+            {/* TODO(ayvi): dropdown for weekdays */}
+            <div className="grid gap-3">
+              <Label htmlFor="weekDays-1">weekDays</Label>
+              <Input
+                autoComplete="false"
+                aria-autocomplete="none"
+                id="weekDays-1"
+                name="weekDays"
+                defaultValue={routine.weekDays ? `${routine.weekDays}` : ""}
               />
             </div>
           </div>

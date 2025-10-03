@@ -9,6 +9,7 @@ export interface Routine {
   timeMin: string | null;
   timeMax: string | null;
   notes: string | null;
+  weekDays: number[];
 }
 
 export interface Section {

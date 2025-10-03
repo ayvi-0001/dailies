@@ -9,6 +9,12 @@
     "weightedValue": 2,
     "timeMin": "07:00:00",
     "timeMax": "12:00:00",
+    "weekDays": [
+      0,
+      1,
+      2,
+      3
+    ],
     "notes": "example daily #1"
   },
   {
@@ -21,6 +27,7 @@
     "weightedValue": 1.23,
     "timeMin": null,
     "timeMax": null,
+    "weekDays": [],
     "notes": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt."
   },
   {
@@ -33,6 +40,10 @@
     "weightedValue": 1,
     "timeMin": null,
     "timeMax": null,
+    "weekDays": [
+      6,
+      7
+    ],
     "notes": ""
   },
   {
@@ -45,6 +56,7 @@
     "weightedValue": null,
     "timeMin": null,
     "timeMax": null,
+    "weekDays": [],
     "notes": ""
   },
   {
@@ -57,6 +69,7 @@
     "weightedValue": 1,
     "timeMin": null,
     "timeMax": null,
+    "weekDays": [],
     "notes": ""
   },
   {
@@ -69,6 +82,7 @@
     "weightedValue": 3.21,
     "timeMin": null,
     "timeMax": null,
+    "weekDays": [],
     "notes": ""
   }
 ]

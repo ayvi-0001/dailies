@@ -52,7 +52,10 @@ export default function RoutineCard({
       routine.timeMin !== null
         ? `time: ${routine.timeMin} ~ ${routine.timeMax}`
         : null;
-    let daysDetail: string | null = `${/* TODO(ayvi) weekdays */ ""}`;
+    let daysDetail: string | null =
+      !Array.isArray(routine.weekDays) || !routine.weekDays.length
+        ? null
+        : `days: ${routine.weekDays}`;
 
     return (
       <div className="flex flex-col">

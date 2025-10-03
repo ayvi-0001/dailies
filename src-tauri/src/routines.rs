@@ -17,6 +17,7 @@ pub struct Routine {
     #[serde_as(as = "Option<NaiveTime>")]
     pub time_max: Option<NaiveTime>,
     pub notes: Option<String>,
+    pub week_days: Vec<i8>,
 }
 
 #[tauri::command]
