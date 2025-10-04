@@ -1,19 +1,29 @@
-export interface Routine {
-  value_id: string;
-  routine_id: string;
+type int = BigInteger;
+
+export type Routine = {
+  ordinalPos: int;
+  valueId: string;
+  routineId: string;
   name: string;
   group: string;
   type: string;
   maxValue: number;
+  notes: string | null;
+  nDays: BigInteger | null;
+  weekdays: string | null;
+  date: Date;
+  dateStarted: Date;
+  dateArchived: Date | null;
   value: number | null;
   weight: number;
   weightedValue: number | null;
+  // convert NaiveTime from rs to ts?
   timeMin: string | null;
   timeMax: string | null;
-  notes: string | null;
-  weekdays: number[];
-}
+  timeBucketMin: BigInteger;
+  timeBucketMax: BigInteger;
+};
 
-export interface Section {
+export type Section = {
   title: string;
-}
+};
