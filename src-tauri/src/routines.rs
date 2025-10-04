@@ -101,9 +101,9 @@ pub async fn get_routines(
 
 /// This function doesn't get called unless the value change is valid.
 #[tauri::command(async, rename_all = "snake_case")]
-#[allow(unused_must_use)] // TODO(ayvi): toast if query errors
+#[allow(unused_must_use)]
 pub async fn handle_value_change(
-    state: State<'_, Mutex<state::AppState>>, routine: Daily,
+    app: tauri::AppHandle, state: State<'_, Mutex<state::AppState>>, routine: Daily,
 ) -> Result<(), ()> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
 
@@ -116,18 +116,29 @@ pub async fn handle_value_change(
                 routine.value_id
             ))
             .await
+            .map_err(|e| {
+                app.emit(
+                    "tauri://error",
+                    messages::ErrorMessage { message: &e.to_string() },
+                )
+                .unwrap()
+            })
             .unwrap()
     } else {
         state
             .connection_pool
-            .execute(
-                sqlx::query!(
-                    "UPDATE dailies.values SET value = NULL WHERE value_id = $1",
-                    routine.value_id,
-                )
-            )
+            .execute(sqlx::query!(
+                "UPDATE dailies.values SET value = NULL WHERE value_id = $1",
+                routine.value_id,
+            ))
             .await
-            // TODO(ayvi): map err to app.emit
+            .map_err(|e| {
+                app.emit(
+                    "tauri://error",
+                    messages::ErrorMessage { message: &e.to_string() },
+                )
+                .unwrap()
+            })
             .unwrap()
     };
 
