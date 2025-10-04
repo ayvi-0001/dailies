@@ -1,4 +1,6 @@
 export interface Routine {
+  value_id: string;
+  routine_id: string;
   name: string;
   group: string;
   type: string;
@@ -9,7 +11,7 @@ export interface Routine {
   timeMin: string | null;
   timeMax: string | null;
   notes: string | null;
-  weekDays: number[];
+  weekdays: number[];
 }
 
 export interface Section {

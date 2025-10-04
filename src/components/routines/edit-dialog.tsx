@@ -124,7 +124,7 @@ export default function EditDialog({
                 aria-autocomplete="none"
                 id="weekDays-1"
                 name="weekDays"
-                defaultValue={routine.weekDays ? `${routine.weekDays}` : ""}
+                defaultValue={routine.weekdays ? `${routine.weekdays}` : ""}
               />
             </div>
           </div>

@@ -1,12 +1,11 @@
 "use client";
 
+import type { Routine } from "@/types/routines";
 import React from "react";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 
-import type { Routine } from "../../types/routines";
 import EditDialog from "./edit-dialog";
 import HistoryDrawer from "./history-drawer";
 import ValueInput from "./value-input";
@@ -21,7 +20,6 @@ export default function RoutineCard({
     return (
       <div className="flex flex-wrap items-center md:flex-row gap-4">
         <EditDialog routine={routine} />
-        {/* TODO(ayvi): editable history http://ayvi:3000/ayvi/dailies/issues/14 */}
         <HistoryDrawer routine={routine} />
       </div>
     );
@@ -54,9 +52,9 @@ export default function RoutineCard({
         ? `time: ${routine.timeMin} ~ ${routine.timeMax}`
         : null;
     let daysDetail: string | null =
-      !Array.isArray(routine.weekDays) || !routine.weekDays.length
+      !Array.isArray(routine.weekdays) || !routine.weekdays.length
         ? null
-        : `days: ${routine.weekDays}`;
+        : `days: ${routine.weekdays}`;
 
     return (
       <div className="flex flex-col">
@@ -87,7 +85,7 @@ export default function RoutineCard({
   return (
     <div
       className="select-none box-content border-yellow-400/80 m-5 py-1 isolate bg-white/78 shadow-lg ring-1 ring-black/5 relative size-auto transition-all duration-300 ease-in-out hover:border-yellow/40 hover:translate-y-[-1px] hover:shadow-lg border-4"
-      style={{ height: 150 }}
+      style={{ height: 150 } as React.CSSProperties}
     >
       <GroupLabel />
       <div className="absolute top-0 left-0 ml-16">
