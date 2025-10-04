@@ -1,40 +1,40 @@
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import React from "react";
 
-interface BackgroundProps {
+type BackgroundProps = {
   src: string;
-  alt: string;
-  children?: React.ReactNode;
-  className?: string;
+  alt?: string;
   style?: React.CSSProperties;
-}
+  className?: string;
+  props?: React.ComponentProps<"div">;
+  imageProps?: React.ComponentProps<typeof Image>;
+  children?: React.ReactNode;
+};
 
-// TODO(ayvi): parallax background
-const FullScreenBackground = ({
-  src,
-  alt,
-  children,
-  className,
-  style,
-}: BackgroundProps): React.ReactNode => {
-  const image = (
-    <Image
-      src={src}
-      alt={alt}
-      quality={100} // Adjust quality as needed
-      fill // Makes the image fill the parent container
-      className={className}
-      style={{ ...style, objectFit: "cover" }} // Ensures the image covers the entire area without distortion
-      priority // Preload the image if it's a critical background
-    />
-  );
+// TODO(ayvi): parallax background + rotate selection
+// http://ayvi:3000/ayvi/dailies/issues/25
+export default function BackgroundImage(
+  background_props: BackgroundProps,
+): React.ReactElement {
+  let { src, alt, style, className, props, imageProps, children } =
+    background_props;
 
   return (
-    <div className="fixed top-0 left-0 w-screen h-screen z--2">
-      {image}
+    <div
+      className={cn("fixed top-0 left-0 w-screen h-screen z--2", className)}
+      {...props}
+    >
+      <Image
+        alt={alt ?? ""}
+        fill
+        priority
+        quality={100}
+        src={src}
+        style={{ ...style, objectFit: "cover" }}
+        {...imageProps}
+      />
       {children}
     </div>
   );
-};
-
-export default FullScreenBackground;
+}

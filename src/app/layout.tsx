@@ -1,4 +1,4 @@
-import FullScreenBackground from "@/app/background";
+import BackgroundImage from "@/app/background";
 import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
 import React from "react";
@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${spaceMono.className} antialiased`}>
-        <FullScreenBackground src="/images/background.png" alt="" />
+        <BackgroundImage src="/images/background.png" />
         <div className="md:m-20">{children}</div>
       </body>
     </html>
