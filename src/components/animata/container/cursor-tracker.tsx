@@ -1,5 +1,6 @@
-import { useMousePosition } from "@/hooks/use-mouse-position";
 import { useCallback, useRef } from "react";
+
+import { useMousePosition } from "@/hooks/use-mouse-position";
 
 /**
  * @component @name CursorTracker

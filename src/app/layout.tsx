@@ -1,7 +1,8 @@
+import React from "react";
+
 import BackgroundImage from "@/app/background";
 import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
-import React from "react";
 
 import "./globals.css";
 

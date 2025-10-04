@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import type { Routine } from "../../types/routines";
+import type { Routine } from "@/types/routines";
 
 // TODO(ayvi) complete edit dialog http://ayvi:3000/ayvi/dailies/issues/13
 export default function EditDialog({

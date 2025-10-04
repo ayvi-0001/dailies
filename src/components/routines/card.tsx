@@ -1,10 +1,11 @@
 "use client";
 
-import type { Routine } from "@/types/routines";
 import React from "react";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+
+import type { Routine } from "@/types/routines";
 
 import EditDialog from "./edit-dialog";
 import HistoryDrawer from "./history-drawer";

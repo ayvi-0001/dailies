@@ -1,6 +1,8 @@
-import { cn } from "@/lib/utils";
-import Image from "next/image";
 import React from "react";
+
+import Image from "next/image";
+
+import { cn } from "@/lib/utils";
 
 type BackgroundProps = {
   src: string;

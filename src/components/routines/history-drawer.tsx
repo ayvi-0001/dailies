@@ -12,7 +12,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
-import type { Routine } from "../../types/routines";
+import type { Routine } from "@/types/routines";
 
 export default function HistoryDrawer({
   routine,

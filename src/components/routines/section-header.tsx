@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { Section } from "../../types/routines";
+import type { Section } from "@/types/routines";
 
 export default function SectionHeader({ title }: Section): React.ReactNode {
   return (

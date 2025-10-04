@@ -1,7 +1,8 @@
 import React from "react";
 
-import type { Routine } from "../../types/routines";
-import RingChart from "../animata/graphs/ring-chart";
+import RingChart from "@/components/animata/graphs/ring-chart";
+
+import type { Routine } from "@/types/routines";
 
 export default function WeightsLabel({
   routine,

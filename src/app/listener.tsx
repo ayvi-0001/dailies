@@ -1,11 +1,13 @@
 "use client";
 
-import type { ErrorMessage } from "@/types/errors";
-import { Event, listen } from "@tauri-apps/api/event";
-import dynamic from "next/dynamic";
 import React from "react";
 import { useEffect } from "react";
+
+import { Event, listen } from "@tauri-apps/api/event";
+import dynamic from "next/dynamic";
 import { toast } from "sonner";
+
+import type { ErrorMessage } from "@/types/errors";
 
 export default function Toaster(): React.ReactElement {
   useEffect(() => {
