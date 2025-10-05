@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
   },
   // Configure assetPrefix or else the server won't properly resolve your assets.
   assetPrefix: isProd ? undefined : `http://${internalHost}:3002`,
+  experimental: {
+    cacheComponents: true,
+  },
 };
 
 export default nextConfig;
