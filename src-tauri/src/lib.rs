@@ -44,6 +44,7 @@ pub async fn run() {
             routines::get_routines,
             routines::handle_value_change,
             routines::query_routine_history,
+            routines::get_total_eval_weight,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

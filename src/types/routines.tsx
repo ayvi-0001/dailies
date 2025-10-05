@@ -26,4 +26,5 @@ export type Routine = {
 
 export type Section = {
   title: string;
+  totalWeight: number;
 };

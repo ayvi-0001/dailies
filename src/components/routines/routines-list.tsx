@@ -16,6 +16,7 @@ export default function RoutineList({
   title,
 }: RoutineListProps): React.ReactNode {
   const [routines, setRoutines] = useState<Routine[]>([]);
+  const [totalWeight, settotalWeight] = useState<number>(0);
   const [refreshRoutines, setRefreshRoutines] = useState<number>(0);
 
   // TODO(ayvi): useEffect individually for each daily, so refresh doesn't pull all dailies
@@ -29,17 +30,27 @@ export default function RoutineList({
     get_routines();
   }, [refreshRoutines]);
 
+  useEffect(() => {
+    const get_total_eval_weight = async () => {
+      await invoke<number>("get_total_eval_weight", { date: "2025-10-03" })
+        .then((result) => settotalWeight(result))
+        .catch(console.error);
+    };
+    get_total_eval_weight();
+  }, []);
+
   const triggerRoutineRefresh = () => {
     setRefreshRoutines(refreshRoutines + 1);
   };
 
   return (
     <main>
-      <SectionHeader title={title} />
+      <SectionHeader title={title} totalWeight={totalWeight} />
       {routines.map((value, index) => (
         <RoutineCard
           key={index}
           routine={value}
+          totalWeight={totalWeight}
           onRefreshAction={triggerRoutineRefresh}
         />
       ))}

@@ -136,6 +136,44 @@ pub async fn query_routine_history(
     Ok(dailies)
 }
 
+#[tauri::command(async, rename_all = "snake_case")]
+pub async fn get_total_eval_weight(
+    app: tauri::AppHandle,
+    state: State<'_, Mutex<state::AppState>>,
+    date: &str,
+) -> Result<Decimal, ()> {
+    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+
+    struct _Row {
+        total_weight: Option<Decimal>,
+    }
+
+    let row: Result<_Row, sqlx::Error> = sqlx::query_as!(
+        _Row,
+        "SELECT
+           SUM(weight) AS total_weight
+         FROM
+           dailies.weighted_values
+         WHERE
+           date = $1",
+        NaiveDate::from_str(date).unwrap(),
+    )
+    .fetch_one(&state.connection_pool)
+    .await;
+
+    match row {
+        Ok(row) => Ok(row.total_weight.unwrap()),
+        Err(e) => {
+            app.emit(
+                "tauri://error",
+                messages::ErrorMessage { message: &e.to_string() },
+            )
+            .unwrap();
+            Ok(rust_decimal::Decimal::new(0, 0))
+        }
+    }
+}
+
 /// This function doesn't get called unless the value change is valid.
 #[tauri::command(async, rename_all = "snake_case")]
 #[allow(unused_must_use)]

@@ -28,8 +28,12 @@ import WeightsLabel from "./weights-label";
 
 export default function HistoryDrawer({
   routine,
+  // TODO(ayvi): totalWeight for history should eval for the respective day
+  // http://ayvi:3000/ayvi/dailies/issues/35
+  totalWeight,
 }: {
   routine: Routine;
+  totalWeight: number;
 }): React.ReactElement {
   const [openHistory, setOpenHistory] = React.useState<boolean>(false);
 
@@ -48,6 +52,7 @@ export default function HistoryDrawer({
             {openHistory && (
               <HistoryCards
                 routines={cachedQueryRoutineHistory(routine.routineId, 6)}
+                totalWeight={totalWeight}
               />
             )}
           </div>
@@ -68,21 +73,27 @@ export default function HistoryDrawer({
 // TODO(ayvi): infinite scroll history http://ayvi:3000/ayvi/dailies/issues/33
 function HistoryCards({
   routines,
+  totalWeight,
 }: {
   routines: Promise<Routine[]>;
+  totalWeight: number;
 }): React.ReactElement {
   return (
     <ScrollArea className="h-[32rem] rounded-md">
       <React.Suspense fallback={<div>Loading...</div>}>
         {React.use(routines).map((routine: Routine, index: number) =>
-          HistoryRoutineCard(routine, index),
+          HistoryRoutineCard(routine, index, totalWeight),
         )}
       </React.Suspense>
     </ScrollArea>
   );
 }
 
-const HistoryRoutineCard = (routine: Routine, index: number) => {
+const HistoryRoutineCard = (
+  routine: Routine,
+  index: number,
+  totalWeight: number,
+) => {
   const [inputValue, setInputValue] = React.useState<number | null>(
     routine.value,
   );
@@ -96,7 +107,7 @@ const HistoryRoutineCard = (routine: Routine, index: number) => {
       <div className="absolute bottom-0 left-0 ml-16 mb-2">
         <Details key={index} routine={routine} />
       </div>
-      <div className="absolute bottom-0 right-0 mr-6 mb-4">
+      <div className="absolute bottom-0 right-0 mr-5 mb-4">
         <ValueInput
           key={index}
           routine={routine}
@@ -107,12 +118,12 @@ const HistoryRoutineCard = (routine: Routine, index: number) => {
           setInputValueAction={setInputValue}
         />
       </div>
-      <div className="absolute top-0 right-0 mr-6 mt-4">
+      <div className="absolute top-0 right-0 mr-5">
         <WeightsLabel
           key={index}
           routine={routine}
           inputValue={inputValue}
-          setInputValueAction={setInputValue}
+          totalWeight={totalWeight}
         />
       </div>
     </CardBorder>

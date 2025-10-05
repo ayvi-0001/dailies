@@ -17,16 +17,18 @@ import WeightsLabel from "./weights-label";
 
 export default function RoutineCard({
   routine,
+  totalWeight,
   onRefreshAction,
 }: {
   routine: Routine;
+  totalWeight: number;
   onRefreshAction: () => void;
 }): React.ReactNode {
   const RoutineActions = (): React.ReactElement => {
     return (
       <div className="flex flex-wrap items-center md:flex-row gap-4">
         <EditDialog routine={routine} />
-        <HistoryDrawer routine={routine} />
+        <HistoryDrawer routine={routine} totalWeight={totalWeight} />
       </div>
     );
   };
@@ -49,7 +51,7 @@ export default function RoutineCard({
       <div className="absolute inset-x-60 top-0 ml-50 m-5 w-5/10">
         <Notes notes={routine.notes ?? ""} />
       </div>
-      <div className="absolute bottom-0 right-0 mr-6 mb-4">
+      <div className="absolute bottom-0 right-0 mr-5 mb-4">
         <ValueInput
           routine={routine}
           inputValue={inputValue}
@@ -57,11 +59,11 @@ export default function RoutineCard({
           onRefreshAction={onRefreshAction}
         />
       </div>
-      <div className="absolute top-0 right-0 mr-6 mt-4">
+      <div className="absolute top-0 right-0 mr-5">
         <WeightsLabel
           routine={routine}
           inputValue={inputValue}
-          setInputValueAction={setInputValue}
+          totalWeight={totalWeight}
         />
       </div>
     </CardBorder>

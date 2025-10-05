@@ -1,58 +1,80 @@
 import React from "react";
 
 import RingChart from "@/components/animata/graphs/ring-chart";
+import { Function, Weight } from "@/components/svgs";
+import { Separator } from "@/components/ui/separator";
 
 import type { Routine } from "@/types/routines";
 
 export default function WeightsLabel({
   routine,
   inputValue,
-  setInputValueAction,
+  totalWeight,
 }: {
   routine: Routine;
   inputValue: number | null;
-  setInputValueAction: React.Dispatch<React.SetStateAction<number | null>>;
+  totalWeight: number;
 }): React.ReactNode {
+  let routineActive: boolean = inputValue !== null;
+
+  let routineTotalWeight: number = (routine.weight / totalWeight) * 100;
+  let routineValueContribution: number = routine.weightedValue
+    ? (routine.weightedValue / totalWeight) * 100
+    : 0;
+
   const WeightLabel = () => (
     <div className="flex flex-row justify-self-end">
-      <p className="font-bold text-black">weight:</p>
-      <div className="w-5"></div>
-      <p className="empty:w-3 font-bold text-black decoration-2 underline-offset-2 underline decoration-blue-500/30">
-        {routine.weight}
-      </p>
+      <p className="empty:w-3 font-bold text-black">{routine.weight}</p>
+      <div className="w-1"></div>
+      <Weight className="fill-black stroke-2 stroke-black" />
     </div>
   );
 
   const WeightedValueLabel = () => {
-    if (inputValue !== null) {
-      return (
-        <div className="flex flex-row justify-self-end">
-          {/* TODO(ayvi) recalculate weighted value onChange http://ayvi:3000/ayvi/dailies/issues/5 */}
-          <p className="font-bold text-black">weighted value:</p>
-          <div className="w-5"></div>
-          <p className="empty:w-3 font-bold text-black decoration-2 underline-offset-2 underline decoration-blue-500/30">
-            {routine.weightedValue}
-          </p>
-        </div>
-      );
+    let displayValue: string;
+
+    if (routineActive) {
+      displayValue = `(${Math.round(routineValueContribution * 100) / 100}%) ${routine.weightedValue}`;
+    } else {
+      displayValue = `(-%)`;
     }
+
+    return (
+      <div className="flex flex-row justify-self-end">
+        <p className="empty:w-3 font-bold text-black">{displayValue}</p>
+        <div className="w-1"></div>
+        <Function className="fill-black stroke-2 stroke-black " />
+      </div>
+    );
   };
 
   return (
     <div className="flex flex-row">
-      <div className="mr-3">
+      <div className="mr-1 mt-3">
         <WeightLabel />
+        <div className="m-1"></div>
         <WeightedValueLabel />
       </div>
-      {/* TODO(ayvi) calculate weight against daily total http://ayvi:3000/ayvi/dailies/issues/6 */}
+      <div className="flex items-center h-12 mt-4 ml-2">
+        <Separator
+          orientation="vertical"
+          decorative
+          className="border-slate-400/80 border-1"
+        />
+      </div>
       <RingChart
-        size={10}
-        width={5}
+        size={8}
+        width={6}
         className="bg-transparent"
         rings={[
           {
-            progress: routine.weight * 10, // TEMP
-            progressClassName: "text-black",
+            progress: routineValueContribution,
+            progressClassName: "text-green-900",
+            trackClassName: "bg-black text-green-500/30",
+          },
+          {
+            progress: routineActive ? routineTotalWeight : 0,
+            progressClassName: "text-black/70",
             trackClassName: "bg-black text-black/20",
           },
         ]}
