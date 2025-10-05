@@ -17,6 +17,8 @@ export default function RoutineList({
 }: RoutineListProps): React.ReactNode {
   const [routines, setRoutines] = useState<Routine[]>([]);
 
+  // TODO(ayvi): useEffect individually for each daily, so refresh doesn't pull all dailies
+  // http://ayvi:3000/ayvi/dailies/issues/34
   useEffect(() => {
     const get_routines = async () => {
       await invoke<Routine[]>("get_routines")
@@ -24,7 +26,7 @@ export default function RoutineList({
         .catch(console.error);
     };
     get_routines();
-  }, []);
+  }, [routines]);
 
   return (
     <main>
