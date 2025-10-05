@@ -6,6 +6,8 @@ import { Space_Mono } from "next/font/google";
 
 import "./globals.css";
 
+export const experimental_ppr = true;
+
 const spaceMono = Space_Mono({
   weight: ["400", "700"],
   style: ["normal", "italic"],
