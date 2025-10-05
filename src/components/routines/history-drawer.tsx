@@ -5,7 +5,6 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -23,7 +22,9 @@ import { cachedQueryRoutineHistory } from "./utils";
 import ValueInput from "./value-input";
 import WeightsLabel from "./weights-label";
 
+// TODO(ayvi): history days options/streaming http://ayvi:3000/ayvi/dailies/issues/32
 // TODO(ayvi): move to generic drawer component
+
 export default function HistoryDrawer({
   routine,
 }: {
@@ -31,11 +32,8 @@ export default function HistoryDrawer({
 }): React.ReactElement {
   const [openHistory, setOpenHistory] = React.useState<boolean>(false);
 
-  // TODO(ayvi): history days options/streaming http://ayvi:3000/ayvi/dailies/issues/32
-
   return (
     <Drawer open={openHistory} onOpenChange={setOpenHistory}>
-      {/* TODO(ayvi): editable history http://ayvi:3000/ayvi/dailies/issues/14 */}
       <DrawerTrigger asChild>
         <Button variant="default" size="sm">
           history
@@ -44,9 +42,7 @@ export default function HistoryDrawer({
       <DrawerContent className="bg-black/80 border-white border-1">
         <DrawerHeader className="text-left">
           <DrawerTitle className="text-white">{routine.name}</DrawerTitle>
-          <DrawerDescription className="text-white">
-            {"< TODO >"}
-          </DrawerDescription>
+          {/*<DrawerDescription className="text-white"></DrawerDescription>*/}
           <div>
             {openHistory && (
               <HistoryCards
@@ -68,6 +64,7 @@ export default function HistoryDrawer({
   );
 }
 
+// TODO(ayvi): infinite scroll history http://ayvi:3000/ayvi/dailies/issues/33
 function HistoryCards({
   routines,
 }: {

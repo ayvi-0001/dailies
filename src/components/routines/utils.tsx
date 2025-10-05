@@ -8,9 +8,15 @@ export async function queryRoutineHistory(
   routineId: string,
   days: number,
 ): Promise<Routine[]> {
+  let startDate: Date = new Date();
+  let endDate: Date = new Date();
+
+  startDate.setDate(endDate.getDate() - days);
+
   return await invoke<Routine[]>("query_routine_history", {
     routine_id: routineId,
-    days: days,
+    start_date: startDate.toISOString().substring(0, 10),
+    end_date: endDate.toISOString().substring(0, 10),
   });
 }
 

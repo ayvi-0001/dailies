@@ -95,11 +95,10 @@ pub async fn query_routine_history(
     app: tauri::AppHandle,
     state: State<'_, Mutex<state::AppState>>,
     routine_id: &str,
-    days: i64,
+    start_date: &str,
+    end_date: &str,
 ) -> Result<Vec<Daily>, ()> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
-
-    let date: NaiveDate = chrono::Local::now().date_naive() - chrono::Duration::days(days);
 
     let rows: Result<Vec<Daily>, sqlx::Error> = sqlx::query_as!(
         Daily,
@@ -112,10 +111,12 @@ pub async fn query_routine_history(
          WHERE
            routine_id = $1
            AND date >= $2
+           AND date <= $3
          ORDER BY
            date DESC",
         routine_id,
-        date
+        NaiveDate::from_str(start_date).unwrap(),
+        NaiveDate::from_str(end_date).unwrap()
     )
     .fetch_all(&state.connection_pool)
     .await;
