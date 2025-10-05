@@ -1,5 +1,6 @@
-import React from "react";
+import * as React from "react";
 
+import { ManageHistory } from "@/components/svgs";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -36,7 +37,7 @@ export default function HistoryDrawer({
     <Drawer open={openHistory} onOpenChange={setOpenHistory}>
       <DrawerTrigger asChild>
         <Button variant="default" size="sm">
-          history
+          <ManageHistory />
         </Button>
       </DrawerTrigger>
       <DrawerContent className="bg-black/80 border-white border-1">

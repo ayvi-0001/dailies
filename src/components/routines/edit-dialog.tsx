@@ -1,5 +1,6 @@
-import React from "react";
+import * as React from "react";
 
+import { EditSquare } from "@/components/svgs";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,7 +28,7 @@ export default function EditDialog({
       <form>
         <DialogTrigger asChild>
           <Button variant="default" size="sm">
-            edit
+            <EditSquare />
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px] bg-black/80 text-white">

@@ -36,7 +36,7 @@ export default function RoutineCard({
       <GroupLabel routine={routine} />
       <div className="absolute top-0 left-0 ml-16">
         <Header title={routine.name}>
-          <div className="ml-10 mt-1">
+          <div className="ml-5 mt-1">
             <RoutineActions />
           </div>
         </Header>
