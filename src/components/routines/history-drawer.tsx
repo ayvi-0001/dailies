@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Suspense } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +17,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 import type { Routine } from "@/types/routines";
 
+import CardBorder from "./border";
+import Details from "./details";
+import GroupLabel from "./group-label";
+import Header from "./header";
 import { cachedQueryRoutineHistory } from "./utils";
+import ValueInput from "./value-input";
+import WeightsLabel from "./weights-label";
 
 // TODO(ayvi): move to generic drawer component
 export default function HistoryDrawer({
@@ -38,7 +43,7 @@ export default function HistoryDrawer({
           history
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="bg-black border-white border-1">
+      <DrawerContent className="bg-black/80 border-white border-1">
         <DrawerHeader className="text-left">
           <DrawerTitle className="text-white">{routine.name}</DrawerTitle>
           <DrawerDescription className="text-white">
@@ -72,17 +77,45 @@ function HistoryCards({
 }): React.ReactElement {
   return (
     <ScrollArea className="h-[32rem] rounded-md">
-      <Suspense fallback={<div>Loading...</div>}>
-        {React.use(routines).map((value: Routine, index: number) => (
-          <div
-            key={index}
-            className="select-none box-content border-yellow-400/80 m-5 py-1 isolate bg-white/78 shadow-lg ring-1 ring-black/5 relative size-auto transition-all duration-300 ease-in-out hover:border-yellow/40 hover:translate-y-[-1px] hover:shadow-lg border-4"
-            style={{ height: 150 } as React.CSSProperties}
-          >
-            <div key={index}>{JSON.stringify(value, null, 2)}</div>
-          </div>
-        ))}
-      </Suspense>
+      <React.Suspense fallback={<div>Loading...</div>}>
+        {React.use(routines).map((routine: Routine, index: number) =>
+          HistoryRoutineCard(routine, index),
+        )}
+      </React.Suspense>
     </ScrollArea>
   );
 }
+
+const HistoryRoutineCard = (routine: Routine, index: number) => {
+  const [inputValue, setInputValue] = React.useState<number | null>(
+    routine.value,
+  );
+
+  return (
+    <CardBorder key={index}>
+      <GroupLabel key={index} routine={routine} />
+      <div className="absolute top-0 left-0 ml-16">
+        <Header key={index} title={routine.date.toString()} />
+      </div>
+      <div className="absolute bottom-0 left-0 ml-16 mb-2">
+        <Details key={index} routine={routine} />
+      </div>
+      <div className="absolute bottom-0 right-0 mr-6 mb-4">
+        <ValueInput
+          key={index}
+          routine={routine}
+          inputValue={inputValue}
+          setInputValueAction={setInputValue}
+        />
+      </div>
+      <div className="absolute top-0 right-0 mr-6 mt-4">
+        <WeightsLabel
+          key={index}
+          routine={routine}
+          inputValue={inputValue}
+          setInputValueAction={setInputValue}
+        />
+      </div>
+    </CardBorder>
+  );
+};

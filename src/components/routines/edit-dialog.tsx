@@ -30,7 +30,7 @@ export default function EditDialog({
             edit
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px] bg-black text-white">
+        <DialogContent className="sm:max-w-[425px] bg-black/80 text-white">
           <DialogHeader>
             <DialogTitle>{routine.name}</DialogTitle>
             <DialogDescription></DialogDescription>

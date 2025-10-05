@@ -32,7 +32,21 @@ export default function ValueInput({
       if (value <= routine.maxValue) {
         setInputValueAction(value);
         routine.value = value;
+        // const unlisten = listen<ErrorMessage>(
+        //   "tauri://db-error",
+        //   (event: Event<ErrorMessage>) => {
+        //     console.log(
+        //       `from nextjs event listener "tauri://db-error" - listen ${event.payload.message}`,
+        //     );
+        //     toast(event.payload.message, {
+        //       id: "1",
+        //     });
+        //   },
+        // );
+
         await invoke<Routine[]>("handle_value_change", { routine: routine });
+
+        // unlisten.then((off) => off());
       }
     } else {
       setShowError(true);
