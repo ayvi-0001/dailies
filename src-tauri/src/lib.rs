@@ -43,6 +43,7 @@ pub async fn run() {
         .invoke_handler(tauri::generate_handler![
             routines::get_routines,
             routines::handle_value_change,
+            routines::query_routine_history,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

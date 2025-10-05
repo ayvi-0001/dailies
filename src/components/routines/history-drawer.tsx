@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { Suspense } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,15 +14,21 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 import type { Routine } from "@/types/routines";
 
+import queryRoutineHistory from "./utils";
+
+// TODO(ayvi): move to generic drawer component
 export default function HistoryDrawer({
   routine,
 }: {
   routine: Routine;
 }): React.ReactElement {
   const [openHistory, setOpenHistory] = React.useState<boolean>(false);
+
+  // TODO(ayvi): history days options/streaming http://ayvi:3000/ayvi/dailies/issues/32
 
   return (
     <Drawer open={openHistory} onOpenChange={setOpenHistory}>
@@ -35,17 +44,47 @@ export default function HistoryDrawer({
           <DrawerDescription className="text-white">
             {"< TODO >"}
           </DrawerDescription>
-          <div className="h-screen"></div>
+          <div>
+            {openHistory && (
+              <HistoryCards
+                routines={queryRoutineHistory(routine.routineId, 6)}
+              />
+            )}
+          </div>
         </DrawerHeader>
         <div className="px-4"></div>
         <DrawerFooter className="pt-2">
           <DrawerClose asChild>
-            <Button variant="ghost" size="sm">
-              cancel
+            <Button variant="outline" size="sm">
+              close
             </Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
+  );
+}
+
+function HistoryCards({
+  routines,
+}: {
+  routines: Promise<Routine[]>;
+}): React.ReactElement {
+  const allRoutines = React.use(routines);
+
+  return (
+    <ScrollArea className="h-[32rem] rounded-md">
+      <Suspense fallback={<div>Loading...</div>}>
+        {allRoutines.map((value: Routine, index: number) => (
+          <div
+            key={index}
+            className="select-none box-content border-yellow-400/80 m-5 py-1 isolate bg-white/78 shadow-lg ring-1 ring-black/5 relative size-auto transition-all duration-300 ease-in-out hover:border-yellow/40 hover:translate-y-[-1px] hover:shadow-lg border-4"
+            style={{ height: 150 } as React.CSSProperties}
+          >
+            <div key={index}>{JSON.stringify(value, null, 2)}</div>
+          </div>
+        ))}
+      </Suspense>
+    </ScrollArea>
   );
 }

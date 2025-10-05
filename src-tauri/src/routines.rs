@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use chrono::{NaiveDate, NaiveTime};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
@@ -47,39 +49,73 @@ pub struct Daily {
 
 #[tauri::command(async)]
 pub async fn get_routines(
-    app: tauri::AppHandle, state: State<'_, Mutex<state::AppState>>,
+    app: tauri::AppHandle,
+    state: State<'_, Mutex<state::AppState>>,
 ) -> Result<Vec<Daily>, ()> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
+
+    // TODO(ayvi): pulling fixed date for dev
+    // let date: NaiveDate = chrono::Local::now().date_naive();
+    let date: NaiveDate = chrono::NaiveDate::from_str("2025-10-03").unwrap();
 
     let rows: Result<Vec<Daily>, sqlx::Error> = sqlx::query_as!(
         Daily,
         "SELECT
-           \"date\",
-           \"name\",
-           \"type\",
-           \"group\",
-           \"value\",
-           ordinal_pos,
-           value_id,
-           routine_id,
-           max_value,
-           weight,
-           date_started,
-           date_archived,
-           weighted_value,
-           time_min,
-           time_max,
-           time_bucket_min,
-           time_bucket_max,
-           notes,
-           weekdays,
-           n_days
+           \"date\", \"name\", \"type\", \"group\", \"value\", ordinal_pos, value_id,
+           routine_id, max_value, weight, date_started, date_archived, weighted_value,
+           time_min, time_max, time_bucket_min, time_bucket_max, notes, weekdays, n_days
          FROM
            dailies.weighted_values
          WHERE
-           date = '2025-10-03'
+           date = $1
          ORDER BY
            ordinal_pos;",
+        date
+    )
+    .fetch_all(&state.connection_pool)
+    .await;
+
+    let mut dailies: Vec<Daily> = vec![];
+
+    match rows {
+        Ok(r) => dailies.extend(r),
+        Err(e) => app
+            .emit(
+                "tauri://error",
+                messages::ErrorMessage { message: &e.to_string() },
+            )
+            .unwrap(),
+    }
+
+    Ok(dailies)
+}
+
+#[tauri::command(async, rename_all = "snake_case")]
+pub async fn query_routine_history(
+    app: tauri::AppHandle,
+    state: State<'_, Mutex<state::AppState>>,
+    routine_id: &str,
+    days: i64,
+) -> Result<Vec<Daily>, ()> {
+    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+
+    let date: NaiveDate = chrono::Local::now().date_naive() - chrono::Duration::days(days);
+
+    let rows: Result<Vec<Daily>, sqlx::Error> = sqlx::query_as!(
+        Daily,
+        "SELECT
+           \"date\", \"name\", \"type\", \"group\", \"value\", ordinal_pos, value_id,
+           routine_id, max_value, weight, date_started, date_archived, weighted_value,
+           time_min, time_max, time_bucket_min, time_bucket_max, notes, weekdays, n_days
+         FROM
+           dailies.weighted_values
+         WHERE
+           routine_id = $1
+           AND date >= $2
+         ORDER BY
+           date DESC",
+        routine_id,
+        date
     )
     .fetch_all(&state.connection_pool)
     .await;
@@ -103,7 +139,9 @@ pub async fn get_routines(
 #[tauri::command(async, rename_all = "snake_case")]
 #[allow(unused_must_use)]
 pub async fn handle_value_change(
-    app: tauri::AppHandle, state: State<'_, Mutex<state::AppState>>, routine: Daily,
+    app: tauri::AppHandle,
+    state: State<'_, Mutex<state::AppState>>,
+    routine: Daily,
 ) -> Result<(), ()> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
 
