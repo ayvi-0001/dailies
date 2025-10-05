@@ -17,8 +17,10 @@ import WeightsLabel from "./weights-label";
 
 export default function RoutineCard({
   routine,
+  onRefreshAction,
 }: {
   routine: Routine;
+  onRefreshAction: () => void;
 }): React.ReactNode {
   const RoutineActions = (): React.ReactElement => {
     return (
@@ -52,6 +54,7 @@ export default function RoutineCard({
           routine={routine}
           inputValue={inputValue}
           setInputValueAction={setInputValue}
+          onRefreshAction={onRefreshAction}
         />
       </div>
       <div className="absolute top-0 right-0 mr-6 mt-4">

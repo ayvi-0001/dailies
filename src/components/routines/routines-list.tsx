@@ -16,6 +16,7 @@ export default function RoutineList({
   title,
 }: RoutineListProps): React.ReactNode {
   const [routines, setRoutines] = useState<Routine[]>([]);
+  const [refreshRoutines, setRefreshRoutines] = useState<number>(0);
 
   // TODO(ayvi): useEffect individually for each daily, so refresh doesn't pull all dailies
   // http://ayvi:3000/ayvi/dailies/issues/34
@@ -26,13 +27,21 @@ export default function RoutineList({
         .catch(console.error);
     };
     get_routines();
-  }, [routines]);
+  }, [refreshRoutines]);
+
+  const triggerRoutineRefresh = () => {
+    setRefreshRoutines(refreshRoutines + 1);
+  };
 
   return (
     <main>
       <SectionHeader title={title} />
       {routines.map((value, index) => (
-        <RoutineCard key={index} routine={value} />
+        <RoutineCard
+          key={index}
+          routine={value}
+          onRefreshAction={triggerRoutineRefresh}
+        />
       ))}
     </main>
   );

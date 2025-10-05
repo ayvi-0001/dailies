@@ -15,10 +15,12 @@ export default function ValueInput({
   routine,
   inputValue,
   setInputValueAction,
+  onRefreshAction,
 }: {
   routine: Routine;
   inputValue: number | null;
   setInputValueAction: React.Dispatch<React.SetStateAction<number | null>>;
+  onRefreshAction: () => void;
 }): React.ReactNode {
   // TODO(ayvi) add alert on invalid value http://ayvi:3000/ayvi/dailies/issues/2
   const [_showError, setShowError] = useState<boolean>(false);
@@ -32,6 +34,7 @@ export default function ValueInput({
       if (value <= routine.maxValue) {
         setInputValueAction(value);
         routine.value = value;
+        onRefreshAction();
         // const unlisten = listen<ErrorMessage>(
         //   "tauri://db-error",
         //   (event: Event<ErrorMessage>) => {

@@ -101,6 +101,9 @@ const HistoryRoutineCard = (routine: Routine, index: number) => {
           key={index}
           routine={routine}
           inputValue={inputValue}
+          // TODO(ayvi): onRefreshAction for history cards should refresh historic data,
+          // not dailies in current day view http://ayvi:3000/ayvi/dailies/issues/36
+          onRefreshAction={() => {}}
           setInputValueAction={setInputValue}
         />
       </div>
