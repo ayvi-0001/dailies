@@ -1,7 +1,14 @@
 "use client";
 
-import React from "react";
-import { useState } from "react";
+import * as React from "react";
+
+import { NoteStack } from "@/components/svgs";
+import { Button } from "@/components/ui/button";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 import type { Routine } from "@/types/routines";
 
@@ -11,7 +18,6 @@ import EditDialog from "./edit-dialog";
 import GroupLabel from "./group-label";
 import Header from "./header";
 import HistoryDrawer from "./history-drawer";
-import Notes from "./notes";
 import ValueInput from "./value-input";
 import WeightsLabel from "./weights-label";
 
@@ -37,8 +43,10 @@ export default function RoutineCard({
     );
   };
 
-  const [windowWidth, setWindowWidth] = useState<number>(0);
-  const [inputValue, setInputValue] = useState<number | null>(routine.value);
+  const [windowWidth, setWindowWidth] = React.useState<number>(0);
+  const [inputValue, setInputValue] = React.useState<number | null>(
+    routine.value,
+  );
 
   React.useEffect(() => {
     setWindowWidth(window.innerWidth);
@@ -65,7 +73,7 @@ export default function RoutineCard({
           <div className="flex flex-col">
             <div className="ml-4">
               <Header title={routine.name}>
-                <div className="ml-6 mt-1">
+                <div className="ml-6">
                   <RoutineActions />
                 </div>
               </Header>
@@ -75,13 +83,34 @@ export default function RoutineCard({
             </div>
           </div>
         </div>
-        {windowWidth >= 1200 ? (
-          <div className="py-4 ml-7 mr-7 grow items-center justify-self-center">
-            <Notes notes={routine.notes ?? ""} />
-          </div>
-        ) : (
-          <div className="grow items-center justify-self-center"></div>
-        )}
+        <div className="py-3 ml-7 mr-7 grow items-center justify-self-center">
+          {windowWidth >= 1200 ? (
+            <div>
+              <p className="text-black overflow-hidden text-ellipsis">
+                {routine.notes ?? ""}
+              </p>
+            </div>
+          ) : (
+            <div>
+              {routine.notes && (
+                <HoverCard>
+                  <HoverCardTrigger>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-transparent border-none"
+                    >
+                      <NoteStack fill="#000000" />
+                    </Button>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="bg-black/70">
+                    <p className="text-sm text-white">{routine.notes ?? ""}</p>
+                  </HoverCardContent>
+                </HoverCard>
+              )}
+            </div>
+          )}
+        </div>
         <div className="flex flex-none items-center justify-self-center">
           <div>
             <div className="justify-self-end">
