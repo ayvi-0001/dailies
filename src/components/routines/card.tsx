@@ -84,9 +84,9 @@ export default function RoutineCard({
           </div>
         </div>
         <div className="py-3 ml-7 mr-7 grow items-center justify-self-center">
-          {windowWidth >= 1200 ? (
+          {windowWidth >= 700 ? (
             <div>
-              <p className="text-black overflow-hidden text-ellipsis">
+              <p className="text-black overflow-hidden text-ellipsis line-clamp-5">
                 {routine.notes ?? ""}
               </p>
             </div>
