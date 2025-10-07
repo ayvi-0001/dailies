@@ -9,7 +9,10 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { UnlistenFn, listen } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
+import type { TauriWindowResizeEvent } from "@/types/events";
 import type { Routine } from "@/types/routines";
 
 import CardBorder from "./border";
@@ -44,21 +47,23 @@ export default function RoutineCard({
   };
 
   const [windowWidth, setWindowWidth] = React.useState<number>(0);
-  const [inputValue, setInputValue] = React.useState<number | null>(
-    routine.value,
-  );
+  const [inputValue, setInputValue] = React.useState<number | null>(routine.value);
 
   React.useEffect(() => {
-    setWindowWidth(window.innerWidth);
-
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
+    const getInitialWidth = async () => {
+      let innerSize = await getCurrentWindow().innerSize();
+      setWindowWidth(innerSize.width);
     };
 
-    window.addEventListener("resize", handleResize);
+    getInitialWidth();
+
+    const unlisten = listen("tauri://resize", (event: TauriWindowResizeEvent) => {
+      console.debug(JSON.stringify(event));
+      setWindowWidth(event.payload.width);
+    });
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      unlisten.then((off: UnlistenFn) => off());
     };
   }, []);
 
