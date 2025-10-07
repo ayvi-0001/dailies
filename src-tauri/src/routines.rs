@@ -1,106 +1,16 @@
 use std::str::FromStr;
 
-use chrono::{NaiveDate, NaiveTime};
+use chrono::NaiveDate;
 use rust_decimal::Decimal;
-use serde::{Deserialize, Serialize};
-use serde_with::serde_as;
 use sqlx::Executor;
-use strum::{AsRefStr, EnumIter, EnumString, IntoEnumIterator, IntoStaticStr};
 use tauri::State;
 use tokio::sync::{Mutex, MutexGuard};
 
+crate::mod_flat!(daily, daily_type);
+
+use daily::Daily;
+
 use crate::{state, utils};
-
-#[allow(clippy::upper_case_acronyms)]
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Serialize,
-    Deserialize,
-    AsRefStr,
-    EnumIter,
-    EnumString,
-    IntoStaticStr,
-    sqlx::Type,
-)]
-#[sqlx(type_name = "type")]
-pub enum DailyType {
-    #[serde(rename = "r-d-b")]
-    #[strum(serialize = "r-d-b")]
-    RDB,
-    #[serde(rename = "r-d-n")]
-    #[strum(serialize = "r-d-n")]
-    RDN,
-    #[serde(rename = "r-d-c-d")]
-    #[strum(serialize = "r-d-c-d")]
-    RDCD,
-    #[serde(rename = "r-ln-b")]
-    #[strum(serialize = "r-ln-b")]
-    RLnB,
-    #[serde(rename = "r-d-cy")]
-    #[strum(serialize = "r-d-cy")]
-    RDCy,
-    #[serde(rename = "r-sc-c")]
-    #[strum(serialize = "r-sc-c")]
-    RScC,
-}
-
-impl DailyType {
-    pub fn match_string(s: String) -> Result<Self, Box<dyn std::error::Error + 'static>> {
-        if let Some(r#type) = Self::iter().find(|f| s.trim().eq_ignore_ascii_case(f.as_ref())) {
-            Ok(r#type)
-        } else {
-            Err("Non matching type.".into())
-        }
-    }
-}
-
-impl From<String> for DailyType {
-    fn from(s: String) -> Self {
-        Self::match_string(s).expect("Database should always return a valid enum.")
-    }
-}
-
-// TODO(ayvi): use separate structs for values table & routines table?
-// http://ayvi:3000/ayvi/dailies/issues/30
-#[derive(Debug, Serialize, Deserialize, sqlx::Decode, sqlx::Encode, sqlx::FromRow)]
-#[serde(rename_all = "camelCase")]
-#[serde_as]
-pub struct Daily {
-    pub ordinal_pos: i32,
-    pub value_id: String,
-    pub routine_id: String,
-    pub name: String,
-    pub group: String,
-    pub r#type: DailyType,
-    pub notes: Option<String>,
-    pub n_days: Option<i32>,
-    // TODO(ayvi): enum for weekdays + array http://ayvi:3000/ayvi/dailies/issues/42
-    pub weekdays: Option<String>,
-    #[serde_as(as = "NaiveDate")]
-    pub date: NaiveDate,
-    #[serde_as(as = "NaiveDate")]
-    pub date_started: NaiveDate,
-    #[serde_as(as = "Option<NaiveDate>")]
-    pub date_archived: Option<NaiveDate>,
-    #[serde_as(as = "Option<Decimal>")]
-    pub value: Option<Decimal>,
-    #[serde_as(as = "Decimal")]
-    pub max_value: Decimal,
-    #[serde_as(as = "Decimal")]
-    pub weight: Decimal,
-    #[serde_as(as = "Option<Decimal>")]
-    pub weighted_value: Option<Decimal>,
-    #[serde_as(as = "Option<NaiveTime>")]
-    pub time_min: Option<NaiveTime>,
-    #[serde_as(as = "Option<NaiveTime>")]
-    pub time_max: Option<NaiveTime>,
-    pub time_bucket_min: Option<i32>,
-    pub time_bucket_max: Option<i32>,
-}
 
 #[tauri::command(async)]
 pub async fn get_routines(
@@ -402,7 +312,6 @@ pub async fn update_daily(
         Some(notes) => {
             if let Some(new_notes) = new_daily.notes {
                 if !notes.eq(&new_notes) {
-                    println!("detected change notes {:?} -> {:?}", notes, new_notes);
                     state
                         .connection_pool
                         .execute(sqlx::query!(
@@ -418,7 +327,6 @@ pub async fn update_daily(
         }
         None => {
             if let Some(new_notes) = new_daily.notes {
-                println!("detected change notes None -> {:?}", new_notes);
                 state
                     .connection_pool
                     .execute(sqlx::query!(
@@ -437,7 +345,6 @@ pub async fn update_daily(
         Some(n_days) => {
             if let Some(new_n_days) = new_daily.n_days {
                 if !n_days.eq(&new_n_days) {
-                    println!("detected change n_days {:?} -> {:?}", n_days, new_n_days);
                     state
                         .connection_pool
                         .execute(sqlx::query!(
@@ -463,7 +370,6 @@ pub async fn update_daily(
         }
         None => {
             if let Some(new_n_days) = new_daily.n_days {
-                println!("detected change n_days None -> {:?}", new_n_days);
                 state
                     .connection_pool
                     .execute(sqlx::query!(
@@ -492,10 +398,6 @@ pub async fn update_daily(
         Some(weekdays) => {
             if let Some(new_weekdays) = new_daily.weekdays {
                 if !weekdays.eq(&new_weekdays) {
-                    println!(
-                        "detected change weekdays {:?} -> {:?}",
-                        weekdays, new_weekdays
-                    );
                     state
                         .connection_pool
                         .execute(sqlx::query!(
@@ -511,7 +413,6 @@ pub async fn update_daily(
         }
         None => {
             if let Some(new_weekdays) = new_daily.weekdays {
-                println!("detected change weekdays None -> {:?}", new_weekdays);
                 state
                     .connection_pool
                     .execute(sqlx::query!(
@@ -530,10 +431,6 @@ pub async fn update_daily(
         Some(date_archived) => {
             if let Some(new_date_archived) = new_daily.date_archived {
                 if !date_archived.eq(&new_date_archived) {
-                    println!(
-                        "detected change date_archived {:?} -> {:?}",
-                        date_archived, new_date_archived
-                    );
                     state
                         .connection_pool
                         .execute(sqlx::query!(
@@ -549,10 +446,6 @@ pub async fn update_daily(
         }
         None => {
             if let Some(new_date_archived) = new_daily.date_archived {
-                println!(
-                    "detected change date_archived None -> {:?}",
-                    new_date_archived
-                );
                 state
                     .connection_pool
                     .execute(sqlx::query!(
@@ -571,10 +464,6 @@ pub async fn update_daily(
         Some(time_min) => {
             if let Some(new_time_min) = new_daily.time_min {
                 if !time_min.eq(&new_time_min) {
-                    println!(
-                        "detected change time_min {:?} -> {:?}",
-                        time_min, new_time_min
-                    );
                     state
                         .connection_pool
                         .execute(sqlx::query!(
@@ -600,7 +489,6 @@ pub async fn update_daily(
         }
         None => {
             if let Some(new_time_min) = new_daily.time_min {
-                println!("detected change time_min None -> {:?}", new_time_min);
                 state
                     .connection_pool
                     .execute(sqlx::query!(
@@ -629,10 +517,6 @@ pub async fn update_daily(
         Some(time_max) => {
             if let Some(new_time_max) = new_daily.time_max {
                 if !time_max.eq(&new_time_max) {
-                    println!(
-                        "detected change time_max {:?} -> {:?}",
-                        time_max, new_time_max
-                    );
                     state
                         .connection_pool
                         .execute(sqlx::query!(
@@ -658,7 +542,6 @@ pub async fn update_daily(
         }
         None => {
             if let Some(new_time_max) = new_daily.time_max {
-                println!("detected change time_max None -> {:?}", new_time_max);
                 state
                     .connection_pool
                     .execute(sqlx::query!(
