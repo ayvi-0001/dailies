@@ -4,39 +4,94 @@ use chrono::{NaiveDate, NaiveTime};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use sqlx::{Decode, Encode, Executor, FromRow};
-use tauri::{Emitter, State};
+use sqlx::Executor;
+use strum::{AsRefStr, EnumIter, EnumString, IntoEnumIterator, IntoStaticStr};
+use tauri::State;
 use tokio::sync::{Mutex, MutexGuard};
 
-use crate::{messages, state};
+use crate::{state, utils};
+
+#[allow(clippy::upper_case_acronyms)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Serialize,
+    Deserialize,
+    AsRefStr,
+    EnumIter,
+    EnumString,
+    IntoStaticStr,
+    sqlx::Type,
+)]
+#[sqlx(type_name = "type")]
+pub enum DailyType {
+    #[serde(rename = "r-d-b")]
+    #[strum(serialize = "r-d-b")]
+    RDB,
+    #[serde(rename = "r-d-n")]
+    #[strum(serialize = "r-d-n")]
+    RDN,
+    #[serde(rename = "r-d-c-d")]
+    #[strum(serialize = "r-d-c-d")]
+    RDCD,
+    #[serde(rename = "r-ln-b")]
+    #[strum(serialize = "r-ln-b")]
+    RLnB,
+    #[serde(rename = "r-d-cy")]
+    #[strum(serialize = "r-d-cy")]
+    RDCy,
+    #[serde(rename = "r-sc-c")]
+    #[strum(serialize = "r-sc-c")]
+    RScC,
+}
+
+impl DailyType {
+    pub fn match_string(s: String) -> Result<Self, Box<dyn std::error::Error + 'static>> {
+        if let Some(r#type) = Self::iter().find(|f| s.trim().eq_ignore_ascii_case(f.as_ref())) {
+            Ok(r#type)
+        } else {
+            Err("Non matching type.".into())
+        }
+    }
+}
+
+impl From<String> for DailyType {
+    fn from(s: String) -> Self {
+        Self::match_string(s).expect("Database should always return a valid enum.")
+    }
+}
 
 // TODO(ayvi): use separate structs for values table & routines table?
 // http://ayvi:3000/ayvi/dailies/issues/30
-// view columns do not have null restrictions, so everything must be an Option.
-#[derive(Debug, Default, Serialize, Deserialize, Decode, Encode, FromRow)]
+#[derive(Debug, Serialize, Deserialize, sqlx::Decode, sqlx::Encode, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 #[serde_as]
 pub struct Daily {
-    pub ordinal_pos: Option<i32>,
-    pub value_id: Option<String>,
-    pub routine_id: Option<String>,
-    pub name: Option<String>,
-    pub group: Option<String>,
-    pub r#type: Option<String>,
-    pub max_value: Option<i32>,
+    pub ordinal_pos: i32,
+    pub value_id: String,
+    pub routine_id: String,
+    pub name: String,
+    pub group: String,
+    pub r#type: DailyType,
     pub notes: Option<String>,
     pub n_days: Option<i32>,
+    // TODO(ayvi): enum for weekdays + array http://ayvi:3000/ayvi/dailies/issues/42
     pub weekdays: Option<String>,
-    #[serde_as(as = "Option<NaiveDate>")]
-    pub date: Option<NaiveDate>,
-    #[serde_as(as = "Option<NaiveDate>")]
-    pub date_started: Option<NaiveDate>,
+    #[serde_as(as = "NaiveDate")]
+    pub date: NaiveDate,
+    #[serde_as(as = "NaiveDate")]
+    pub date_started: NaiveDate,
     #[serde_as(as = "Option<NaiveDate>")]
     pub date_archived: Option<NaiveDate>,
     #[serde_as(as = "Option<Decimal>")]
     pub value: Option<Decimal>,
-    #[serde_as(as = "Option<Decimal>")]
-    pub weight: Option<Decimal>,
+    #[serde_as(as = "Decimal")]
+    pub max_value: Decimal,
+    #[serde_as(as = "Decimal")]
+    pub weight: Decimal,
     #[serde_as(as = "Option<Decimal>")]
     pub weighted_value: Option<Decimal>,
     #[serde_as(as = "Option<NaiveTime>")]
@@ -61,9 +116,26 @@ pub async fn get_routines(
     let rows: Result<Vec<Daily>, sqlx::Error> = sqlx::query_as!(
         Daily,
         "SELECT
-           \"date\", \"name\", \"type\", \"group\", \"value\", ordinal_pos, value_id,
-           routine_id, max_value, weight, date_started, date_archived, weighted_value,
-           time_min, time_max, time_bucket_min, time_bucket_max, notes, weekdays, n_days
+           \"date\" AS \"date!\",
+           \"name\" AS \"name!\",
+           \"type\" AS \"type!\",
+           \"group\" AS \"group!\",
+           \"value\",
+           ordinal_pos AS \"ordinal_pos!\",
+           value_id AS \"value_id!\",
+           routine_id AS \"routine_id!\",
+           max_value AS \"max_value!\",
+           weight AS \"weight!\",
+           date_started AS \"date_started!\",
+           date_archived,
+           weighted_value AS \"weighted_value!\",
+           time_min,
+           time_max,
+           time_bucket_min,
+           time_bucket_max,
+           notes,
+           weekdays,
+           n_days
          FROM
            dailies.weighted_values
          WHERE
@@ -79,12 +151,7 @@ pub async fn get_routines(
 
     match rows {
         Ok(r) => dailies.extend(r),
-        Err(e) => app
-            .emit(
-                "tauri://error",
-                messages::ErrorMessage { message: &e.to_string() },
-            )
-            .unwrap(),
+        Err(e) => utils::emit_app_error(&app, "tauri://error", &e),
     }
 
     Ok(dailies)
@@ -103,9 +170,26 @@ pub async fn query_routine_history(
     let rows: Result<Vec<Daily>, sqlx::Error> = sqlx::query_as!(
         Daily,
         "SELECT
-           \"date\", \"name\", \"type\", \"group\", \"value\", ordinal_pos, value_id,
-           routine_id, max_value, weight, date_started, date_archived, weighted_value,
-           time_min, time_max, time_bucket_min, time_bucket_max, notes, weekdays, n_days
+           \"date\" AS \"date!\",
+           \"name\" AS \"name!\",
+           \"type\" AS \"type!\",
+           \"group\" AS \"group!\",
+           \"value\",
+           ordinal_pos AS \"ordinal_pos!\",
+           value_id AS \"value_id!\",
+           routine_id AS \"routine_id!\",
+           max_value AS \"max_value!\",
+           weight AS \"weight!\",
+           date_started AS \"date_started!\",
+           date_archived,
+           weighted_value AS \"weighted_value!\",
+           time_min,
+           time_max,
+           time_bucket_min,
+           time_bucket_max,
+           notes,
+           weekdays,
+           n_days
          FROM
            dailies.weighted_values
          WHERE
@@ -125,12 +209,7 @@ pub async fn query_routine_history(
 
     match rows {
         Ok(r) => dailies.extend(r),
-        Err(e) => app
-            .emit(
-                "tauri://error",
-                messages::ErrorMessage { message: &e.to_string() },
-            )
-            .unwrap(),
+        Err(e) => utils::emit_app_error(&app, "tauri://error", &e),
     }
 
     Ok(dailies)
@@ -164,11 +243,7 @@ pub async fn get_total_eval_weight(
     match row {
         Ok(row) => Ok(row.total_weight.unwrap()),
         Err(e) => {
-            app.emit(
-                "tauri://error",
-                messages::ErrorMessage { message: &e.to_string() },
-            )
-            .unwrap();
+            utils::emit_app_error(&app, "tauri://error", &e);
             Ok(rust_decimal::Decimal::new(0, 0))
         }
     }
@@ -176,7 +251,6 @@ pub async fn get_total_eval_weight(
 
 /// This function doesn't get called unless the value change is valid.
 #[tauri::command(async, rename_all = "snake_case")]
-#[allow(unused_must_use)]
 pub async fn handle_value_change(
     app: tauri::AppHandle,
     state: State<'_, Mutex<state::AppState>>,
@@ -193,13 +267,7 @@ pub async fn handle_value_change(
                 routine.value_id
             ))
             .await
-            .map_err(|e| {
-                app.emit(
-                    "tauri://error",
-                    messages::ErrorMessage { message: &e.to_string() },
-                )
-                .unwrap()
-            })
+            .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
             .unwrap()
     } else {
         state
@@ -209,15 +277,411 @@ pub async fn handle_value_change(
                 routine.value_id,
             ))
             .await
-            .map_err(|e| {
-                app.emit(
-                    "tauri://error",
-                    messages::ErrorMessage { message: &e.to_string() },
-                )
-                .unwrap()
-            })
+            .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
             .unwrap()
     };
+
+    Ok(())
+}
+
+#[tauri::command(async, rename_all = "snake_case")]
+pub async fn update_daily(
+    app: tauri::AppHandle,
+    state: State<'_, Mutex<state::AppState>>,
+    original_daily: Daily,
+    new_daily: Daily,
+) -> Result<(), ()> {
+    println!("Received updated event");
+    println!("original_daily: {:?}", original_daily);
+    println!("new_daily: {:?}", new_daily);
+
+    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+
+    if !original_daily
+        .ordinal_pos
+        .eq(&new_daily.ordinal_pos)
+    {
+        state
+            .connection_pool
+            .execute(sqlx::query!(
+                "UPDATE dailies.routines SET ordinal_pos = $1 WHERE routine_id = $2",
+                new_daily.ordinal_pos,
+                original_daily.routine_id,
+            ))
+            .await
+            .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+            .unwrap();
+    }
+
+    if !original_daily.name.eq(&new_daily.name) {
+        state
+            .connection_pool
+            .execute(sqlx::query!(
+                "UPDATE dailies.routines SET name = $1 WHERE routine_id = $2",
+                new_daily.name,
+                original_daily.routine_id,
+            ))
+            .await
+            .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+            .unwrap();
+    }
+
+    if !original_daily.group.eq(&new_daily.group) {
+        state
+            .connection_pool
+            .execute(sqlx::query!(
+                "UPDATE dailies.routines SET \"group\" = $1 WHERE routine_id = $2",
+                new_daily.group,
+                original_daily.routine_id,
+            ))
+            .await
+            .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+            .unwrap();
+    }
+
+    if !original_daily.r#type.eq(&new_daily.r#type) {
+        state
+            .connection_pool
+            .execute(sqlx::query!(
+                "UPDATE dailies.routines SET type = $1 WHERE routine_id = $2",
+                std::convert::Into::<&str>::into(new_daily.r#type),
+                original_daily.routine_id,
+            ))
+            .await
+            .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+            .unwrap();
+    }
+
+    if !original_daily.max_value.eq(&new_daily.max_value) {
+        state
+            .connection_pool
+            .execute(sqlx::query!(
+                "UPDATE dailies.routines SET max_value = $1 WHERE routine_id = $2",
+                new_daily.max_value,
+                original_daily.routine_id,
+            ))
+            .await
+            .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+            .unwrap();
+        state
+            .connection_pool
+            .execute(sqlx::query!(
+                "UPDATE dailies.values SET max_value = $1 WHERE value_id = $2",
+                new_daily.max_value,
+                original_daily.value_id,
+            ))
+            .await
+            .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+            .unwrap();
+    }
+
+    if !original_daily.weight.eq(&new_daily.weight) {
+        state
+            .connection_pool
+            .execute(sqlx::query!(
+                "UPDATE dailies.routines SET weight = $1 WHERE routine_id = $2",
+                new_daily.weight,
+                original_daily.routine_id,
+            ))
+            .await
+            .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+            .unwrap();
+        state
+            .connection_pool
+            .execute(sqlx::query!(
+                "UPDATE dailies.values SET weight = $1 WHERE value_id = $2",
+                new_daily.weight,
+                original_daily.value_id,
+            ))
+            .await
+            .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+            .unwrap();
+    }
+
+    match original_daily.notes {
+        Some(notes) => {
+            if let Some(new_notes) = new_daily.notes {
+                if !notes.eq(&new_notes) {
+                    println!("detected change notes {:?} -> {:?}", notes, new_notes);
+                    state
+                        .connection_pool
+                        .execute(sqlx::query!(
+                            "UPDATE dailies.routines SET notes = $1 WHERE routine_id = $2",
+                            new_notes,
+                            original_daily.routine_id,
+                        ))
+                        .await
+                        .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                        .unwrap();
+                }
+            }
+        }
+        None => {
+            if let Some(new_notes) = new_daily.notes {
+                println!("detected change notes None -> {:?}", new_notes);
+                state
+                    .connection_pool
+                    .execute(sqlx::query!(
+                        "UPDATE dailies.routines SET notes = $1 WHERE routine_id = $2",
+                        new_notes,
+                        original_daily.routine_id,
+                    ))
+                    .await
+                    .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                    .unwrap();
+            }
+        }
+    }
+
+    match original_daily.n_days {
+        Some(n_days) => {
+            if let Some(new_n_days) = new_daily.n_days {
+                if !n_days.eq(&new_n_days) {
+                    println!("detected change n_days {:?} -> {:?}", n_days, new_n_days);
+                    state
+                        .connection_pool
+                        .execute(sqlx::query!(
+                            "UPDATE dailies.routines SET n_days = $1 WHERE routine_id = $2",
+                            new_n_days,
+                            original_daily.routine_id,
+                        ))
+                        .await
+                        .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                        .unwrap();
+                    state
+                        .connection_pool
+                        .execute(sqlx::query!(
+                            "UPDATE dailies.values SET n_days = $1 WHERE value_id = $2",
+                            new_n_days,
+                            original_daily.value_id,
+                        ))
+                        .await
+                        .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                        .unwrap();
+                }
+            }
+        }
+        None => {
+            if let Some(new_n_days) = new_daily.n_days {
+                println!("detected change n_days None -> {:?}", new_n_days);
+                state
+                    .connection_pool
+                    .execute(sqlx::query!(
+                        "UPDATE dailies.routines SET n_days = $1 WHERE routine_id = $2",
+                        new_n_days,
+                        original_daily.routine_id,
+                    ))
+                    .await
+                    .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                    .unwrap();
+                state
+                    .connection_pool
+                    .execute(sqlx::query!(
+                        "UPDATE dailies.values SET n_days = $1 WHERE value_id = $2",
+                        new_n_days,
+                        original_daily.value_id,
+                    ))
+                    .await
+                    .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                    .unwrap();
+            }
+        }
+    }
+
+    match original_daily.weekdays {
+        Some(weekdays) => {
+            if let Some(new_weekdays) = new_daily.weekdays {
+                if !weekdays.eq(&new_weekdays) {
+                    println!(
+                        "detected change weekdays {:?} -> {:?}",
+                        weekdays, new_weekdays
+                    );
+                    state
+                        .connection_pool
+                        .execute(sqlx::query!(
+                            "UPDATE dailies.routines SET weekdays = $1 WHERE routine_id = $2",
+                            new_weekdays,
+                            original_daily.routine_id,
+                        ))
+                        .await
+                        .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                        .unwrap();
+                }
+            }
+        }
+        None => {
+            if let Some(new_weekdays) = new_daily.weekdays {
+                println!("detected change weekdays None -> {:?}", new_weekdays);
+                state
+                    .connection_pool
+                    .execute(sqlx::query!(
+                        "UPDATE dailies.routines SET weekdays = $1 WHERE routine_id = $2",
+                        new_weekdays,
+                        original_daily.routine_id,
+                    ))
+                    .await
+                    .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                    .unwrap();
+            }
+        }
+    }
+
+    match original_daily.date_archived {
+        Some(date_archived) => {
+            if let Some(new_date_archived) = new_daily.date_archived {
+                if !date_archived.eq(&new_date_archived) {
+                    println!(
+                        "detected change date_archived {:?} -> {:?}",
+                        date_archived, new_date_archived
+                    );
+                    state
+                        .connection_pool
+                        .execute(sqlx::query!(
+                            "UPDATE dailies.routines SET date_archived = $1 WHERE routine_id = $2",
+                            new_date_archived,
+                            original_daily.routine_id,
+                        ))
+                        .await
+                        .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                        .unwrap();
+                }
+            }
+        }
+        None => {
+            if let Some(new_date_archived) = new_daily.date_archived {
+                println!(
+                    "detected change date_archived None -> {:?}",
+                    new_date_archived
+                );
+                state
+                    .connection_pool
+                    .execute(sqlx::query!(
+                        "UPDATE dailies.routines SET date_archived = $1 WHERE routine_id = $2",
+                        new_date_archived,
+                        original_daily.routine_id,
+                    ))
+                    .await
+                    .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                    .unwrap();
+            }
+        }
+    }
+
+    match original_daily.time_min {
+        Some(time_min) => {
+            if let Some(new_time_min) = new_daily.time_min {
+                if !time_min.eq(&new_time_min) {
+                    println!(
+                        "detected change time_min {:?} -> {:?}",
+                        time_min, new_time_min
+                    );
+                    state
+                        .connection_pool
+                        .execute(sqlx::query!(
+                            "UPDATE dailies.routines SET time_min = $1 WHERE routine_id = $2",
+                            new_time_min,
+                            original_daily.routine_id,
+                        ))
+                        .await
+                        .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                        .unwrap();
+                    state
+                        .connection_pool
+                        .execute(sqlx::query!(
+                            "UPDATE dailies.values SET time_min = $1 WHERE value_id = $2",
+                            new_time_min,
+                            original_daily.value_id,
+                        ))
+                        .await
+                        .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                        .unwrap();
+                }
+            }
+        }
+        None => {
+            if let Some(new_time_min) = new_daily.time_min {
+                println!("detected change time_min None -> {:?}", new_time_min);
+                state
+                    .connection_pool
+                    .execute(sqlx::query!(
+                        "UPDATE dailies.routines SET time_min = $1 WHERE routine_id = $2",
+                        new_time_min,
+                        original_daily.routine_id,
+                    ))
+                    .await
+                    .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                    .unwrap();
+                state
+                    .connection_pool
+                    .execute(sqlx::query!(
+                        "UPDATE dailies.values SET time_min = $1 WHERE value_id = $2",
+                        new_time_min,
+                        original_daily.value_id,
+                    ))
+                    .await
+                    .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                    .unwrap();
+            }
+        }
+    }
+
+    match original_daily.time_max {
+        Some(time_max) => {
+            if let Some(new_time_max) = new_daily.time_max {
+                if !time_max.eq(&new_time_max) {
+                    println!(
+                        "detected change time_max {:?} -> {:?}",
+                        time_max, new_time_max
+                    );
+                    state
+                        .connection_pool
+                        .execute(sqlx::query!(
+                            "UPDATE dailies.routines SET time_max = $1 WHERE routine_id = $2",
+                            new_time_max,
+                            original_daily.routine_id,
+                        ))
+                        .await
+                        .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                        .unwrap();
+                    state
+                        .connection_pool
+                        .execute(sqlx::query!(
+                            "UPDATE dailies.values SET time_max = $1 WHERE value_id = $2",
+                            new_time_max,
+                            original_daily.value_id,
+                        ))
+                        .await
+                        .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                        .unwrap();
+                }
+            }
+        }
+        None => {
+            if let Some(new_time_max) = new_daily.time_max {
+                println!("detected change time_max None -> {:?}", new_time_max);
+                state
+                    .connection_pool
+                    .execute(sqlx::query!(
+                        "UPDATE dailies.routines SET time_max = $1 WHERE routine_id = $2",
+                        new_time_max,
+                        original_daily.routine_id,
+                    ))
+                    .await
+                    .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                    .unwrap();
+                state
+                    .connection_pool
+                    .execute(sqlx::query!(
+                        "UPDATE dailies.values SET time_max = $1 WHERE value_id = $2",
+                        new_time_max,
+                        original_daily.value_id,
+                    ))
+                    .await
+                    .map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
+                    .unwrap();
+            }
+        }
+    }
 
     Ok(())
 }

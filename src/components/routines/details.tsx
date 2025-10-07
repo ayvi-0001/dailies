@@ -19,11 +19,11 @@ export default function Details({
     !Array.isArray(weekdays) || !weekdays.length ? null : `days: ${weekdays}`;
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col text-black">
       <div>
         type:{" "}
         <Badge
-          className="bg-slate-400 border-yellow-600 font-bold h-5 min-w-5 rounded-full px-1 font-mono tabular-nums"
+          className="text-black bg-slate-400 border-yellow-600 font-bold h-5 min-w-5 rounded-full px-1 font-mono tabular-nums"
           variant={"outline"}
         >
           {routine.type}

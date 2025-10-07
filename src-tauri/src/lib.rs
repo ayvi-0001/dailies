@@ -3,7 +3,7 @@ use tauri::Manager;
 use tokio::sync::Mutex;
 
 pub(crate) mod macros;
-crate::mod_flat!(messages, routines, state);
+crate::mod_flat!(messages, routines, state, utils);
 
 lazy_static::lazy_static! {
     // TODO(ayvi): decide how db credentials will be passed to application
@@ -45,6 +45,7 @@ pub async fn run() {
             routines::handle_value_change,
             routines::query_routine_history,
             routines::get_total_eval_weight,
+            routines::update_daily,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

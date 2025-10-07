@@ -7,7 +7,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { TextCursorInput } from "lucide-react";
 
 import CursorTracker from "@/components/animata/container/cursor-tracker";
-import { Input } from "@/components/ui/input";
+import Input from "@/components/ui/input";
 
 import type { Routine } from "@/types/routines";
 
@@ -28,7 +28,6 @@ export default function ValueInput({
   const handleOnChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ): Promise<void> => {
-    // TODO(ayvi) set null values http://ayvi:3000/ayvi/dailies/issues/8
     let value = parseInt(event.target.value, 10);
     if (!Number.isNaN(value)) {
       if (value <= routine.maxValue) {
@@ -116,6 +115,7 @@ export default function ValueInput({
         <div className="flex items-center mr-30 ml-30 mt-1 mb-1 text-lg font-semibold">
           {/* TODO(ayvi) input more than 1 char http://ayvi:3000/ayvi/dailies/issues/9 */}
           <Input
+            id={routine.valueId}
             // TODO(ayvi) must allow float values http://ayvi:3000/ayvi/dailies/issues/1
             maxLength={String(routine.maxValue).length}
             value={`${inputValue ?? ""}`}

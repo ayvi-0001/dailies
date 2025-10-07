@@ -27,7 +27,7 @@ export default function RoutineCard({
   const RoutineActions = (): React.ReactElement => {
     return (
       <div className="flex flex-wrap items-center md:flex-row gap-4">
-        <EditDialog routine={routine} />
+        <EditDialog routine={routine} onRefreshAction={onRefreshAction} />
         <HistoryDrawer routine={routine} totalWeight={totalWeight} />
       </div>
     );

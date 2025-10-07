@@ -34,7 +34,7 @@ export default function WeightsLabel({
     let displayValue: string;
 
     if (routineActive) {
-      displayValue = `(${Math.round(routineValueContribution * 100) / 100}%) ${routine.weightedValue}`;
+      displayValue = `(${Math.round(routineValueContribution * 100) / 100}%) ${routine.weightedValue && Math.round(routine.weightedValue * 100) / 100}`;
     } else {
       displayValue = `(-%)`;
     }

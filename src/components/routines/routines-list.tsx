@@ -5,16 +5,16 @@ import { useEffect, useState } from "react";
 
 import { invoke } from "@tauri-apps/api/core";
 
-import type { Routine, Section } from "@/types/routines";
+import type { Routine } from "@/types/routines";
 
 import RoutineCard from "./card";
 import SectionHeader from "./section-header";
 
-interface RoutineListProps extends Section {}
-
 export default function RoutineList({
   title,
-}: RoutineListProps): React.ReactNode {
+}: {
+  title: string;
+}): React.ReactNode {
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [totalWeight, settotalWeight] = useState<number>(0);
   const [refreshRoutines, setRefreshRoutines] = useState<number>(0);
