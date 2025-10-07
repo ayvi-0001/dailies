@@ -27,44 +27,78 @@ export default function RoutineCard({
   const RoutineActions = (): React.ReactElement => {
     return (
       <div className="flex flex-wrap items-center md:flex-row gap-4">
-        <EditDialog routine={routine} onRefreshAction={onRefreshAction} />
+        <EditDialog
+          title={routine.name}
+          routine={routine}
+          onRefreshAction={onRefreshAction}
+        />
         <HistoryDrawer routine={routine} totalWeight={totalWeight} />
       </div>
     );
   };
 
+  const [windowWidth, setWindowWidth] = useState<number>(0);
   const [inputValue, setInputValue] = useState<number | null>(routine.value);
+
+  React.useEffect(() => {
+    setWindowWidth(window.innerWidth);
+
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
     <CardBorder>
-      <GroupLabel routine={routine} />
-      <div className="absolute top-0 left-0 ml-16">
-        <Header title={routine.name}>
-          <div className="ml-5 mt-1">
-            <RoutineActions />
+      <div
+        className="flex flex-row self-center"
+        style={{ height: 150 } as React.CSSProperties}
+      >
+        <div className="flex flex-none items-center">
+          <GroupLabel routine={routine} />
+          <div className="flex flex-col">
+            <div className="ml-4">
+              <Header title={routine.name}>
+                <div className="ml-6 mt-1">
+                  <RoutineActions />
+                </div>
+              </Header>
+              <div className="mt-4">
+                <Details routine={routine} />
+              </div>
+            </div>
           </div>
-        </Header>
-      </div>
-      <div className="absolute bottom-0 left-0 ml-16 mb-2">
-        <Details routine={routine} />
-      </div>
-      <div className="absolute inset-x-60 top-0 ml-50 m-5 w-5/10">
-        <Notes notes={routine.notes ?? ""} />
-      </div>
-      <div className="absolute bottom-0 right-0 mr-5 mb-4">
-        <ValueInput
-          routine={routine}
-          inputValue={inputValue}
-          setInputValueAction={setInputValue}
-          onRefreshAction={onRefreshAction}
-        />
-      </div>
-      <div className="absolute top-0 right-0 mr-5">
-        <WeightsLabel
-          routine={routine}
-          inputValue={inputValue}
-          totalWeight={totalWeight}
-        />
+        </div>
+        {windowWidth >= 1200 ? (
+          <div className="py-4 ml-7 mr-7 grow items-center justify-self-center">
+            <Notes notes={routine.notes ?? ""} />
+          </div>
+        ) : (
+          <div className="grow items-center justify-self-center"></div>
+        )}
+        <div className="flex flex-none items-center justify-self-center">
+          <div>
+            <div className="justify-self-end">
+              <WeightsLabel
+                routine={routine}
+                inputValue={inputValue}
+                totalWeight={totalWeight}
+              />
+            </div>
+            <ValueInput
+              routine={routine}
+              inputValue={inputValue}
+              setInputValueAction={setInputValue}
+              onRefreshAction={onRefreshAction}
+            />
+          </div>
+        </div>
       </div>
     </CardBorder>
   );

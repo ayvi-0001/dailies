@@ -8,7 +8,7 @@ export default function Header({
   children?: React.ReactNode;
 }): React.ReactElement {
   return (
-    <div className="flex flex-row mt-2">
+    <div className="flex flex-row">
       <p className="text-black font-bold text-4xl tracking-tight">{title}</p>
       {children}
     </div>

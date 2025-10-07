@@ -7,6 +7,6 @@ export default function Notes({
 }): React.ReactElement {
   return (
     /* TODO(ayvi): clip notes text if too long http://ayvi:3000/ayvi/dailies/issues/10 */
-    <p className="overflow-hidden text-ellipsis">{notes}</p>
+    <p className="text-black overflow-hidden text-ellipsis">{notes}</p>
   );
 }

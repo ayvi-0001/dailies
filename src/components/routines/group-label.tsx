@@ -8,9 +8,9 @@ export default function GroupLabel({
   routine: Routine;
 }): React.ReactElement {
   return (
-    <div className="w-8 h-full ml-4 bg-yellow-400 border-yellow-500 border-2">
+    <div className="h-35 bg-yellow-400 border-yellow-500 border-2">
       <div className="flex justify-center items-center w-full h-full">
-        <p className="text-black font-mono font-medium text-xl rotate-180 [writing-mode:vertical-rl]">
+        <p className="font-mono font-medium text-xl rotate-180 [writing-mode:vertical-rl]">
           {routine.group}
         </p>
       </div>

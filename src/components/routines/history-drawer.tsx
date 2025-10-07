@@ -6,6 +6,7 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
+  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -17,6 +18,7 @@ import type { Routine } from "@/types/routines";
 
 import CardBorder from "./border";
 import Details from "./details";
+import EditDialog from "./edit-dialog";
 import GroupLabel from "./group-label";
 import Header from "./header";
 import { cachedQueryRoutineHistory } from "./utils";
@@ -47,7 +49,7 @@ export default function HistoryDrawer({
       <DrawerContent className="bg-black/80 border-white border-1">
         <DrawerHeader className="text-left">
           <DrawerTitle className="text-white">{routine.name}</DrawerTitle>
-          {/*<DrawerDescription className="text-white"></DrawerDescription>*/}
+          {<DrawerDescription className="text-white"></DrawerDescription>}
           <div>
             {openHistory && (
               <HistoryCards
@@ -79,11 +81,16 @@ function HistoryCards({
   totalWeight: number;
 }): React.ReactElement {
   return (
-    <ScrollArea className="h-[32rem] rounded-md">
+    <ScrollArea
+      className="h-[32rem] rounded-md overflow-y-auto [scrollbarWidth:none]"
+      style={{ scrollbarWidth: "none" }}
+    >
       <React.Suspense fallback={<div>Loading...</div>}>
-        {React.use(routines).map((routine: Routine, index: number) =>
-          HistoryRoutineCard(routine, index, totalWeight),
-        )}
+        {React.use(routines).map((routine: Routine, index: number) => (
+          <div key={`${routine.valueId}-${index}`} className="m-4">
+            {HistoryRoutineCard(routine, index, totalWeight)}
+          </div>
+        ))}
       </React.Suspense>
     </ScrollArea>
   );
@@ -99,32 +106,53 @@ const HistoryRoutineCard = (
   );
 
   return (
-    <CardBorder key={index}>
-      <GroupLabel key={index} routine={routine} />
-      <div className="absolute top-0 left-0 ml-16">
-        <Header key={index} title={routine.date.toString()} />
-      </div>
-      <div className="absolute bottom-0 left-0 ml-16 mb-2">
-        <Details key={index} routine={routine} />
-      </div>
-      <div className="absolute bottom-0 right-0 mr-5 mb-4">
-        <ValueInput
-          key={index}
-          routine={routine}
-          inputValue={inputValue}
-          // TODO(ayvi): onRefreshAction for history cards should refresh historic data,
-          // not dailies in current day view http://ayvi:3000/ayvi/dailies/issues/36
-          onRefreshAction={() => {}}
-          setInputValueAction={setInputValue}
-        />
-      </div>
-      <div className="absolute top-0 right-0 mr-5">
-        <WeightsLabel
-          key={index}
-          routine={routine}
-          inputValue={inputValue}
-          totalWeight={totalWeight}
-        />
+    <CardBorder key={`${routine.valueId}-${index}`}>
+      <div
+        key={`${routine.valueId}-${index}`}
+        className="flex flex-row self-center"
+        style={{ height: 150 } as React.CSSProperties}
+      >
+        <div className="flex flex-none items-center">
+          <GroupLabel routine={routine} />
+          <div className="flex flex-col">
+            <div className="ml-4">
+              <Header title={routine.date.toString()}>
+                <div className="ml-6 mt-1">
+                  <div className="flex flex-wrap items-center md:flex-row gap-4">
+                    <EditDialog
+                      title={`${routine.name} (${routine.date})`}
+                      routine={routine}
+                      onRefreshAction={() => {}}
+                    />
+                  </div>
+                </div>
+              </Header>
+              <div className="mt-4">
+                <Details routine={routine} />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="grow items-center justify-self-center"></div>
+        <div className="flex flex-none items-center justify-self-center">
+          <div>
+            <div className="justify-self-end">
+              <WeightsLabel
+                routine={routine}
+                inputValue={inputValue}
+                totalWeight={totalWeight}
+              />
+            </div>
+            <ValueInput
+              routine={routine}
+              inputValue={inputValue}
+              setInputValueAction={setInputValue}
+              // TODO(ayvi): onRefreshAction for history cards should refresh historic data,
+              // not dailies in current day view http://ayvi:3000/ayvi/dailies/issues/36
+              onRefreshAction={() => {}}
+            />
+          </div>
+        </div>
       </div>
     </CardBorder>
   );

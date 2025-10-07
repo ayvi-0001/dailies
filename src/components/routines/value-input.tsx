@@ -66,7 +66,7 @@ export default function ValueInput({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleOuterDivClick = async (
-    _: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    _event: React.MouseEvent<HTMLDivElement, MouseEvent>,
   ) => {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -112,7 +112,7 @@ export default function ValueInput({
         className={`select-none border-dotted border-4 ${border_color} rounded-full`}
         onClick={handleOuterDivClick}
       >
-        <div className="flex items-center mr-30 ml-30 mt-1 mb-1 text-lg font-semibold">
+        <div className="flex mt-1 mb-1 items-center text-lg font-semibold mr-15 ml-15 lg:mr-30 lg:ml-30">
           {/* TODO(ayvi) input more than 1 char http://ayvi:3000/ayvi/dailies/issues/9 */}
           <Input
             id={routine.valueId}
@@ -120,12 +120,24 @@ export default function ValueInput({
             maxLength={String(routine.maxValue).length}
             value={`${inputValue ?? ""}`}
             ref={inputRef}
-            className={`${text_color} border-none text-lg gap-2 has-disabled:opacity-50 data-[active=true]:border-ring data-[active=true]:ring-ring/50 data-[active=true]:aria-invalid:ring-destructive/20 dark:data-[active=true]:aria-invalid:ring-destructive/40 aria-invalid:border-destructive data-[active=true]:aria-invalid:border-destructive dark:bg-input/30 relative flex h-9 w-9 items-center justify-center border-y border-r shadow-xs transition-all outline-none first:rounded-l-md first:border-l last:rounded-r-md data-[active=true]:z-10 data-[active=true]:ring-[3px]`}
+            className={`
+              ${text_color} border-none text-lg flex h-9 max-w-9
+              shadow-xs transition-all outline-none has-disabled:opacity-50
+              first:rounded-l-md first:border-l border-y border-r
+              data-[active=true]:border-ring data-[active=true]:ring-ring/50
+              data-[active=true]:aria-invalid:ring-destructive/20
+              data-[active=true]:z-10
+              data-[active=true]:ring-[3px]
+              data-[active=true]:aria-invalid:border-destructive
+              dark:bg-input/30 relative
+              dark:data-[active=true]:aria-invalid:ring-destructive/40
+              aria-invalid:border-destructive
+            `}
             onChange={handleOnChange}
             onClick={handleInputClick}
             onKeyDown={onKeyDown}
           />
-          <div className={`mr-2 ml-1`}>
+          <div className="mr-4 ml-1">
             <p className={`${text_color}`}>/</p>
           </div>
           <p className={`${text_color}`}>{routine.maxValue}</p>

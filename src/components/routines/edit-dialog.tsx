@@ -140,9 +140,11 @@ const formSchema = z.object(formSchemaObjects);
 // });
 
 export default function EditDialog({
+  title,
   routine,
   onRefreshAction,
 }: {
+  title: string;
   routine: Routine;
   onRefreshAction: () => void;
 }): React.ReactNode {
@@ -163,7 +165,7 @@ export default function EditDialog({
       <DialogContent className="h-[80vh] bg-black/90 text-white ">
         <ScrollArea className="h-[70vh] rounded-md">
           <DialogHeader>
-            <DialogTitle>{routine.name}</DialogTitle>
+            <DialogTitle>{title}</DialogTitle>
             <DialogDescription className="mb-5">
               Value changes will apply to the current date.
             </DialogDescription>

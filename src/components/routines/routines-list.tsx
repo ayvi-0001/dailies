@@ -44,7 +44,7 @@ export default function RoutineList({
   };
 
   return (
-    <main>
+    <div className="grid gap-3 ml-3 mr-3 md:ml-0 md:mr-0 md:gap-4 lg:gap-5">
       <SectionHeader title={title} totalWeight={totalWeight} />
       {routines.map((value, index) => (
         <RoutineCard
@@ -54,6 +54,6 @@ export default function RoutineList({
           onRefreshAction={triggerRoutineRefresh}
         />
       ))}
-    </main>
+    </div>
   );
 }

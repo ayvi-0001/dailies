@@ -23,7 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${spaceMono.className} antialiased`}>
         <BackgroundImage src="/images/background.png" />
-        <div className="md:m-20">{children}</div>
+        <div className="sm:m-5 lg:m-20">{children}</div>
       </body>
     </html>
   );

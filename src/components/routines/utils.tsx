@@ -9,7 +9,8 @@ export async function queryRoutineHistory(
   days: number,
 ): Promise<Routine[]> {
   let startDate: Date = new Date();
-  let endDate: Date = new Date();
+  // TODO(ayvi): replace fixed date with current date after dev
+  let endDate: Date = new Date("2025-10-03");
 
   startDate.setDate(endDate.getDate() - days);
 
