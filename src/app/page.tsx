@@ -8,7 +8,7 @@ export default function Home(): React.ReactNode {
   return (
     <main>
       <Toaster />
-      <RoutineList title="Open" />
+      <RoutineList title="Dailies" />
     </main>
   );
 }
