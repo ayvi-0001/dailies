@@ -6,7 +6,6 @@ color                       = "Always"
 condense_wildcard_suffixes  = true
 edition                     = "2024"
 empty_item_single_line      = true
-fn_args_layout              = "Tall"
 fn_call_width               = 60
 fn_params_layout            = "Tall"
 fn_single_line              = true
