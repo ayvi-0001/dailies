@@ -4,6 +4,7 @@ import React from "react";
 import { useRef, useState } from "react";
 
 import { invoke } from "@tauri-apps/api/core";
+import clsx from "clsx";
 import { TextCursorInput } from "lucide-react";
 
 import CursorTracker from "@/components/animata/container/cursor-tracker";
@@ -32,21 +33,7 @@ export default function ValueInput({
         setInputValueAction(value);
         routine.value = value;
         onRefreshAction();
-        // const unlisten = listen<ErrorMessage>(
-        //   "tauri://db-error",
-        //   (event: Event<ErrorMessage>) => {
-        //     console.log(
-        //       `from nextjs event listener "tauri://db-error" - listen ${event.payload.message}`,
-        //     );
-        //     toast(event.payload.message, {
-        //       id: "1",
-        //     });
-        //   },
-        // );
-
         await invoke<Routine[]>("handle_value_change", { routine: routine });
-
-        // unlisten.then((off) => off());
       }
     } else {
       setShowError(true);
@@ -80,24 +67,19 @@ export default function ValueInput({
     }
   };
 
-  // These strings must be fully defined or tailwind won't compile all options
-  let border_color: string =
-    routine.value === null
-      ? "border-transparent"
-      : routine.value == 0
-        ? "border-red-700"
-        : routine.value == routine.maxValue
-          ? "border-green-700"
-          : "border-blue-700";
+  let border_color: string = clsx(
+    "border-blue-700",
+    routine.value ?? "border-transparent",
+    routine.value == 0 && "border-red-700",
+    routine.value == routine.maxValue && "border-green-700",
+  );
 
-  let text_color: string =
-    routine.value === null
-      ? "text-transparent"
-      : routine.value == 0
-        ? "text-red-700"
-        : routine.value == routine.maxValue
-          ? "text-green-700"
-          : "text-blue-700";
+  let text_color: string = clsx(
+    "text-blue-700",
+    routine.value ?? "text-transparent",
+    routine.value == 0 && "text-red-700",
+    routine.value == routine.maxValue && "text-green-700",
+  );
 
   return (
     <CursorTracker>

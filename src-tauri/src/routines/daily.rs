@@ -19,6 +19,7 @@ pub struct Daily {
     pub r#type: DailyType,
     pub notes: Option<String>,
     pub n_days: Option<i32>,
+    pub streak: Option<i32>,
     // TODO(ayvi): enum for weekdays + array http://ayvi:3000/ayvi/dailies/issues/42
     pub weekdays: Option<String>,
     #[serde_as(as = "NaiveDate")]

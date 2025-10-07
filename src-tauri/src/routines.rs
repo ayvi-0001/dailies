@@ -12,6 +12,8 @@ use daily::Daily;
 
 use crate::{state, utils};
 
+// https://docs.rs/sqlx/0.5.13/sqlx/macro.query.html#type-overrides-output-columns
+
 #[tauri::command(async)]
 pub async fn get_routines(
     app: tauri::AppHandle,
@@ -38,14 +40,15 @@ pub async fn get_routines(
            weight AS \"weight!\",
            date_started AS \"date_started!\",
            date_archived,
-           weighted_value AS \"weighted_value!\",
+           weighted_value,
            time_min,
            time_max,
            time_bucket_min,
            time_bucket_max,
            notes,
            weekdays,
-           n_days
+           n_days,
+           streak
          FROM
            dailies.weighted_values
          WHERE
@@ -92,14 +95,15 @@ pub async fn query_routine_history(
            weight AS \"weight!\",
            date_started AS \"date_started!\",
            date_archived,
-           weighted_value AS \"weighted_value!\",
+           weighted_value,
            time_min,
            time_max,
            time_bucket_min,
            time_bucket_max,
            notes,
            weekdays,
-           n_days
+           n_days,
+           streak
          FROM
            dailies.weighted_values
          WHERE

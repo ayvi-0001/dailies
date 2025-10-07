@@ -36,6 +36,9 @@ pub enum DailyType {
     #[serde(rename = "r-sc-c")]
     #[strum(serialize = "r-sc-c")]
     RScC,
+    #[serde(rename = "r-d-st-n")]
+    #[strum(serialize = "r-d-st-n")]
+    RDStN,
 }
 
 impl DailyType {

@@ -1,7 +1,8 @@
 import React from "react";
 
 import RingChart from "@/components/animata/graphs/ring-chart";
-import { Function, Weight } from "@/components/svgs";
+import { Function, TrailLength, Weight } from "@/components/svgs";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Separator } from "@/components/ui/separator";
 
 import type { Routine } from "@/types/routines";
@@ -23,10 +24,9 @@ export default function WeightsLabel({
     : 0;
 
   const WeightLabel = () => (
-    <div className="flex flex-row justify-self-end">
+    <div className="mb-1 flex flex-row justify-self-end">
       <p className="font-bold text-black empty:w-3">{routine.weight}</p>
-      <div className="w-1"></div>
-      <Weight className="fill-black stroke-black stroke-2" />
+      <Weight className="ml-1 fill-black stroke-black stroke-2" />
     </div>
   );
 
@@ -42,17 +42,39 @@ export default function WeightsLabel({
     return (
       <div className="flex flex-row justify-self-end">
         <p className="font-bold text-black empty:w-3">{displayValue}</p>
-        <div className="w-1"></div>
-        <Function className="fill-black stroke-black stroke-2" />
+        <Function className="ml-1 fill-black stroke-black stroke-2" />
       </div>
     );
+  };
+
+  // TODO(ayvi): visual component for streaks http://ayvi:3000/ayvi/dailies/issues/46
+  const StreakLabel = (): React.ReactElement | undefined => {
+    if (routine.streak) {
+      return (
+        <HoverCard>
+          <HoverCardTrigger>
+            <div className="mr-5 mb-1 flex flex-row">
+              <p className="mr-2 font-bold text-black italic empty:w-3">
+                {routine.streak}/{routine.nDays}
+              </p>
+              <TrailLength fill="#000000" />
+            </div>
+          </HoverCardTrigger>
+          <HoverCardContent className="bg-black/70">
+            <p className="text-sm text-white">current streak</p>
+          </HoverCardContent>
+        </HoverCard>
+      );
+    }
   };
 
   return (
     <div className="flex flex-row">
       <div className="mt-3 mr-1">
-        <WeightLabel />
-        <div className="m-1"></div>
+        <div className="flex flex-row justify-self-end">
+          <StreakLabel />
+          <WeightLabel />
+        </div>
         <WeightedValueLabel />
       </div>
       <div className="mt-4 ml-2 flex h-12 items-center">

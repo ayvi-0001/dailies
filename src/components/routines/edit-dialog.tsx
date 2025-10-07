@@ -3,10 +3,11 @@ import { ControllerRenderProps, useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { invoke } from "@tauri-apps/api/core";
+import clsx from "clsx";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { ValueOf } from "next/dist/shared/lib/constants";
 import { z } from "zod";
 
+import { camelCaseToTitleCase } from "@/lib/string";
 import { cn } from "@/lib/utils";
 
 import { EditSquare } from "@/components/svgs";
@@ -42,94 +43,55 @@ import Input from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import type { Routine, RoutineAttrs } from "@/types/routines";
-import { RoutineType } from "@/types/routines";
-
-// TODO(ayvi): allow reordering dailies http://ayvi:3000/ayvi/dailies/issues/39
-const ordinalPos = z.coerce.number<number>().readonly();
-const valueId = z.string().readonly();
-const routineId = z.string().readonly();
-const name = z.string().nonempty();
-const group = z.string().nonempty();
-const type = z.enum(Object.values(RoutineType));
-const maxValue = z.coerce.number<number>().gt(0);
-const notes = z.string().nullable();
-const nDays = z.coerce.number<number>().int().nullable();
-const weekdays = z.string().nullable();
-const date = z.coerce
-  .date<Date>()
-  .nullable()
-  .transform((arg: Date | null) => (arg ? arg.toISOString().substring(0, 10) : null));
-const dateStarted = z.coerce
-  .date()
-  .nullable()
-  .transform((arg: Date | null) => (arg ? arg.toISOString().substring(0, 10) : null));
-const dateArchived = z.iso.date().nullable();
-// dateArchived: z.coerce .date() .nullable() .transform((arg: Date | null) => arg ? arg.toISOString().substring(0, 10) : null, ),
-// date: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: string | null): Date | null => isoString ? new Date(isoString) : null, encode: (date: Date | null): string | null => date ? date.toISOString().substring(0, 10) : null, }),
-// dateStarted: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: string | null): Date | null => isoString ? new Date(isoString) : null, encode: (date: Date | null): string | null => date ? date.toISOString().substring(0, 10) : null, }),
-// dateArchived: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: string | null): Date | null => isoString ? new Date(isoString) : null, encode: (date: Date | null): string | null => date ? date.toISOString().substring(0, 10) : null, }),
-const value = z.coerce.number<number>().gt(0).nullable().readonly();
-const weight = z.coerce.number<number>().gt(0);
-const weightedValue = z.coerce.number<number>().gt(0).nullable().readonly();
-const timeMin = z.iso.time().nullable();
-const timeMax = z.iso.time().nullable();
-const timeBucketMin = z.coerce.number<number>().readonly();
-const timeBucketMax = z.coerce.number<number>().readonly();
+import type { RoutineAttrs } from "@/types/routines";
+import { Routine, RoutineType } from "@/types/routines";
 
 // NOTE: in ts, z.readonly() only affects objects, arrays, tuples, Set, and Map
-const formSchemaObjects = {
-  ordinalPos: ordinalPos,
-  valueId: valueId,
-  routineId: routineId,
-  name: name,
-  group: group,
-  type: type,
-  maxValue: maxValue,
-  notes: notes,
-  nDays: nDays,
-  weekdays: weekdays,
-  date: date,
-  dateStarted: dateStarted,
-  dateArchived: dateArchived,
-  value: value,
-  weight: weight,
-  weightedValue: weightedValue,
-  timeMin: timeMin,
-  timeMax: timeMax,
-  timeBucketMin: timeBucketMin,
-  timeBucketMax: timeBucketMax,
-};
+const formSchema = z.object({
+  // TODO(ayvi): allow reordering dailies http://ayvi:3000/ayvi/dailies/issues/39
+  ordinalPos: z.coerce.number<number>().readonly(),
+  valueId: z.string().readonly(),
+  routineId: z.string().readonly(),
+  name: z.string().nonempty(),
+  group: z.string().nonempty(),
+  type: z.enum(RoutineType.values()),
+  maxValue: z.coerce.number<number>().gt(0),
+  notes: z.string().nullable(),
+  streak: z.coerce.number<number>().nullable(),
+  nDays: z.coerce.number<number>().int().nullable(),
+  weekdays: z.string().nullable(),
+  // prettier-ignore
+  date:  z.coerce.date<Date>().nullable().transform((arg: Date | null) => (arg ? arg.toISOString().substring(0, 10) : null)),
+  // prettier-ignore
+  dateStarted:  z.coerce.date().nullable().transform((arg: Date | null) => (arg ? arg.toISOString().substring(0, 10) : null)),
+  dateArchived: z.iso.date().nullable(),
+  // date: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: string | null): Date | null => isoString ? new Date(isoString) : null, encode: (date: Date | null): string | null => date ? date.toISOString().substring(0, 10) : null, }),
+  // dateStarted: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: string | null): Date | null => isoString ? new Date(isoString) : null, encode: (date: Date | null): string | null => date ? date.toISOString().substring(0, 10) : null, }),
+  // dateArchived: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: string | null): Date | null => isoString ? new Date(isoString) : null, encode: (date: Date | null): string | null => date ? date.toISOString().substring(0, 10) : null, }),
+  value: z.coerce.number<number>().gt(0).nullable().readonly(),
+  weight: z.coerce.number<number>().gt(0),
+  weightedValue: z.coerce.number<number>().gt(0).nullable().readonly(),
+  timeMin: z.iso.time().nullable(),
+  timeMax: z.iso.time().nullable(),
+  timeBucketMin: z.coerce.number<number>().readonly(),
+  timeBucketMax: z.coerce.number<number>().readonly(),
+});
 
-const formSchema = z.object(formSchemaObjects);
+const formExcludeFields = [
+  "valueId",
+  "routineId",
+  "date",
+  "dateStarted",
+  "streak",
+  "value",
+  "weightedValue",
+  "timeBucketMin",
+  "timeBucketMax",
+] as const;
+type ExcludedField = (typeof formExcludeFields)[number];
 
-// // NOTE: in ts, z.readonly() only affects objects, arrays, tuples, Set, and Map
-// const formSchema = z.object({
-//   ordinalPos: z.coerce.number<number>().readonly(), // TODO(ayvi): allow reordering dailies http://ayvi:3000/ayvi/dailies/issues/39
-//   valueId: z.string().readonly(),
-//   routineId: z.string().readonly(),
-//   name: z.string().nonempty(),
-//   group: z.string().nonempty(),
-//   type: z.enum(Object.values(RoutineType)),
-//   maxValue: z.coerce.number<number>().gt(0),
-//   notes: z.string().nullable(),
-//   nDays: z.coerce.number<number>().int().nullable(),
-//   weekdays: z .string() .nullable() .transform((arg: string | null) => (arg ? `[${arg}]` : null)),
-//   date: z.coerce .date<Date>() .nullable() .transform((arg: Date | null) => arg ? arg.toISOString().substring(0, 10) : null, ),
-//   dateStarted: z.coerce .date() .nullable() .transform((arg: Date | null) => arg ? arg.toISOString().substring(0, 10) : null, ),
-//   dateArchived: z.iso.date().nullable(),
-//   // dateArchived: z.coerce .date() .nullable() .transform((arg: Date | null) => arg ? arg.toISOString().substring(0, 10) : null, ),
-//   // date: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: string | null): Date | null => isoString ? new Date(isoString) : null, encode: (date: Date | null): string | null => date ? date.toISOString().substring(0, 10) : null, }),
-//   // dateStarted: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: string | null): Date | null => isoString ? new Date(isoString) : null, encode: (date: Date | null): string | null => date ? date.toISOString().substring(0, 10) : null, }),
-//   // dateArchived: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: string | null): Date | null => isoString ? new Date(isoString) : null, encode: (date: Date | null): string | null => date ? date.toISOString().substring(0, 10) : null, }),
-//   value: z.coerce.number<number>().gt(0).nullable().readonly(),
-//   weight: z.coerce.number<number>().gt(0),
-//   weightedValue: z.coerce.number<number>().gt(0).nullable().readonly(),
-//   timeMin: z.iso.time().nullable(),
-//   timeMax: z.iso.time().nullable(),
-//   timeBucketMin: z.coerce.number<number>().readonly(),
-//   timeBucketMax: z.coerce.number<number>().readonly(),
-// });
+const formReadOnlyFields = ["ordinalPos"] as const;
+type ReadOnlyField = (typeof formReadOnlyFields)[number];
 
 export default function EditDialog({
   title,
@@ -270,7 +232,7 @@ function EditDailyForm({
         className="space-y-8"
       >
         {(Object.keys(routine) as RoutineAttrs[])
-          .filter((value: string) => !FormExcludeFields.includes(value))
+          .filter((value: string) => !formExcludeFields.includes(value as ExcludedField))
           .map((attr: RoutineAttrs, idx: number) => {
             form.formState.errors[attr] &&
               console.debug(
@@ -288,7 +250,9 @@ function EditDailyForm({
                     <FormItem className="w-full bg-black">
                       <FormLabel>
                         {camelCaseToTitleCase(attr)}
-                        <p className="text-gray-500 italic">({formSchemaObjects[attr].type})</p>
+                        <p className="text-gray-500 italic">
+                          ({Routine.RustTypes[attr as keyof typeof Routine.RustTypes]})
+                        </p>
                       </FormLabel>
                       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                         <PopoverTrigger asChild>
@@ -302,12 +266,7 @@ function EditDailyForm({
                               )}
                             >
                               {field.value
-                                ? Object.values(RoutineType)
-                                    .filter(
-                                      (value: RoutineType) =>
-                                        (field.value as ValueOf<RoutineType>) === value,
-                                    )
-                                    .at(0)
+                                ? RoutineType.find(field.value as string)
                                 : "select routine type"}
                               <ChevronsUpDown className="opacity-50" />
                             </Button>
@@ -319,7 +278,7 @@ function EditDailyForm({
                             <CommandList className="bg-black text-white">
                               <CommandEmpty>no matches..</CommandEmpty>
                               <CommandGroup>
-                                {Object.values(RoutineType).map((type: RoutineType) => (
+                                {RoutineType.values().map(type => (
                                   <CommandItem
                                     className="bg-black text-white"
                                     value={type}
@@ -332,8 +291,7 @@ function EditDailyForm({
                                     {type}
                                     <Check
                                       className={cn(
-                                        // "ml-auto",
-                                        type === field.value ? "opacity-100" : "opacity-0",
+                                        clsx(type === field.value ? "opacity-100" : "opacity-0"),
                                       )}
                                     />
                                   </CommandItem>
@@ -359,14 +317,7 @@ function EditDailyForm({
                       <FormLabel>
                         {camelCaseToTitleCase(attr)}
                         <p className="text-gray-500 italic">
-                          (
-                          {
-                            // TODO(ayvi): map correct types
-                            formSchemaObjects[attr].type !== "nullable"
-                              ? formSchemaObjects[attr].type
-                              : formSchemaObjects[attr].def?.innerType?.type
-                          }
-                          )
+                          ({Routine.RustTypes[attr as keyof typeof Routine.RustTypes]})
                         </p>
                       </FormLabel>
                       <FormControl>
@@ -375,7 +326,7 @@ function EditDailyForm({
                           id={`${idx}-${routine.valueId}`}
                           key={`${idx}-${routine.valueId}`}
                           placeholder="none"
-                          readOnly={ReadOnlyFields.includes(field.name)}
+                          readOnly={formReadOnlyFields.includes(field.name as ReadOnlyField)}
                           autoComplete="false"
                           aria-autocomplete="none"
                           {...form.register(attr)}
@@ -383,7 +334,7 @@ function EditDailyForm({
                         />
                       </FormControl>
                       <FormDescription className="text-gray-500 italic">
-                        {/*ReadOnlyFields.includes(field.name) && `(readonly)`*/}
+                        {formReadOnlyFields.includes(field.name as ReadOnlyField) && `(readonly)`}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -395,30 +346,4 @@ function EditDailyForm({
       </form>
     </Form>
   );
-}
-
-const FormExcludeFields: string[] = [
-  "valueId",
-  "routineId",
-  "date",
-  "dateStarted",
-  "value",
-  "weightedValue",
-  "timeBucketMin",
-  "timeBucketMax",
-] as const;
-
-const ReadOnlyFields: string[] = ["ordinalPos"] as const;
-
-function camelCaseToTitleCase(camelCaseString: string): string {
-  // Add a space before each uppercase letter (except the first one)
-  // and then capitalize the first letter of the entire string
-  const spacedString = camelCaseString.replace(/([A-Z])/g, " $1");
-
-  // Capitalize the first letter of each word and convert the rest to lowercase
-  return spacedString
-    .split(" ")
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ")
-    .trim(); // Remove any leading/trailing spaces
 }
