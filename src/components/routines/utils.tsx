@@ -4,10 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 
 import type { Routine } from "@/types/routines";
 
-export async function queryRoutineHistory(
-  routineId: string,
-  days: number,
-): Promise<Routine[]> {
+export async function queryRoutineHistory(routineId: string, days: number): Promise<Routine[]> {
   let startDate: Date = new Date();
   // TODO(ayvi): replace fixed date with current date after dev
   let endDate: Date = new Date("2025-10-03");
@@ -22,7 +19,5 @@ export async function queryRoutineHistory(
 }
 
 // TODO(ayvi): cached call not working?
-export const cachedQueryRoutineHistory: (
-  routineId: string,
-  days: number,
-) => Promise<Routine[]> = React.cache(queryRoutineHistory);
+export const cachedQueryRoutineHistory: (routineId: string, days: number) => Promise<Routine[]> =
+  React.cache(queryRoutineHistory);

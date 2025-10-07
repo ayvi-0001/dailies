@@ -4,15 +4,9 @@ import { Badge } from "@/components/ui/badge";
 
 import type { Routine } from "@/types/routines";
 
-export default function Details({
-  routine,
-}: {
-  routine: Routine;
-}): React.ReactElement {
+export default function Details({ routine }: { routine: Routine }): React.ReactElement {
   let timeDetail: string | null =
-    routine.timeMin !== null
-      ? `time: ${routine.timeMin} ~ ${routine.timeMax}`
-      : null;
+    routine.timeMin !== null ? `time: ${routine.timeMin} ~ ${routine.timeMax}` : null;
 
   let weekdays = routine.weekdays?.slice(1, -1).split(",");
   let daysDetail: string | null =

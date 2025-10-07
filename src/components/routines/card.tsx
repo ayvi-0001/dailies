@@ -50,10 +50,7 @@ export default function RoutineCard({
 
   return (
     <CardBorder>
-      <div
-        className="flex flex-row self-center"
-        style={{ height: 150 } as React.CSSProperties}
-      >
+      <div className="flex flex-row self-center" style={{ height: 150 } as React.CSSProperties}>
         <div className="flex flex-none items-center">
           <GroupLabel routine={routine} />
           <div className="flex flex-col">
@@ -82,11 +79,7 @@ export default function RoutineCard({
         <div className="flex flex-none items-center justify-self-center">
           <div>
             <div className="justify-self-end">
-              <WeightsLabel
-                routine={routine}
-                inputValue={inputValue}
-                totalWeight={totalWeight}
-              />
+              <WeightsLabel routine={routine} inputValue={inputValue} totalWeight={totalWeight} />
             </div>
             <ValueInput
               routine={routine}

@@ -2,9 +2,12 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-export default function Input<
-  T extends string | number | undefined | readonly string[],
->({ className, type, value, ...props }: React.ComponentProps<"input">) {
+export default function Input<T extends string | number | undefined | readonly string[]>({
+  className,
+  type,
+  value,
+  ...props
+}: React.ComponentProps<"input">) {
   return (
     <input
       type={type}

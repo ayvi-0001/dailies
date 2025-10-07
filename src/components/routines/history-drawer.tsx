@@ -96,14 +96,8 @@ function HistoryCards({
   );
 }
 
-const HistoryRoutineCard = (
-  routine: Routine,
-  index: number,
-  totalWeight: number,
-) => {
-  const [inputValue, setInputValue] = React.useState<number | null>(
-    routine.value,
-  );
+const HistoryRoutineCard = (routine: Routine, index: number, totalWeight: number) => {
+  const [inputValue, setInputValue] = React.useState<number | null>(routine.value);
 
   return (
     <CardBorder key={`${routine.valueId}-${index}`}>
@@ -137,11 +131,7 @@ const HistoryRoutineCard = (
         <div className="flex flex-none items-center justify-self-center">
           <div>
             <div className="justify-self-end">
-              <WeightsLabel
-                routine={routine}
-                inputValue={inputValue}
-                totalWeight={totalWeight}
-              />
+              <WeightsLabel routine={routine} inputValue={inputValue} totalWeight={totalWeight} />
             </div>
             <ValueInput
               routine={routine}

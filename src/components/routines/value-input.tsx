@@ -25,9 +25,7 @@ export default function ValueInput({
   // TODO(ayvi) add alert on invalid value http://ayvi:3000/ayvi/dailies/issues/2
   const [_showError, setShowError] = useState<boolean>(false);
 
-  const handleOnChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ): Promise<void> => {
+  const handleOnChange = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     let value = parseInt(event.target.value, 10);
     if (!Number.isNaN(value)) {
       if (value <= routine.maxValue) {
@@ -56,18 +54,14 @@ export default function ValueInput({
     event.target.blur();
   };
 
-  const handleInputClick = (
-    event: React.MouseEvent<HTMLInputElement, MouseEvent>,
-  ): void => {
+  const handleInputClick = (event: React.MouseEvent<HTMLInputElement, MouseEvent>): void => {
     // @ts-ignore
     event.target.select();
   };
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleOuterDivClick = async (
-    _event: React.MouseEvent<HTMLDivElement, MouseEvent>,
-  ) => {
+  const handleOuterDivClick = async (_event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (inputRef.current) {
       inputRef.current.focus();
       inputRef.current.select();

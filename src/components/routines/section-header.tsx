@@ -8,14 +8,9 @@ export default function SectionHeader(section: Section): React.ReactNode {
   return (
     <div className="select-none h-11 bg-[#6B6C76] z-5 relative opacity-90 bg-blend-overlay">
       <div className="flex flex-row gap-3 items-center">
-        <div
-          className="bg-yellow-400 box-content size-11 aspect-square shadow-md"
-        >
-        </div>
+        <div className="bg-yellow-400 box-content size-11 aspect-square shadow-md"></div>
         <div>
-          <p className="font-bold text-black text-3xl text-shadow-sm">
-            {section.title}
-          </p>
+          <p className="font-bold text-black text-3xl text-shadow-sm">{section.title}</p>
         </div>
         <div className="absolute right-0 mr-4 flex flex-row text-lg">
           <p className="font-bold">total weight</p>

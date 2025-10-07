@@ -56,11 +56,7 @@ export default function WeightsLabel({
         <WeightedValueLabel />
       </div>
       <div className="flex items-center h-12 mt-4 ml-2">
-        <Separator
-          orientation="vertical"
-          decorative
-          className="border-slate-400/80 border-1"
-        />
+        <Separator orientation="vertical" decorative className="border-slate-400/80 border-1" />
       </div>
       <RingChart
         size={8}

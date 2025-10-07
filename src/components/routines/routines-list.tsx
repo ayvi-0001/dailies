@@ -10,11 +10,7 @@ import type { Routine } from "@/types/routines";
 import RoutineCard from "./card";
 import SectionHeader from "./section-header";
 
-export default function RoutineList({
-  title,
-}: {
-  title: string;
-}): React.ReactNode {
+export default function RoutineList({ title }: { title: string }): React.ReactNode {
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [totalWeight, settotalWeight] = useState<number>(0);
   const [refreshRoutines, setRefreshRoutines] = useState<number>(0);
@@ -24,7 +20,7 @@ export default function RoutineList({
   useEffect(() => {
     const get_routines = async () => {
       await invoke<Routine[]>("get_routines")
-        .then((result) => setRoutines(result))
+        .then(result => setRoutines(result))
         .catch(console.error);
     };
     get_routines();
@@ -33,7 +29,7 @@ export default function RoutineList({
   useEffect(() => {
     const get_total_eval_weight = async () => {
       await invoke<number>("get_total_eval_weight", { date: "2025-10-03" })
-        .then((result) => settotalWeight(result))
+        .then(result => settotalWeight(result))
         .catch(console.error);
     };
     get_total_eval_weight();

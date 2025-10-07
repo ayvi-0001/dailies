@@ -10,3 +10,11 @@ importOrder:
   - "^[./]"
 importOrderSeparation: true
 importOrderSortSpecifiers: true
+importOrderGroupNamespaceSpecifiers: true
+arrowParens: avoid
+bracketSameLine: false
+embeddedLanguageFormatting: auto
+endOfLine: lf
+printWidth: 100
+semi: true
+trailingComma: all

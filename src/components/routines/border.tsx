@@ -1,8 +1,6 @@
 import React from "react";
 
-export default function CardBorder({
-  children,
-}: React.PropsWithChildren): React.ReactElement {
+export default function CardBorder({ children }: React.PropsWithChildren): React.ReactElement {
   return (
     <div
       className={`select-none box-content border-yellow-400/80 isolate bg-white/78

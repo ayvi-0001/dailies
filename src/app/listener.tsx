@@ -17,7 +17,7 @@ export default function Toaster(): React.ReactElement {
     });
   }, []);
 
-  const Toaster = dynamic(() => import("sonner").then((mod) => mod.Toaster), {
+  const Toaster = dynamic(() => import("sonner").then(mod => mod.Toaster), {
     ssr: false,
   });
 

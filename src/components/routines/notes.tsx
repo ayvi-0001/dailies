@@ -2,11 +2,7 @@ import * as React from "react";
 
 import { NoteStack } from "@/components/svgs";
 import { Button } from "@/components/ui/button";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 export default function Notes({
   windowWidth,
@@ -17,9 +13,7 @@ export default function Notes({
 }): React.ReactElement {
   return windowWidth >= 800 ? (
     <div>
-      <p className="text-black overflow-hidden text-ellipsis line-clamp-5">
-        {title ?? ""}
-      </p>
+      <p className="text-black overflow-hidden text-ellipsis line-clamp-5">{title ?? ""}</p>
     </div>
   ) : (
     <div>

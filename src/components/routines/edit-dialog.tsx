@@ -39,11 +39,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import Input from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import type { Routine, RoutineAttrs } from "@/types/routines";
@@ -63,15 +59,11 @@ const weekdays = z.string().nullable();
 const date = z.coerce
   .date<Date>()
   .nullable()
-  .transform((arg: Date | null) =>
-    arg ? arg.toISOString().substring(0, 10) : null,
-  );
+  .transform((arg: Date | null) => (arg ? arg.toISOString().substring(0, 10) : null));
 const dateStarted = z.coerce
   .date()
   .nullable()
-  .transform((arg: Date | null) =>
-    arg ? arg.toISOString().substring(0, 10) : null,
-  );
+  .transform((arg: Date | null) => (arg ? arg.toISOString().substring(0, 10) : null));
 const dateArchived = z.iso.date().nullable();
 // dateArchived: z.coerce .date() .nullable() .transform((arg: Date | null) => arg ? arg.toISOString().substring(0, 10) : null, ),
 // date: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: string | null): Date | null => isoString ? new Date(isoString) : null, encode: (date: Date | null): string | null => date ? date.toISOString().substring(0, 10) : null, }),
@@ -148,8 +140,7 @@ export default function EditDialog({
   routine: Routine;
   onRefreshAction: () => void;
 }): React.ReactNode {
-  const dailyFormRef: React.RefObject<HTMLFormElement | null> =
-    React.createRef<HTMLFormElement>();
+  const dailyFormRef: React.RefObject<HTMLFormElement | null> = React.createRef<HTMLFormElement>();
 
   const handleSubmitButtonRef = async (): Promise<void> => {
     dailyFormRef?.current?.requestSubmit();
@@ -242,9 +233,7 @@ function EditDailyForm({
     defaultValues: originalValues,
   });
 
-  const onSubmit = async (
-    values: z.infer<typeof formSchema>,
-  ): Promise<void> => {
+  const onSubmit = async (values: z.infer<typeof formSchema>): Promise<void> => {
     console.debug(`original_daily: ${JSON.stringify(originalValues)}`);
     console.debug(`new_daily: ${JSON.stringify(values)}`);
 
@@ -299,9 +288,7 @@ function EditDailyForm({
                     <FormItem className="bg-black w-full">
                       <FormLabel>
                         {camelCaseToTitleCase(attr)}
-                        <p className="text-gray-500 italic">
-                          ({formSchemaObjects[attr].type})
-                        </p>
+                        <p className="text-gray-500 italic">({formSchemaObjects[attr].type})</p>
                       </FormLabel>
                       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                         <PopoverTrigger asChild>
@@ -318,8 +305,7 @@ function EditDailyForm({
                                 ? Object.values(RoutineType)
                                     .filter(
                                       (value: RoutineType) =>
-                                        (field.value as ValueOf<RoutineType>) ===
-                                        value,
+                                        (field.value as ValueOf<RoutineType>) === value,
                                     )
                                     .at(0)
                                 : "select routine type"}
@@ -329,36 +315,29 @@ function EditDailyForm({
                         </PopoverTrigger>
                         <PopoverContent className="p-0">
                           <Command className="bg-black text-white">
-                            <CommandInput
-                              placeholder={field.name}
-                              className="h-fit"
-                            />
+                            <CommandInput placeholder={field.name} className="h-fit" />
                             <CommandList className="bg-black text-white">
                               <CommandEmpty>no matches..</CommandEmpty>
                               <CommandGroup>
-                                {Object.values(RoutineType).map(
-                                  (type: RoutineType) => (
-                                    <CommandItem
-                                      className="bg-black text-white"
-                                      value={type}
-                                      key={type}
-                                      onSelect={() => {
-                                        form.setValue(field.name, type);
-                                        setPopoverOpen(false);
-                                      }}
-                                    >
-                                      {type}
-                                      <Check
-                                        className={cn(
-                                          // "ml-auto",
-                                          type === field.value
-                                            ? "opacity-100"
-                                            : "opacity-0",
-                                        )}
-                                      />
-                                    </CommandItem>
-                                  ),
-                                )}
+                                {Object.values(RoutineType).map((type: RoutineType) => (
+                                  <CommandItem
+                                    className="bg-black text-white"
+                                    value={type}
+                                    key={type}
+                                    onSelect={() => {
+                                      form.setValue(field.name, type);
+                                      setPopoverOpen(false);
+                                    }}
+                                  >
+                                    {type}
+                                    <Check
+                                      className={cn(
+                                        // "ml-auto",
+                                        type === field.value ? "opacity-100" : "opacity-0",
+                                      )}
+                                    />
+                                  </CommandItem>
+                                ))}
                               </CommandGroup>
                             </CommandList>
                           </Command>
@@ -439,7 +418,7 @@ function camelCaseToTitleCase(camelCaseString: string): string {
   // Capitalize the first letter of each word and convert the rest to lowercase
   return spacedString
     .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ")
     .trim(); // Remove any leading/trailing spaces
 }
