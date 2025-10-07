@@ -13,11 +13,11 @@ export default function Details({ routine }: { routine: Routine }): React.ReactE
     !Array.isArray(weekdays) || !weekdays.length ? null : `days: ${weekdays}`;
 
   return (
-    <div className="flex flex-col text-black font-mono">
+    <div className="flex flex-col font-mono text-black">
       <div className="justify-self-start">
         type:{" "}
         <Badge
-          className="text-black bg-slate-400 border-yellow-600 font-bold rounded-full"
+          className="rounded-full border-yellow-600 bg-slate-400 font-bold text-black"
           variant="outline"
         >
           {routine.type}

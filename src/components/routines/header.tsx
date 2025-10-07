@@ -9,7 +9,7 @@ export default function Header({
 }): React.ReactElement {
   return (
     <div className="flex flex-row">
-      <p className="text-black font-bold text-4xl tracking-tight">{title}</p>
+      <p className="text-4xl font-bold tracking-tight text-black">{title}</p>
       {children}
     </div>
   );

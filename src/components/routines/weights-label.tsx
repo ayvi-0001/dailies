@@ -24,9 +24,9 @@ export default function WeightsLabel({
 
   const WeightLabel = () => (
     <div className="flex flex-row justify-self-end">
-      <p className="empty:w-3 font-bold text-black">{routine.weight}</p>
+      <p className="font-bold text-black empty:w-3">{routine.weight}</p>
       <div className="w-1"></div>
-      <Weight className="fill-black stroke-2 stroke-black" />
+      <Weight className="fill-black stroke-black stroke-2" />
     </div>
   );
 
@@ -41,22 +41,22 @@ export default function WeightsLabel({
 
     return (
       <div className="flex flex-row justify-self-end">
-        <p className="empty:w-3 font-bold text-black">{displayValue}</p>
+        <p className="font-bold text-black empty:w-3">{displayValue}</p>
         <div className="w-1"></div>
-        <Function className="fill-black stroke-2 stroke-black " />
+        <Function className="fill-black stroke-black stroke-2" />
       </div>
     );
   };
 
   return (
     <div className="flex flex-row">
-      <div className="mr-1 mt-3">
+      <div className="mt-3 mr-1">
         <WeightLabel />
         <div className="m-1"></div>
         <WeightedValueLabel />
       </div>
-      <div className="flex items-center h-12 mt-4 ml-2">
-        <Separator orientation="vertical" decorative className="border-slate-400/80 border-1" />
+      <div className="mt-4 ml-2 flex h-12 items-center">
+        <Separator orientation="vertical" decorative className="border-1 border-slate-400/80" />
       </div>
       <RingChart
         size={8}

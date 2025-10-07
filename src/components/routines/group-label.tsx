@@ -4,9 +4,9 @@ import type { Routine } from "@/types/routines";
 
 export default function GroupLabel({ routine }: { routine: Routine }): React.ReactElement {
   return (
-    <div className="h-35 bg-yellow-400 border-yellow-500 border-2">
-      <div className="flex justify-center items-center w-full h-full">
-        <p className="font-mono font-medium text-xl rotate-180 [writing-mode:vertical-rl]">
+    <div className="h-35 border-2 border-yellow-500 bg-yellow-400">
+      <div className="flex h-full w-full items-center justify-center">
+        <p className="rotate-180 font-mono text-xl font-medium [writing-mode:vertical-rl]">
           {routine.group}
         </p>
       </div>

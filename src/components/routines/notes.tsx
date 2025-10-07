@@ -13,14 +13,14 @@ export default function Notes({
 }): React.ReactElement {
   return windowWidth >= 800 ? (
     <div>
-      <p className="text-black overflow-hidden text-ellipsis line-clamp-5">{title ?? ""}</p>
+      <p className="line-clamp-5 overflow-hidden text-ellipsis text-black">{title ?? ""}</p>
     </div>
   ) : (
     <div>
       {title && (
         <HoverCard>
           <HoverCardTrigger>
-            <Button variant="outline" size="sm" className="bg-transparent border-none">
+            <Button variant="outline" size="sm" className="border-none bg-transparent">
               <NoteStack fill="#000000" />
             </Button>
           </HoverCardTrigger>

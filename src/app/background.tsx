@@ -20,7 +20,7 @@ export default function BackgroundImage(background_props: BackgroundProps): Reac
   let { src, alt, style, className, props, imageProps, children } = background_props;
 
   return (
-    <div className={cn("fixed top-0 left-0 w-screen h-screen z--2", className)} {...props}>
+    <div className={cn("z--2 fixed top-0 left-0 h-screen w-screen", className)} {...props}>
       <Image
         alt={alt ?? ""}
         fill

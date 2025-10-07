@@ -57,7 +57,7 @@ export default function RoutineCard({
             <div className="ml-4">
               <Header title={routine.name}>
                 <div className="ml-6">
-                  <div className="flex flex-wrap items-center md:flex-row gap-4">
+                  <div className="flex flex-wrap items-center gap-4 md:flex-row">
                     <EditDialog
                       title={routine.name}
                       routine={routine}
@@ -73,7 +73,7 @@ export default function RoutineCard({
             </div>
           </div>
         </div>
-        <div className="py-3 ml-7 mr-7 grow items-center justify-self-center">
+        <div className="mr-7 ml-7 grow items-center justify-self-center py-3">
           <Notes title={routine.notes} windowWidth={windowWidth} />
         </div>
         <div className="flex flex-none items-center justify-self-center">

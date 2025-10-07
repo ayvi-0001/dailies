@@ -103,10 +103,10 @@ export default function ValueInput({
     <CursorTracker>
       <TextCursorInput />
       <div
-        className={`select-none border-dotted border-4 ${border_color} rounded-full`}
+        className={`border-4 border-dotted select-none ${border_color} rounded-full`}
         onClick={handleOuterDivClick}
       >
-        <div className="flex mt-1 mb-1 items-center text-lg font-semibold mr-15 ml-15 lg:mr-30 lg:ml-30">
+        <div className="mt-1 mr-15 mb-1 ml-15 flex items-center text-lg font-semibold lg:mr-30 lg:ml-30">
           {/* TODO(ayvi) input more than 1 char http://ayvi:3000/ayvi/dailies/issues/9 */}
           <Input
             id={routine.valueId}
@@ -114,19 +114,7 @@ export default function ValueInput({
             maxLength={String(routine.maxValue).length}
             value={`${inputValue ?? ""}`}
             ref={inputRef}
-            className={`
-              ${text_color} border-none text-lg flex h-9 max-w-9
-              shadow-xs transition-all outline-none has-disabled:opacity-50
-              first:rounded-l-md first:border-l border-y border-r
-              data-[active=true]:border-ring data-[active=true]:ring-ring/50
-              data-[active=true]:aria-invalid:ring-destructive/20
-              data-[active=true]:z-10
-              data-[active=true]:ring-[3px]
-              data-[active=true]:aria-invalid:border-destructive
-              dark:bg-input/30 relative
-              dark:data-[active=true]:aria-invalid:ring-destructive/40
-              aria-invalid:border-destructive
-            `}
+            className={` ${text_color} data-[active=true]:border-ring data-[active=true]:ring-ring/50 data-[active=true]:aria-invalid:ring-destructive/20 data-[active=true]:aria-invalid:border-destructive dark:bg-input/30 dark:data-[active=true]:aria-invalid:ring-destructive/40 aria-invalid:border-destructive relative flex h-9 max-w-9 border-y border-r border-none text-lg shadow-xs transition-all outline-none first:rounded-l-md first:border-l has-disabled:opacity-50 data-[active=true]:z-10 data-[active=true]:ring-[3px]`}
             onChange={handleOnChange}
             onClick={handleInputClick}
             onKeyDown={onKeyDown}

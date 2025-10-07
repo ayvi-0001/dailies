@@ -46,7 +46,7 @@ export default function HistoryDrawer({
           <ManageHistory />
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="bg-black/80 border-white border-1">
+      <DrawerContent className="border-1 border-white bg-black/80">
         <DrawerHeader className="text-left">
           <DrawerTitle className="text-white">{routine.name}</DrawerTitle>
           {<DrawerDescription className="text-white"></DrawerDescription>}
@@ -82,7 +82,7 @@ function HistoryCards({
 }): React.ReactElement {
   return (
     <ScrollArea
-      className="h-[32rem] rounded-md overflow-y-auto [scrollbarWidth:none]"
+      className="h-[32rem] overflow-y-auto rounded-md [scrollbarWidth:none]"
       style={{ scrollbarWidth: "none" }}
     >
       <React.Suspense fallback={<div>Loading...</div>}>
@@ -111,8 +111,8 @@ const HistoryRoutineCard = (routine: Routine, index: number, totalWeight: number
           <div className="flex flex-col">
             <div className="ml-4">
               <Header title={routine.date.toString()}>
-                <div className="ml-6 mt-1">
-                  <div className="flex flex-wrap items-center md:flex-row gap-4">
+                <div className="mt-1 ml-6">
+                  <div className="flex flex-wrap items-center gap-4 md:flex-row">
                     <EditDialog
                       title={`${routine.name} (${routine.date})`}
                       routine={routine}

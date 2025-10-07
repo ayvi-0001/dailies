@@ -153,7 +153,7 @@ export default function EditDialog({
           <EditSquare />
         </Button>
       </DialogTrigger>
-      <DialogContent className="h-[80vh] bg-black/90 text-white ">
+      <DialogContent className="h-[80vh] bg-black/90 text-white">
         <ScrollArea className="h-[70vh] rounded-md">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
@@ -166,11 +166,11 @@ export default function EditDialog({
             dailyFormRef={dailyFormRef}
             onRefreshAction={onRefreshAction}
           />
-          <DialogFooter className="mt-4 mb-3 flex gap-2 leading-none font-medium justify-center select-none">
+          <DialogFooter className="mt-4 mb-3 flex justify-center gap-2 leading-none font-medium select-none">
             <DialogClose asChild className="text-black">
               <Button
                 variant="outline"
-                className="bg-slate-700 text-slate-300 shadow hover:slate-700/90"
+                className="hover:slate-700/90 bg-slate-700 text-slate-300 shadow"
               >
                 cancel
               </Button>
@@ -178,7 +178,7 @@ export default function EditDialog({
             <DialogClose asChild className="text-black">
               <Button
                 variant="outline"
-                className="bg-gray-300 text-gray-700 shadow hover:gray-300/90"
+                className="hover:gray-300/90 bg-gray-300 text-gray-700 shadow"
                 onClick={handleSubmitButtonRef}
               >
                 save
@@ -285,7 +285,7 @@ function EditDailyForm({
                   control={form.control}
                   name={attr}
                   render={({ field }: { field: Field }) => (
-                    <FormItem className="bg-black w-full">
+                    <FormItem className="w-full bg-black">
                       <FormLabel>
                         {camelCaseToTitleCase(attr)}
                         <p className="text-gray-500 italic">({formSchemaObjects[attr].type})</p>
