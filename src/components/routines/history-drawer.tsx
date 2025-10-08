@@ -96,7 +96,7 @@ function HistoryCards({
 }
 
 const HistoryRoutineCard = (routine: Routine, index: number, totalWeight: number) => {
-  const [inputValue, setInputValue] = React.useState<number | null>(routine.value);
+  const [inputValue, setInputValue] = React.useState<string | null>(`${routine.value}`);
 
   return (
     <CardBorder key={`${routine.valueId}-${index}`}>

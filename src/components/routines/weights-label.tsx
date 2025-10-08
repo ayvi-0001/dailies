@@ -13,7 +13,7 @@ export default function WeightsLabel({
   totalWeight,
 }: {
   routine: Routine;
-  inputValue: number | null;
+  inputValue: string | null;
   totalWeight: number;
 }): React.ReactNode {
   let routineActive: boolean = inputValue !== null;

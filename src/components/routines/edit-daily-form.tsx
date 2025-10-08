@@ -191,6 +191,7 @@ export default function EditDailyForm({
                       readOnly={formReadOnlyFields.includes(field.name as ReadOnlyField)}
                       autoComplete="false"
                       aria-autocomplete="none"
+                      className="px-3 py-1"
                       {...form.register(attr)}
                       {...field}
                     />

@@ -28,7 +28,7 @@ export default function RoutineCard({
   onRefreshAction: () => void;
 }): React.ReactNode {
   const [windowWidth, setWindowWidth] = React.useState<number>(0);
-  const [inputValue, setInputValue] = React.useState<number | null>(routine.value);
+  const [inputValue, setInputValue] = React.useState<string | null>(`${routine.value}`);
 
   React.useEffect(() => {
     const getInitialWidth = async () => {
@@ -76,7 +76,7 @@ export default function RoutineCard({
         <div className="mr-7 ml-7 grow items-center justify-self-center py-3">
           <Notes title={routine.notes} windowWidth={windowWidth} />
         </div>
-        <div className="flex flex-none items-center justify-self-center">
+        <div className="flex flex-none items-center">
           <div>
             <div className="justify-self-end">
               <WeightsLabel routine={routine} inputValue={inputValue} totalWeight={totalWeight} />
