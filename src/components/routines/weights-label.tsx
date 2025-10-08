@@ -5,7 +5,7 @@ import { Function, TrailLength, Weight } from "@/components/svgs";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Separator } from "@/components/ui/separator";
 
-import type { Routine } from "@/types/routines";
+import type { Routine } from "./types";
 
 export default function WeightsLabel({
   routine,

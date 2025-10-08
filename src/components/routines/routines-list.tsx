@@ -5,10 +5,9 @@ import { useEffect, useState } from "react";
 
 import { invoke } from "@tauri-apps/api/core";
 
-import type { Routine } from "@/types/routines";
-
 import RoutineCard from "./card";
 import SectionHeader from "./section-header";
+import type { Routine } from "./types";
 
 export default function RoutineList({ title }: { title: string }): React.ReactNode {
   const [routines, setRoutines] = useState<Routine[]>([]);

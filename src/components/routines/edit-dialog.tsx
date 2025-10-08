@@ -14,9 +14,8 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { Routine } from "@/types/routines";
-
 import EditDailyForm from "./edit-daily-form";
+import { Routine } from "./types";
 
 export default function EditDialog({
   title,

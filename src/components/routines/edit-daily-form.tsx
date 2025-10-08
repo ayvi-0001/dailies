@@ -23,8 +23,7 @@ import {
 } from "@/components/ui/form";
 import Input from "@/components/ui/input";
 
-import type { RoutineAttrs } from "@/types/routines";
-import { Routine, RoutineType } from "@/types/routines";
+import { Routine } from "./types";
 
 // NOTE: in ts, z.readonly() only affects objects, arrays, tuples, Set, and Map
 const formSchema = z.object({
@@ -34,7 +33,7 @@ const formSchema = z.object({
   routineId: z.string().readonly(),
   name: z.string().nonempty(),
   group: z.string().nonempty(),
-  type: z.enum(RoutineType.values()),
+  type: z.enum(Routine.Type.values()),
   maxValue: z.coerce.number<number>().gt(0),
   notes: z.string().nullable(),
   streak: z.coerce.number<number>().nullable(),
@@ -124,9 +123,9 @@ export default function EditDailyForm({
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-8"
       >
-        {(Object.keys(routine) as RoutineAttrs[])
+        {(Object.keys(routine) as (keyof Routine)[])
           .filter((value: string) => !formExcludeFields.includes(value as ExcludedField))
-          .map((attr: RoutineAttrs, idx: number) => {
+          .map((attr: keyof Routine, idx: number) => {
             form.formState.errors[attr] &&
               console.debug(
                 `Error submitting form for field ${attr}: ${form.formState.errors[attr].message}`,
@@ -145,7 +144,7 @@ export default function EditDailyForm({
                   <ComboboxForm
                     selectedValue={
                       field.value
-                        ? `${RoutineType.find(field.value as string)}`
+                        ? `${Routine.Type.find(field.value as string)}`
                         : "select routine type"
                     }
                     inputPlaceholder={field.name}
@@ -155,7 +154,7 @@ export default function EditDailyForm({
                     commandProps={{ className: "bg-black text-white" }}
                     commandListProps={{ className: "bg-black text-white" }}
                     buttonProps={{ className: " bg-black" }}
-                    commandItems={RoutineType.values().map(type => (
+                    commandItems={Routine.Type.values().map(type => (
                       <CommandItem
                         className="bg-black text-white"
                         value={type}

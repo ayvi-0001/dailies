@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { Routine } from "@/types/routines";
+import type { Routine } from "./types";
 
 export default function GroupLabel({ routine }: { routine: Routine }): React.ReactElement {
   return (

@@ -14,13 +14,12 @@ import {
 } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import type { Routine } from "@/types/routines";
-
 import CardBorder from "./border";
 import Details from "./details";
 import EditDialog from "./edit-dialog";
 import GroupLabel from "./group-label";
 import Header from "./header";
+import type { Routine } from "./types";
 import { cachedQueryRoutineHistory } from "./utils";
 import ValueInput from "./value-input";
 import WeightsLabel from "./weights-label";

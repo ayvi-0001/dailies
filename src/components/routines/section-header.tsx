@@ -2,7 +2,7 @@ import React from "react";
 
 import { Separator } from "@/components/ui/separator";
 
-import type { Section } from "@/types/routines";
+import type { Section } from "./types";
 
 export default function SectionHeader(section: Section): React.ReactNode {
   return (

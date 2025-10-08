@@ -10,7 +10,7 @@ import { TextCursorInput } from "lucide-react";
 import CursorTracker from "@/components/animata/container/cursor-tracker";
 import Input from "@/components/ui/input";
 
-import type { Routine } from "@/types/routines";
+import type { Routine } from "./types";
 
 export default function ValueInput({
   routine,

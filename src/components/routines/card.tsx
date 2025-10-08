@@ -6,7 +6,6 @@ import { UnlistenFn, listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
 import type { TauriWindowResizeEvent } from "@/types/events";
-import type { Routine } from "@/types/routines";
 
 import CardBorder from "./border";
 import Details from "./details";
@@ -15,6 +14,7 @@ import GroupLabel from "./group-label";
 import Header from "./header";
 import HistoryDrawer from "./history-drawer";
 import Notes from "./notes";
+import type { Routine } from "./types";
 import ValueInput from "./value-input";
 import WeightsLabel from "./weights-label";
 

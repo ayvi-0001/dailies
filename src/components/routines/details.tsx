@@ -2,7 +2,7 @@ import React from "react";
 
 import { Badge } from "@/components/ui/badge";
 
-import type { Routine } from "@/types/routines";
+import type { Routine } from "./types";
 
 export default function Details({ routine }: { routine: Routine }): React.ReactElement {
   let timeDetail: string | null =

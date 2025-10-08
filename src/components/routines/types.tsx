@@ -4,7 +4,7 @@ export type Routine = {
   routineId: Readonly<string>;
   name: string;
   group: string;
-  type: RoutineType;
+  type: Routine.Type;
   maxValue: number;
   notes: string | null;
   nDays: number | null;
@@ -44,53 +44,27 @@ export namespace Routine {
     timeBucketMin: "Option<i32>",
     timeBucketMax: "Option<i32>",
   } as const;
-}
 
-/**
- * Used for type-checking a string against available attributes on Routine
- */
-export type RoutineAttrs =
-  | "ordinalPos"
-  | "valueId"
-  | "routineId"
-  | "name"
-  | "group"
-  | "type"
-  | "maxValue"
-  | "notes"
-  | "nDays"
-  | "streak"
-  | "weekdays"
-  | "date"
-  | "dateStarted"
-  | "dateArchived"
-  | "value"
-  | "weight"
-  | "weightedValue"
-  | "timeMin"
-  | "timeMax"
-  | "timeBucketMin"
-  | "timeBucketMax";
-
-export enum RoutineType {
-  r_d_b = "r-d-b",
-  r_d_n = "r-d-n",
-  r_d_c_d = "r-d-c-d",
-  r_ln_b = "r-ln-b",
-  r_d_cy = "r-d-cy",
-  r_sc_c = "r-sc-c",
-  r_d_st_n = "r-d-st-n",
-}
-
-export namespace RoutineType {
-  export function values(): RoutineType[] {
-    return Object.values(RoutineType).filter(v => typeof v !== "function")!;
+  export enum Type {
+    r_d_b = "r-d-b",
+    r_d_n = "r-d-n",
+    r_d_c_d = "r-d-c-d",
+    r_ln_b = "r-ln-b",
+    r_d_cy = "r-d-cy",
+    r_sc_c = "r-sc-c",
+    r_d_st_n = "r-d-st-n",
   }
 
-  export function find(str: string): RoutineType {
-    return RoutineType.values()
-      .filter(e => e == str)
-      .at(0)!;
+  export namespace Type {
+    export function values(): Routine.Type[] {
+      return Object.values(Routine.Type).filter(v => typeof v !== "function")!;
+    }
+
+    export function find(str: string): Routine.Type {
+      return Routine.Type.values()
+        .filter(e => e == str)
+        .at(0)!;
+    }
   }
 }
 

@@ -2,7 +2,7 @@ import React from "react";
 
 import { invoke } from "@tauri-apps/api/core";
 
-import type { Routine } from "@/types/routines";
+import type { Routine } from "./types";
 
 export async function queryRoutineHistory(routineId: string, days: number): Promise<Routine[]> {
   let startDate: Date = new Date();
