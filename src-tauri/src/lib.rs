@@ -31,8 +31,14 @@ pub async fn run() {
 
     tauri::Builder::default()
         .setup(|app: &mut tauri::App| {
+            let window: tauri::WebviewWindow = app.get_webview_window("main").unwrap();
+            window.center()?;
+
             #[cfg(debug_assertions)]
             {
+                window.open_devtools();
+                window.close_devtools();
+
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()
                         .level(log::LevelFilter::Info)
