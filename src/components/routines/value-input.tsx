@@ -98,7 +98,7 @@ export default function ValueInput({
   );
 
   let textClasses: ClassValue = cn(
-    "text-xl font-semibold shadow-xs",
+    "text-2xl font-semibold shadow-xs",
     "text-transparent",
     clsx(
       +`${inputValue}` >= routine.maxValue && "text-green-700",

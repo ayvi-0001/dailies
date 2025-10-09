@@ -134,7 +134,7 @@ const HistoryRoutineCard = (routine: Routine, index: number, totalWeight: number
         <div className="mr-7 ml-7 grow items-center justify-self-center py-6">{/* Notes */}</div>
         <div className="flex flex-none items-center justify-self-center">
           <div>
-            <div className="justify-self-end">
+            <div className="mb-2 justify-self-end">
               <WeightsLabel routine={routine} inputValue={inputValue} totalWeight={totalWeight} />
             </div>
             <ValueInput

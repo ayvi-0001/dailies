@@ -31,9 +31,9 @@ export default function WeightsLabel({
     : 0;
 
   const WeightLabel = () => (
-    <div className="mb-1 flex flex-row justify-self-end">
-      <p className="font-bold text-black empty:w-3">{routine.weight}</p>
-      <Weight className="ml-1 fill-black stroke-black stroke-2" />
+    <div className="mb-1 flex flex-row gap-2 justify-self-end">
+      <p className="text-lg font-bold text-black empty:w-3">{routine.weight}</p>
+      <Weight className="size-7 fill-black stroke-black stroke-2" />
     </div>
   );
 
@@ -42,9 +42,9 @@ export default function WeightsLabel({
       (weightedValue && `(${routineValueContribution}%) ${weightedValue}`) || `(-%)`;
 
     return (
-      <div className="flex flex-row justify-self-end">
-        <p className="font-bold text-black empty:w-3">{displayValue}</p>
-        <Function className="ml-1 fill-black stroke-black stroke-2" />
+      <div className="flex flex-row gap-2 justify-self-end">
+        <p className="text-lg font-bold text-black empty:w-3">{displayValue}</p>
+        <Function className="size-7 fill-black stroke-black stroke-2" />
       </div>
     );
   };
@@ -55,11 +55,11 @@ export default function WeightsLabel({
       return (
         <HoverCard>
           <HoverCardTrigger>
-            <div className="mr-5 mb-1 flex flex-row">
-              <p className="mr-2 font-bold text-black italic empty:w-3">
+            <div className="flex flex-row gap-2">
+              <p className="text-lg font-bold text-black italic empty:w-3">
                 {routine.streak}/{routine.nDays}
               </p>
-              <TrailLength fill="#000000" />
+              <TrailLength fill="#000000" className="size-7" />
             </div>
           </HoverCardTrigger>
           <HoverCardContent className="bg-black/70">
@@ -71,34 +71,40 @@ export default function WeightsLabel({
   };
 
   return (
-    <div className="flex flex-row">
-      <div className="mt-3 mr-1">
-        <div className="flex flex-row justify-self-end">
+    <div className="flex">
+      <div>
+        <div className="flex flex-row gap-4 justify-self-end align-middle">
           <StreakLabel />
           <WeightLabel />
         </div>
         <WeightedValueLabel />
       </div>
-      <div className="mt-4 ml-2 flex h-12 items-center">
-        <Separator orientation="vertical" decorative className="border-1 border-slate-400/80" />
+      <div className="mr-1 ml-3 h-14 place-content-center">
+        <Separator orientation="vertical" className="border-2 border-slate-400/80" />
       </div>
-      <RingChart
-        size={8}
-        width={6}
-        className="bg-transparent"
-        rings={[
-          {
-            progress: routineValueContribution,
-            progressClassName: "text-green-900",
-            trackClassName: "bg-black text-green-500/30",
-          },
-          {
-            progress: routineActive ? routineTotalWeight : 0,
-            progressClassName: "text-black/70",
-            trackClassName: "bg-black text-black/20",
-          },
-        ]}
-      />
+      <div>
+        <RingChart
+          size={8}
+          width={6}
+          className="bg-transparent"
+          rings={[
+            {
+              progress: routineValueContribution,
+              progressClassName: routineValueContribution ? "text-green-900" : "text-red-900",
+              trackClassName: !routineActive
+                ? "bg-transparent text-slate-500/30"
+                : routineValueContribution
+                  ? "bg-black text-green-500/30"
+                  : "bg-black text-red-500/30",
+            },
+            {
+              progress: routineActive ? routineTotalWeight : 0,
+              progressClassName: "text-black/70",
+              trackClassName: "bg-black text-black/20",
+            },
+          ]}
+        />
+      </div>
     </div>
   );
 }

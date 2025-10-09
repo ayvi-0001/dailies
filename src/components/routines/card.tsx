@@ -82,7 +82,7 @@ export default function RoutineCard({
         </div>
         <div className="flex flex-none items-center">
           <div>
-            <div className="justify-self-end">
+            <div className="mb-2 justify-self-end">
               <WeightsLabel routine={routine} inputValue={inputValue} totalWeight={totalWeight} />
             </div>
             <ValueInput

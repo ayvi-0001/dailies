@@ -87,10 +87,10 @@ export default function RingChart({
 
   return (
     <div
-      className={cn("relative flex items-center justify-center rounded-3xl bg-zinc-950", className)}
+      className={cn(className, "flex items-center justify-center place-self-center")}
       style={{
-        minWidth: totalWidth + gap * rings.length * 4,
-        minHeight: totalWidth + gap * rings.length * 4,
+        minWidth: totalWidth + gap * rings.length * 2,
+        minHeight: totalWidth + gap * rings.length * 2,
       }}
     >
       {rings.map((ring, index) => {
