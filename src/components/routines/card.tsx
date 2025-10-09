@@ -61,7 +61,7 @@ export default function RoutineCard({
             <div className="ml-4">
               <Header title={routine.name}>
                 <div className="ml-6">
-                  <div className="flex flex-wrap items-center gap-4 md:flex-row">
+                  <div className="mt-2 ml-3 flex flex-wrap items-center gap-4 md:flex-row">
                     <EditDialog
                       title={routine.name}
                       routine={routine}
