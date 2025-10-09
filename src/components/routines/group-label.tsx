@@ -15,7 +15,9 @@ export default function GroupLabel({
   routine: Routine;
 }): React.ReactElement {
   return (
-    <div className={cn(borderColor, bgColor, "h-35 border-2 outline-offset-4")}>
+    <div
+      className={cn(borderColor, bgColor, "h-35 border-2 align-middle text-white outline-offset-4")}
+    >
       <div className="flex h-full w-full items-center justify-center">
         <p className="rotate-180 font-mono text-xl font-medium [writing-mode:vertical-rl]">
           {routine.group}
