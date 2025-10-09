@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { invoke } from "@tauri-apps/api/core";
-import clsx from "clsx";
+import { type ClassValue, clsx } from "clsx";
 import { TextCursorInput } from "lucide-react";
 import { toast } from "sonner";
 
@@ -25,7 +25,7 @@ export default function ValueInput({
   setInputValueAction: React.Dispatch<React.SetStateAction<string | null>>;
   onRefreshAction: () => void;
 }): React.ReactNode {
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   const [cancelInput, setCancelInput] = React.useState<boolean>(false);
   const [restoreInputValue, setRestoreInputValue] = React.useState<string | null>(inputValue);
@@ -84,32 +84,32 @@ export default function ValueInput({
     }
   };
 
-  let border_color: string = cn(
+  let borderClasses: ClassValue = cn(
     "border-transparent",
     clsx(
       +`${inputValue}` >= routine.maxValue && "border-green-700",
       +`${inputValue}` < routine.maxValue && "border-blue-700",
       +`${inputValue}` === 0 && "border-red-700",
+      +`${inputValue}` &&
+        "rounded-full border-3 border-dashed outline-2 outline-offset-2 outline-dashed",
     ),
   );
 
-  let text_color: string = cn(
+  let textClasses: ClassValue = cn(
     "text-transparent",
     clsx(
       +`${inputValue}` >= routine.maxValue && "text-green-700",
       +`${inputValue}` < routine.maxValue && "text-blue-700",
       +`${inputValue}` === 0 && "text-red-700",
+      +`${inputValue}` && "text-lg font-semibold ",
     ),
   );
 
   return (
     <CursorTracker>
       <TextCursorInput />
-      <div
-        className={cn(border_color, "rounded-full border-4 border-dotted select-none")}
-        onClick={handleOuterDivClick}
-      >
-        <div className="mt-1 mr-15 mb-1 ml-15 flex items-center text-lg font-semibold lg:mr-30 lg:ml-30">
+      <div className={cn(borderClasses, "select-none")} onClick={handleOuterDivClick}>
+        <div className="mt-1 mr-15 mb-1 ml-15 flex items-center lg:mr-30 lg:ml-30">
           <Input
             id={routine.valueId}
             value={`${inputValue}`}
@@ -126,11 +126,11 @@ export default function ValueInput({
             autoComplete="off"
             height={1}
             className={cn(
-              text_color,
+              textClasses,
               "relative flex field-sizing-content justify-self-end",
               "text-right text-lg shadow-xs",
-              "border-y border-r border-none",
-              `dark:bg-input/30 dark: transition-all outline-none first:rounded-l-md first:border-l has-disabled:opacity-50`,
+              "border-y border-r border-none first:rounded-l-md first:border-l",
+              `dark:bg-input/30 dark: transition-all outline-none has-disabled:opacity-50`,
               "data-[active=true]:border-ring",
               "data-[active=true]:ring-ring/50",
               "data-[active=true]:aria-invalid:ring-destructive/20",
@@ -142,9 +142,9 @@ export default function ValueInput({
             )}
           />
           <div className="mr-4 ml-4">
-            <p className={cn(text_color)}>/</p>
+            <p className={textClasses}>/</p>
           </div>
-          <p className={cn(text_color)}>{routine.maxValue}</p>
+          <p className={textClasses}>{routine.maxValue}</p>
         </div>
       </div>
     </CursorTracker>

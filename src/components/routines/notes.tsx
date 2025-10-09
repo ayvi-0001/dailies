@@ -13,7 +13,7 @@ export default function Notes({
 }): React.ReactElement {
   return windowWidth >= 800 ? (
     <div>
-      <p className="line-clamp-5 overflow-hidden text-ellipsis text-black">{title ?? ""}</p>
+      <p className="line-clamp-4 overflow-hidden text-ellipsis text-black">{title ?? ""}</p>
     </div>
   ) : (
     <div>

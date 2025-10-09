@@ -2,11 +2,11 @@ use std::str::FromStr;
 
 use chrono::NaiveDate;
 use rust_decimal::Decimal;
-use sqlx::Executor;
+use sqlx::{Executor, Pool, Postgres};
 use tauri::State;
 use tokio::sync::{Mutex, MutexGuard};
 
-crate::mod_flat!(daily, daily_type);
+crate::mod_flat!(daily, enums);
 
 use daily::Daily;
 
@@ -27,18 +27,18 @@ pub async fn get_routines(
 
     let rows: Result<Vec<Daily>, sqlx::Error> = sqlx::query_as!(
         Daily,
-        "SELECT
-           \"date\" AS \"date!\",
-           \"name\" AS \"name!\",
-           \"type\" AS \"type!\",
-           \"group\" AS \"group!\",
-           \"value\",
-           ordinal_pos AS \"ordinal_pos!\",
-           value_id AS \"value_id!\",
-           routine_id AS \"routine_id!\",
-           max_value AS \"max_value!\",
-           weight AS \"weight!\",
-           date_started AS \"date_started!\",
+        r#"SELECT
+           date AS "date!",
+           name AS "name!",
+           type AS "type!",
+           "group" AS "group!",
+           value,
+           ordinal_pos AS "ordinal_pos!",
+           value_id AS "value_id!",
+           routine_id AS "routine_id!",
+           max_value AS "max_value!",
+           weight AS "weight!",
+           date_started AS "date_started!",
            date_archived,
            weighted_value,
            time_min,
@@ -54,7 +54,7 @@ pub async fn get_routines(
          WHERE
            date = $1
          ORDER BY
-           ordinal_pos;",
+           ordinal_pos;"#,
         date
     )
     .fetch_all(&state.connection_pool)
@@ -70,6 +70,24 @@ pub async fn get_routines(
     Ok(dailies)
 }
 
+#[derive(Default, Clone)]
+pub struct DailyGroup {
+    pub group: String,
+}
+
+pub async fn get_all_routine_types(pool: &Pool<Postgres>) -> Vec<String> {
+    sqlx::query_as!(
+        DailyGroup,
+        r#"SELECT DISTINCT "group" FROM dailies.routines ORDER BY "group";"#
+    )
+    .fetch_all(pool)
+    .await
+    .iter()
+    .flatten()
+    .map(|r: &DailyGroup| -> String { r.group.clone() })
+    .collect()
+}
+
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn query_routine_history(
     app: tauri::AppHandle,
@@ -82,18 +100,18 @@ pub async fn query_routine_history(
 
     let rows: Result<Vec<Daily>, sqlx::Error> = sqlx::query_as!(
         Daily,
-        "SELECT
-           \"date\" AS \"date!\",
-           \"name\" AS \"name!\",
-           \"type\" AS \"type!\",
-           \"group\" AS \"group!\",
-           \"value\",
-           ordinal_pos AS \"ordinal_pos!\",
-           value_id AS \"value_id!\",
-           routine_id AS \"routine_id!\",
-           max_value AS \"max_value!\",
-           weight AS \"weight!\",
-           date_started AS \"date_started!\",
+        r#"SELECT
+           date AS "date!",
+           name AS "name!",
+           type AS "type!",
+           "group" AS "group!",
+           value,
+           ordinal_pos AS "ordinal_pos!",
+           value_id AS "value_id!",
+           routine_id AS "routine_id!",
+           max_value AS "max_value!",
+           weight AS "weight!",
+           date_started AS "date_started!",
            date_archived,
            weighted_value,
            time_min,
@@ -111,7 +129,7 @@ pub async fn query_routine_history(
            AND date >= $2
            AND date <= $3
          ORDER BY
-           date DESC",
+           date DESC"#,
         routine_id,
         NaiveDate::from_str(start_date).unwrap(),
         NaiveDate::from_str(end_date).unwrap()
@@ -245,7 +263,7 @@ pub async fn update_daily(
             .connection_pool
             .execute(sqlx::query!(
                 "UPDATE dailies.routines SET \"group\" = $1 WHERE routine_id = $2",
-                new_daily.group,
+                std::convert::Into::<&str>::into(new_daily.group),
                 original_daily.routine_id,
             ))
             .await

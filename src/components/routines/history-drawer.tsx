@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+import getAccentClasses from "./accents";
 import CardBorder from "./border";
 import Details from "./details";
 import EditDialog from "./edit-dialog";
@@ -98,15 +99,17 @@ function HistoryCards({
 const HistoryRoutineCard = (routine: Routine, index: number, totalWeight: number) => {
   const [inputValue, setInputValue] = React.useState<string | null>(`${routine.value}`);
 
+  let { bgColor, borderColor } = getAccentClasses(routine.group);
+
   return (
-    <CardBorder key={`${routine.valueId}-${index}`}>
+    <CardBorder key={`${routine.valueId}-${index}`} className={borderColor}>
       <div
         key={`${routine.valueId}-${index}`}
         className="flex flex-row self-center"
         style={{ height: 150 } as React.CSSProperties}
       >
         <div className="flex flex-none items-center">
-          <GroupLabel routine={routine} />
+          <GroupLabel routine={routine} borderColor={borderColor} bgColor={bgColor} />
           <div className="flex flex-col">
             <div className="ml-4">
               <Header title={routine.date.toString()}>
@@ -126,7 +129,7 @@ const HistoryRoutineCard = (routine: Routine, index: number, totalWeight: number
             </div>
           </div>
         </div>
-        <div className="grow items-center justify-self-center"></div>
+        <div className="mr-7 ml-7 grow items-center justify-self-center py-6">{/* Notes */}</div>
         <div className="flex flex-none items-center justify-self-center">
           <div>
             <div className="justify-self-end">

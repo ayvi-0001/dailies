@@ -3,7 +3,7 @@ use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 
-use crate::routines::daily_type::DailyType;
+use crate::routines::enums::{DailyGroup, DailyType};
 
 // TODO(ayvi): use separate structs for values table & routines table?
 // http://ayvi:3000/ayvi/dailies/issues/30
@@ -15,7 +15,7 @@ pub struct Daily {
     pub value_id: String,
     pub routine_id: String,
     pub name: String,
-    pub group: String,
+    pub group: DailyGroup,
     pub r#type: DailyType,
     pub notes: Option<String>,
     pub n_days: Option<i32>,

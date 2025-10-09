@@ -3,7 +3,7 @@ export type Routine = {
   valueId: Readonly<string>;
   routineId: Readonly<string>;
   name: string;
-  group: string;
+  group: Routine.Group;
   type: Routine.Type;
   maxValue: number;
   notes: string | null;
@@ -44,6 +44,13 @@ export namespace Routine {
     timeBucketMin: "Option<i32>",
     timeBucketMax: "Option<i32>",
   } as const;
+
+  export enum Group {
+    rg1 = "rg1",
+    rg2 = "rg2",
+    rg3 = "rg3",
+    rg4 = "rg4",
+  }
 
   export enum Type {
     r_d_b = "r-d-b",

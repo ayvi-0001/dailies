@@ -7,6 +7,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 
 import type { TauriWindowResizeEvent } from "@/types/events";
 
+import getAccentClasses from "./accents";
 import CardBorder from "./border";
 import Details from "./details";
 import EditDialog from "./edit-dialog";
@@ -48,11 +49,13 @@ export default function RoutineCard({
     };
   }, []);
 
+  let { bgColor, borderColor } = getAccentClasses(routine.group);
+
   return (
-    <CardBorder>
+    <CardBorder className={borderColor}>
       <div className="flex flex-row self-center" style={{ height: 150 } as React.CSSProperties}>
         <div className="flex flex-none items-center">
-          <GroupLabel routine={routine} />
+          <GroupLabel routine={routine} borderColor={borderColor} bgColor={bgColor} />
           <div className="flex flex-col">
             <div className="ml-4">
               <Header title={routine.name}>
@@ -67,13 +70,13 @@ export default function RoutineCard({
                   </div>
                 </div>
               </Header>
-              <div className="mt-4">
+              <div className="mt-3">
                 <Details routine={routine} />
               </div>
             </div>
           </div>
         </div>
-        <div className="mr-7 ml-7 grow items-center justify-self-center py-3">
+        <div className="mr-7 ml-7 grow items-center justify-self-center py-6">
           <Notes title={routine.notes} windowWidth={windowWidth} />
         </div>
         <div className="flex flex-none items-center">
