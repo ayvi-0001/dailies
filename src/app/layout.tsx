@@ -20,7 +20,12 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>): React.ReactNode {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {process.env.NODE_ENV !== "production" ? (
+          <script src="http://localhost:8097"></script>
+        ) : undefined}
+      </head>
       <body className={`${spaceMono.className} antialiased`}>
         <BackgroundImage src="/images/background.png" />
         <div className="sm:m-5 lg:m-20">{children}</div>
