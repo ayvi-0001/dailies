@@ -21,15 +21,20 @@ lazy_static::lazy_static! {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub async fn run() {
+    let mut builder = tauri::Builder::default();
+
+    #[cfg(debug_assertions)]
+    {
+        builder = builder.plugin(tauri_plugin_devtools::init());
+    }
+
     let connection_pool: Pool<Postgres> = PgPoolOptions::new()
         .max_connections(20)
         .connect(&CONN_STRING)
         .await
         .unwrap();
 
-    println!("Connection pool opts: {:?}", connection_pool.options());
-
-    tauri::Builder::default()
+    builder
         .setup(|app: &mut tauri::App| {
             let window: tauri::WebviewWindow = app.get_webview_window("main").unwrap();
             window.center()?;
@@ -38,12 +43,6 @@ pub async fn run() {
             {
                 window.open_devtools();
                 window.close_devtools();
-
-                app.handle().plugin(
-                    tauri_plugin_log::Builder::default()
-                        .level(log::LevelFilter::Info)
-                        .build(),
-                )?;
             }
 
             app.manage(Mutex::new(state::AppState { connection_pool }));
