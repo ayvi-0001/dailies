@@ -1,5 +1,7 @@
 import React from "react";
 
+import clsx from "clsx";
+
 import { roundTo } from "@/lib/number";
 
 import RingChart from "@/components/animata/graphs/ring-chart";
@@ -86,21 +88,20 @@ export default function WeightsLabel({
         <RingChart
           size={8}
           width={6}
-          className="bg-transparent"
           rings={[
             {
               progress: routineValueContribution,
-              progressClassName: routineValueContribution ? "text-green-900" : "text-red-900",
-              trackClassName: !routineActive
-                ? "bg-transparent text-slate-500/30"
-                : routineValueContribution
-                  ? "bg-black text-green-500/30"
-                  : "bg-black text-red-500/30",
+              progressClassName: "text-green-900/70",
+              trackClassName: clsx(
+                "text-slate-500/30",
+                +`${inputValue}` > 0 && "text-green-500/30",
+                +`${inputValue}` === 0 && "text-red-500/30",
+              ),
             },
             {
               progress: routineActive ? routineTotalWeight : 0,
               progressClassName: "text-black/70",
-              trackClassName: "bg-black text-black/20",
+              trackClassName: "text-black/20",
             },
           ]}
         />
