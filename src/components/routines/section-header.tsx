@@ -1,14 +1,18 @@
 import React from "react";
 
+import { Swords } from "lucide-react";
+
 import { Separator } from "@/components/ui/separator";
 
 import type { Section } from "./types";
 
 export default function SectionHeader(section: Section): React.ReactNode {
   return (
-    <div className="relative z-5 h-11 bg-[#6B6C76] opacity-90 bg-blend-overlay select-none">
+    <div className="relative z-5 h-11 bg-[#6B6C76] opacity-70 bg-blend-overlay select-none">
       <div className="flex flex-row items-center gap-3">
-        <div className="box-content aspect-square size-11 bg-yellow-400 shadow-md"></div>
+        <div className="box-content aspect-square size-11 bg-yellow-400 shadow-md">
+          <Swords className="size-11 opacity-20" />
+        </div>
         <div>
           <p className="text-3xl font-bold text-black text-shadow-sm">{section.title}</p>
         </div>
@@ -21,7 +25,7 @@ export default function SectionHeader(section: Section): React.ReactNode {
               className="mr-3 ml-3 border-1 border-black"
             />
           </div>
-          <p className="align-middle font-bold underline decoration-amber-600/70 decoration-2 underline-offset-6">
+          <p className="align-middle font-bold">
             {/* TODO(ayvi): recalculate total weight on update http://ayvi:3000/ayvi/dailies/issues/37 */}
             {section.totalWeight}
           </p>
