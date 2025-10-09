@@ -93,28 +93,35 @@ export default function ValueInput({
       +`${inputValue}` >= routine.maxValue && "border-green-700",
       +`${inputValue}` < routine.maxValue && "border-blue-700",
       +`${inputValue}` === 0 && "border-red-700",
-      +`${inputValue}` && " outline-2 outline-offset-2 outline-dashed",
+      +`${inputValue}` && "outline-2 outline-offset-2 outline-dashed",
     ),
   );
 
   let textClasses: ClassValue = cn(
+    "text-xl font-semibold shadow-xs",
     "text-transparent",
     clsx(
       +`${inputValue}` >= routine.maxValue && "text-green-700",
       +`${inputValue}` < routine.maxValue && "text-blue-700",
       +`${inputValue}` === 0 && "text-red-700",
-      +`${inputValue}` && "text-lg font-semibold ",
     ),
   );
 
   return (
     <CursorTracker>
       <TextCursorInput />
-      <div className={cn(borderClasses, "select-none")} onClick={handleOuterDivClick}>
-        <div className="mt-1 mr-15 mb-1 ml-15 flex items-center lg:mr-30 lg:ml-30">
+      <div
+        className={cn(
+          borderClasses,
+          "select-none",
+          "max-w-[20rem] min-w-[20rem] lg:max-w-[25rem] lg:min-w-[25rem]",
+        )}
+        onClick={handleOuterDivClick}
+      >
+        <div className="mt-1 mb-1 flex place-content-center items-center justify-self-center-safe">
           <Input
             id={routine.valueId}
-            value={`${inputValue}`}
+            value={`${inputValue ?? ""}`}
             ref={inputRef}
             type="number"
             inputMode="numeric"
@@ -129,10 +136,9 @@ export default function ValueInput({
             height={1}
             className={cn(
               textClasses,
-              "relative flex field-sizing-content justify-self-end",
-              "text-right text-lg shadow-xs",
-              "border-y border-r border-none first:rounded-l-md first:border-l",
-              `dark:bg-input/30 dark: transition-all outline-none has-disabled:opacity-50`,
+              "field-sizing-content",
+              "border-y border-r border-none",
+              `dark:bg-input/30 has-disabled:opacity-50 dark:transition-all`,
               "data-[active=true]:border-ring",
               "data-[active=true]:ring-ring/50",
               "data-[active=true]:aria-invalid:ring-destructive/20",
