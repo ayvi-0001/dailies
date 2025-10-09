@@ -85,13 +85,13 @@ export default function ValueInput({
   };
 
   let borderClasses: ClassValue = cn(
+    "rounded-full border-3 border-dashed",
     "border-transparent",
     clsx(
       +`${inputValue}` >= routine.maxValue && "border-green-700",
       +`${inputValue}` < routine.maxValue && "border-blue-700",
       +`${inputValue}` === 0 && "border-red-700",
-      +`${inputValue}` &&
-        "rounded-full border-3 border-dashed outline-2 outline-offset-2 outline-dashed",
+      +`${inputValue}` && " outline-2 outline-offset-2 outline-dashed",
     ),
   );
 
