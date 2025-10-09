@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+import type { Option } from "@/types/option";
+
 import EditDailyForm from "./edit-daily-form";
 import { Routine } from "./types";
 
@@ -26,7 +28,7 @@ export default function EditDialog({
   routine: Routine;
   onRefreshAction: () => void;
 }): React.ReactNode {
-  const dailyFormRef: React.RefObject<HTMLFormElement | null> = React.createRef<HTMLFormElement>();
+  const dailyFormRef: React.RefObject<Option<HTMLFormElement>> = React.createRef();
 
   const handleSubmitButtonRef = async (): Promise<void> => {
     dailyFormRef?.current?.requestSubmit();

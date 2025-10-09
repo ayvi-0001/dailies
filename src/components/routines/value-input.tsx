@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 import CursorTracker from "@/components/animata/container/cursor-tracker";
 import Input from "@/components/ui/input";
 
+import type { Option } from "@/types/option";
+
 import type { Routine } from "./types";
 
 export default function ValueInput({
@@ -21,14 +23,14 @@ export default function ValueInput({
   onRefreshAction,
 }: {
   routine: Routine;
-  inputValue: string | null;
-  setInputValueAction: React.Dispatch<React.SetStateAction<string | null>>;
+  inputValue: Option<string>;
+  setInputValueAction: React.Dispatch<React.SetStateAction<Option<string>>>;
   onRefreshAction: () => void;
 }): React.ReactNode {
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const inputRef = React.useRef<Option<HTMLInputElement>>(null);
 
   const [cancelInput, setCancelInput] = React.useState<boolean>(false);
-  const [restoreInputValue, setRestoreInputValue] = React.useState<string | null>(inputValue);
+  const [restoreInputValue, setRestoreInputValue] = React.useState<Option<string>>(inputValue);
 
   const handleOnChange = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     // set max length to 6 characters

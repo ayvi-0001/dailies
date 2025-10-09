@@ -4,12 +4,14 @@ import { NoteStack } from "@/components/svgs";
 import { Button } from "@/components/ui/button";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
+import type { Option } from "@/types/option";
+
 export default function Notes({
   windowWidth,
   title,
 }: {
   windowWidth: number;
-  title: string | null;
+  title: Option<string>;
 }): React.ReactElement {
   return windowWidth >= 800 ? (
     <div>

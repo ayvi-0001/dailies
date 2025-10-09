@@ -1,3 +1,5 @@
+import type { Option } from "@/types/option";
+
 export type Routine = {
   ordinalPos: Readonly<number>;
   valueId: Readonly<string>;
@@ -6,18 +8,18 @@ export type Routine = {
   group: Routine.Group;
   type: Routine.Type;
   maxValue: number;
-  notes: string | null;
-  nDays: number | null;
-  streak: number | null;
-  weekdays: string | null;
+  notes: Option<string>;
+  nDays: Option<number>;
+  streak: Option<number>;
+  weekdays: Option<string>;
   date: Readonly<Date>;
   dateStarted: Readonly<Date>;
-  dateArchived: Date | null;
-  value: number | null;
+  dateArchived: Option<Date>;
+  value: Option<number>;
   weight: number;
-  weightedValue: Readonly<number | null>;
-  timeMin: string | null; // convert NaiveTime from rs to ts?
-  timeMax: string | null;
+  weightedValue: Readonly<Option<number>>;
+  timeMin: Option<string>; // convert NaiveTime from rs to ts?
+  timeMax: Option<string>;
   timeBucketMin: number;
   timeBucketMax: number;
 };

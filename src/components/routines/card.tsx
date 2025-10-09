@@ -6,6 +6,7 @@ import { UnlistenFn, listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
 import type { TauriWindowResizeEvent } from "@/types/events";
+import type { Option } from "@/types/option";
 
 import getAccentClasses from "./accents";
 import CardBorder from "./border";
@@ -29,7 +30,7 @@ export default function RoutineCard({
   onRefreshAction: () => void;
 }): React.ReactNode {
   const [windowWidth, setWindowWidth] = React.useState<number>(0);
-  const [inputValue, setInputValue] = React.useState<string | null>(`${routine.value}`);
+  const [inputValue, setInputValue] = React.useState<Option<string>>(`${routine.value}`);
 
   React.useEffect(() => {
     const getInitialWidth = async () => {

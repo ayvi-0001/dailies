@@ -7,6 +7,8 @@ import { Function, TrailLength, Weight } from "@/components/svgs";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Separator } from "@/components/ui/separator";
 
+import type { Option } from "@/types/option";
+
 import type { Routine } from "./types";
 
 export default function WeightsLabel({
@@ -15,13 +17,13 @@ export default function WeightsLabel({
   totalWeight,
 }: {
   routine: Routine;
-  inputValue: string | null;
+  inputValue: Option<string>;
   totalWeight: number;
 }): React.ReactNode {
   let routineActive: boolean = inputValue !== null;
 
   let routineTotalWeight: number = (routine.weight / totalWeight) * 100;
-  let weightedValue: string | null = routine.weightedValue
+  let weightedValue: Option<string> = routine.weightedValue
     ? roundTo(routine.weightedValue, 2).toString()
     : null;
   let routineValueContribution: number = routine.weightedValue

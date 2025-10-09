@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/form";
 import Input from "@/components/ui/input";
 
+import type { Option } from "@/types/option";
+
 import { Routine } from "./types";
 
 // NOTE: in ts, z.readonly() only affects objects, arrays, tuples, Set, and Map
@@ -40,13 +42,13 @@ const formSchema = z.object({
   nDays: z.coerce.number<number>().int().nullable(),
   weekdays: z.string().nullable(),
   // prettier-ignore
-  date:  z.coerce.date<Date>().nullable().transform((arg: Date | null) => (arg ? arg.toISOString().substring(0, 10) : null)),
+  date:  z.coerce.date<Date>().nullable().transform((arg: Option<Date>) => (arg ? arg.toISOString().substring(0, 10) : null)),
   // prettier-ignore
-  dateStarted:  z.coerce.date().nullable().transform((arg: Date | null) => (arg ? arg.toISOString().substring(0, 10) : null)),
+  dateStarted:  z.coerce.date().nullable().transform((arg: Option<Date>) => (arg ? arg.toISOString().substring(0, 10) : null)),
   dateArchived: z.iso.date().nullable(),
-  // date: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: string | null): Date | null => isoString ? new Date(isoString) : null, encode: (date: Date | null): string | null => date ? date.toISOString().substring(0, 10) : null, }),
-  // dateStarted: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: string | null): Date | null => isoString ? new Date(isoString) : null, encode: (date: Date | null): string | null => date ? date.toISOString().substring(0, 10) : null, }),
-  // dateArchived: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: string | null): Date | null => isoString ? new Date(isoString) : null, encode: (date: Date | null): string | null => date ? date.toISOString().substring(0, 10) : null, }),
+  // date: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: Option<string>): Option<Date> => isoString ? new Date(isoString) : null, encode: (date: Option<Date>): Option<string> => date ? date.toISOString().substring(0, 10) : null, }),
+  // dateStarted: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: Option<string>): Option<Date> => isoString ? new Date(isoString) : null, encode: (date: Option<Date>): Option<string> => date ? date.toISOString().substring(0, 10) : null, }),
+  // dateArchived: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: Option<string>): Option<Date> => isoString ? new Date(isoString) : null, encode: (date: Option<Date>): Option<string> => date ? date.toISOString().substring(0, 10) : null, }),
   value: z.coerce.number<number>().gt(0).nullable().readonly(),
   weight: z.coerce.number<number>().gt(0),
   weightedValue: z.coerce.number<number>().gt(0).nullable().readonly(),
@@ -80,7 +82,7 @@ export default function EditDailyForm({
   onRefreshAction,
 }: {
   routine: Routine;
-  dailyFormRef: React.RefObject<HTMLFormElement | null>;
+  dailyFormRef: React.RefObject<Option<HTMLFormElement>>;
   onRefreshAction: () => void;
 }): React.ReactElement {
   let originalValues = routine as unknown as z.infer<typeof formSchema>;

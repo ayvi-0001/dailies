@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+import type { Option } from "@/types/option";
+
 import getAccentClasses from "./accents";
 import CardBorder from "./border";
 import Details from "./details";
@@ -97,7 +99,7 @@ function HistoryCards({
 }
 
 const HistoryRoutineCard = (routine: Routine, index: number, totalWeight: number) => {
-  const [inputValue, setInputValue] = React.useState<string | null>(`${routine.value}`);
+  const [inputValue, setInputValue] = React.useState<Option<string>>(`${routine.value}`);
 
   let { bgColor, borderColor } = getAccentClasses(routine.group);
 
