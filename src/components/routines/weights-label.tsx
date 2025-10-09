@@ -1,5 +1,7 @@
 import React from "react";
 
+import { roundTo } from "@/lib/number";
+
 import RingChart from "@/components/animata/graphs/ring-chart";
 import { Function, TrailLength, Weight } from "@/components/svgs";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
@@ -19,8 +21,11 @@ export default function WeightsLabel({
   let routineActive: boolean = inputValue !== null;
 
   let routineTotalWeight: number = (routine.weight / totalWeight) * 100;
+  let weightedValue: string | null = routine.weightedValue
+    ? roundTo(routine.weightedValue, 2).toString()
+    : null;
   let routineValueContribution: number = routine.weightedValue
-    ? (routine.weightedValue / totalWeight) * 100
+    ? roundTo((routine.weightedValue / totalWeight) * 100, 2)
     : 0;
 
   const WeightLabel = () => (
@@ -31,13 +36,8 @@ export default function WeightsLabel({
   );
 
   const WeightedValueLabel = () => {
-    let displayValue: string;
-
-    if (routineActive) {
-      displayValue = `(${Math.round(routineValueContribution * 100) / 100}%) ${routine.weightedValue && Math.round(routine.weightedValue * 100) / 100}`;
-    } else {
-      displayValue = `(-%)`;
-    }
+    let displayValue: string =
+      (weightedValue && `(${routineValueContribution}%) ${weightedValue}`) || `(-%)`;
 
     return (
       <div className="flex flex-row justify-self-end">
