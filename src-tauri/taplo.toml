@@ -1,8 +1,9 @@
 [formatting]
-align_entries    = false
-crlf             = false
-reorder_keys     = false
-trailing_newline = true
+align_entries     = false
+array_auto_expand = false
+crlf              = false
+reorder_keys      = false
+trailing_newline  = true
 
 exclude = ["Cargo.lock"]
 
