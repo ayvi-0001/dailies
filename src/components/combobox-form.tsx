@@ -17,7 +17,7 @@ import {
 import { FormControl } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-export default function ComboboxForm({
+export default function ComboboxForm<T>({
   selectedValue,
   inputPlaceholder,
   emptyPlaceholder,
@@ -28,7 +28,7 @@ export default function ComboboxForm({
   commandProps,
   commandListProps,
 }: {
-  selectedValue?: any;
+  selectedValue?: T;
   inputPlaceholder: string;
   emptyPlaceholder: string;
   commandItems: React.ReactElement<typeof CommandItem>[];
@@ -53,7 +53,7 @@ export default function ComboboxForm({
               buttonProps?.className,
             )}
           >
-            {selectedValue ?? inputPlaceholder}
+            {inputPlaceholder}
             <ChevronsUpDown className="opacity-50" />
           </Button>
         </FormControl>
