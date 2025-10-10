@@ -3,6 +3,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 
+import * as WindowSize from "@/app/providers/window-size";
 import { invoke } from "@tauri-apps/api/core";
 
 import RoutineCard from "./card";
@@ -13,6 +14,8 @@ export default function RoutineList({ title }: { title: string }): React.ReactNo
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [totalWeight, settotalWeight] = useState<number>(0);
   const [refreshRoutines, setRefreshRoutines] = useState<number>(0);
+
+  const windowSize: WindowSize.WindowWidthState = WindowSize.useWidth();
 
   // TODO(ayvi): useEffect individually for each daily, so refresh doesn't pull all dailies
   // http://ayvi:3000/ayvi/dailies/issues/34
@@ -46,7 +49,7 @@ export default function RoutineList({ title }: { title: string }): React.ReactNo
           key={index}
           routine={value}
           totalWeight={totalWeight}
-          onRefreshAction={triggerRoutineRefresh}
+          windowWidth={windowSize.windowWidth}
         />
       ))}
     </div>

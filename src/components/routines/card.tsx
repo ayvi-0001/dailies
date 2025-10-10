@@ -2,10 +2,6 @@
 
 import * as React from "react";
 
-import { UnlistenFn, listen } from "@tauri-apps/api/event";
-import { getCurrentWindow } from "@tauri-apps/api/window";
-
-import type { TauriWindowResizeEvent } from "@/types/events";
 import type { Option } from "@/types/option";
 
 import getAccentClasses from "./accents";
@@ -23,34 +19,17 @@ import WeightsLabel from "./weights-label";
 export default function RoutineCard({
   routine,
   totalWeight,
+  windowWidth,
   onRefreshAction,
 }: {
   routine: Routine;
   totalWeight: number;
+  windowWidth: number;
   onRefreshAction: () => void;
 }): React.ReactNode {
-  const [windowWidth, setWindowWidth] = React.useState<number>(0);
   const [inputValue, setInputValue] = React.useState<Option<string>>(`${routine.value}`);
 
-  React.useEffect(() => {
-    const getInitialWidth = async () => {
-      let innerSize = await getCurrentWindow().innerSize();
-      setWindowWidth(innerSize.width);
-    };
-
-    getInitialWidth();
-
-    const unlisten = listen("tauri://resize", (event: TauriWindowResizeEvent) => {
-      console.debug(JSON.stringify(event));
-      setWindowWidth(event.payload.width);
-    });
-
-    return () => {
-      unlisten.then((off: UnlistenFn) => off());
-    };
-  }, []);
-
-  let { bgColor, borderColor } = getAccentClasses(routine.group);
+  const { bgColor, borderColor } = getAccentClasses(routine.group);
 
   return (
     <CardBorder className={borderColor}>

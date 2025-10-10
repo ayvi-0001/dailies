@@ -17,7 +17,7 @@ type BackgroundProps = {
 // TODO(ayvi): parallax background + rotate selection
 // http://ayvi:3000/ayvi/dailies/issues/25
 export default function BackgroundImage(background_props: BackgroundProps): React.ReactElement {
-  let { src, alt, style, className, props, imageProps, children } = background_props;
+  const { src, alt, style, className, props, imageProps, children } = background_props;
 
   return (
     <div className={cn("z--2 fixed top-0 left-0 h-screen w-screen", className)} {...props}>

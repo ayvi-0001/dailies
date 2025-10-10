@@ -7,6 +7,7 @@ import { Space_Mono } from "next/font/google";
 import CommandDialog from "@/components/command-dialog";
 
 import "./globals.css";
+import WindowSizeProvider from "./providers/window-size";
 
 export const experimental_ppr = true;
 
@@ -31,7 +32,9 @@ export default function RootLayout({
       <body className={`${spaceMono.className} antialiased`}>
         <BackgroundImage src="/images/background.png" />
         <CommandDialog />
-        <div className="sm:m-5 lg:m-20">{children}</div>
+        <WindowSizeProvider>
+          <div className="sm:m-5 lg:m-20">{children}</div>
+        </WindowSizeProvider>
       </body>
     </html>
   );
