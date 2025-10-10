@@ -7,14 +7,14 @@ import type { Option } from "@/types/option";
 import getAccentClasses from "./accents";
 import CardBorder from "./border";
 import Details from "./details";
-import EditDialog from "./edit-dialog";
-import GroupLabel from "./group-label";
-import Header from "./header";
-import HistoryDrawer from "./history-drawer";
+import EditDialog from "./dialogs/edit";
+import GroupLabel from "./group";
+import Header from "./name";
+import HistoryDrawer from "./history";
 import Notes from "./notes";
 import type { Routine } from "./types";
-import ValueInput from "./value-input";
-import WeightsLabel from "./weights-label";
+import ValueInput from "./input";
+import WeightsLabel from "./weights";
 
 export default function RoutineCard({
   routine,

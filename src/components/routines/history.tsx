@@ -19,13 +19,13 @@ import type { Option } from "@/types/option";
 import getAccentClasses from "./accents";
 import CardBorder from "./border";
 import Details from "./details";
-import EditDialog from "./edit-dialog";
-import GroupLabel from "./group-label";
-import Header from "./header";
+import EditDialog from "./dialogs/edit";
+import GroupLabel from "./group";
+import Header from "./name";
 import type { Routine } from "./types";
 import { cachedQueryRoutineHistory } from "./utils";
-import ValueInput from "./value-input";
-import WeightsLabel from "./weights-label";
+import ValueInput from "./input";
+import WeightsLabel from "./weights";
 
 // TODO(ayvi): history days options/streaming http://ayvi:3000/ayvi/dailies/issues/32
 // TODO(ayvi): move to generic drawer component

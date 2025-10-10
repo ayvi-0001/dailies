@@ -6,7 +6,7 @@ import * as WindowSize from "@/app/providers/window-size";
 import { invoke } from "@tauri-apps/api/core";
 
 import RoutineCard from "./card";
-import SectionHeader from "./section-header";
+import SectionHeader from "./section";
 import type { Routine } from "./types";
 
 export default function RoutineList({ title }: { title: string }): React.ReactNode {

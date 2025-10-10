@@ -26,7 +26,7 @@ import Input from "@/components/ui/input";
 
 import type { Option } from "@/types/option";
 
-import { Routine } from "./types";
+import { Routine } from "../types";
 
 // NOTE: in ts, z.readonly() only affects objects, arrays, tuples, Set, and Map
 const formSchema = z.object({
