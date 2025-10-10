@@ -26,6 +26,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         {process.env.NODE_ENV !== "production" ? (
+          // Connect to react-devtools server.
+          // eslint-disable-next-line @next/next/no-sync-scripts
           <script src="http://localhost:8097"></script>
         ) : undefined}
       </head>
