@@ -1,3 +1,5 @@
+import * as React from "react";
+
 import { cn } from "@/lib/utils";
 
 import DonutChart from "@/components/animata/graphs/donut-chart";
@@ -76,7 +78,7 @@ export default function RingChart({
   width = 20,
   className,
   rings = sampleRings,
-}: RingChartProps) {
+}: RingChartProps): React.ReactElement {
   const totalWidth = calculateRingSize({
     size,
     width,

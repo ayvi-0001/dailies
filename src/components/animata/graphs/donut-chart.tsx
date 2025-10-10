@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -11,7 +11,7 @@ interface DonutChartProps {
   progressWidth?: number;
   rounded?: boolean;
   className?: string;
-  children?: ReactNode;
+  children?: React.ReactNode;
 }
 
 export default function DonutChart({
@@ -25,9 +25,9 @@ export default function DonutChart({
   className,
   children,
 }: DonutChartProps) {
-  const [shouldUseValue, setShouldUseValue] = useState(false);
+  const [shouldUseValue, setShouldUseValue] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const timeout = setTimeout(() => {
       // This is a hack to force the animation to run for the first time.
       // We can use framer-motion to achieve this but just keeping it simple for now.
