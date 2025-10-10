@@ -118,6 +118,7 @@ export default function ValueInput({
       <div
         className={cn(
           borderClasses,
+          "hover:outline-2 hover:outline-offset-2 hover:outline-dashed",
           "select-none",
           "max-w-[20rem] min-w-[20rem] lg:max-w-[25rem] lg:min-w-[25rem]",
         )}
