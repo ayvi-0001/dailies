@@ -101,7 +101,7 @@ function HistoryCards({
 const HistoryRoutineCard = (routine: Routine, index: number, totalWeight: number) => {
   const [inputValue, setInputValue] = React.useState<Option<string>>(`${routine.value}`);
 
-  let { bgColor, borderColor } = getAccentClasses(routine.group);
+  const { bgColor, borderColor } = getAccentClasses(routine.group);
 
   return (
     <CardBorder key={`${routine.valueId}-${index}`} className={borderColor}>

@@ -90,7 +90,8 @@ export default function ValueInput({
     }
   };
 
-  let borderClasses: ClassValue = cn(
+  const borderClasses: ClassValue = cn(
+    "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
     "rounded-full border-3 border-dashed",
     "border-transparent",
     clsx(
@@ -101,7 +102,7 @@ export default function ValueInput({
     ),
   );
 
-  let textClasses: ClassValue = cn(
+  const textClasses: ClassValue = cn(
     "text-xl font-semibold shadow-xs",
     "text-transparent",
     clsx(

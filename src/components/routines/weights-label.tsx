@@ -22,13 +22,13 @@ export default function WeightsLabel({
   inputValue: Option<string>;
   totalWeight: number;
 }): React.ReactNode {
-  let routineActive: boolean = inputValue !== null;
+  const routineActive: boolean = inputValue !== null;
 
-  let routineTotalWeight: number = (routine.weight / totalWeight) * 100;
-  let weightedValue: Option<string> = routine.weightedValue
+  const routineTotalWeight: number = (routine.weight / totalWeight) * 100;
+  const weightedValue: Option<string> = routine.weightedValue
     ? roundTo(routine.weightedValue, 2).toString()
     : null;
-  let routineValueContribution: number = routine.weightedValue
+  const routineValueContribution: number = routine.weightedValue
     ? roundTo((routine.weightedValue / totalWeight) * 100, 2)
     : 0;
 
@@ -40,7 +40,7 @@ export default function WeightsLabel({
   );
 
   const WeightedValueLabel = () => {
-    let displayValue: string =
+    const displayValue: string =
       (weightedValue && `(${routineValueContribution}%) ${weightedValue}`) || `(-%)`;
 
     return (

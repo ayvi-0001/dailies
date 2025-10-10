@@ -20,8 +20,9 @@ export default function CommandDialog() {
     return (): void => document.removeEventListener("keydown", down);
   }, []);
 
-  let commandItems: React.ReactElement[] = [
+  const commandItems: React.ReactElement[] = [
     <Command.CommandItem
+      key={`command_1`}
       onSelect={async () => {
         console.log(`called add daily`);
         setOpen(open => !open);
@@ -30,6 +31,7 @@ export default function CommandDialog() {
       <span>add daily</span>
     </Command.CommandItem>,
     <Command.CommandItem
+      key={`command_2`}
       onSelect={async () => {
         console.log(`called delete daily`);
         setOpen(open => !open);

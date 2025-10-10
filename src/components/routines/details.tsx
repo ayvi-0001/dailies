@@ -7,14 +7,14 @@ import type { Option } from "@/types/option";
 import type { Routine } from "./types";
 
 export default function Details({ routine }: { routine: Routine }): React.ReactElement {
-  let timeDetail: Option<string> =
+  const timeDetail: Option<string> =
     routine.timeMin !== null ? `time: ${routine.timeMin} ~ ${routine.timeMax}` : null;
 
-  let weekdays: Option<string[]> = (routine.weekdays?.slice(1, -1) || "")
+  const weekdays: Option<string[]> = (routine.weekdays?.slice(1, -1) || "")
     .split(",")
     .filter((value: string) => value != "");
 
-  let daysDetail: Option<string> = weekdays?.length ? `days: ${weekdays}` : null;
+  const daysDetail: Option<string> = weekdays?.length ? `days: ${weekdays}` : null;
 
   return (
     <div className="flex flex-col gap-1 justify-self-start font-mono text-black">

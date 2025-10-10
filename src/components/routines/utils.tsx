@@ -5,9 +5,9 @@ import { invoke } from "@tauri-apps/api/core";
 import type { Routine } from "./types";
 
 export async function queryRoutineHistory(routineId: string, days: number): Promise<Routine[]> {
-  let startDate: Date = new Date();
+  const startDate: Date = new Date();
   // TODO(ayvi): replace fixed date with current date after dev
-  let endDate: Date = new Date("2025-10-03");
+  const endDate: Date = new Date("2025-10-03");
 
   startDate.setDate(endDate.getDate() - days);
 

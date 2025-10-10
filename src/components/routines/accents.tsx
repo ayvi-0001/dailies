@@ -5,7 +5,7 @@ import { Routine } from "./types";
 export default function getAccentClasses<T extends keyof typeof Routine.Group>(
   group: string,
 ): { bgColor: string; borderColor: string } {
-  let accentColor = Routine.Group[group as T];
+  const accentColor = Routine.Group[group as T];
 
   const borderColor: ClassValue = clsx(
     "border-yellow-500/70",
