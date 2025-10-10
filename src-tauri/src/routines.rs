@@ -2,6 +2,8 @@ use std::str::FromStr;
 
 use chrono::NaiveDate;
 use rust_decimal::Decimal;
+use serde::{Deserialize, Serialize};
+use serde_with::serde_as;
 use sqlx::{Executor, Pool, Postgres};
 use tauri::State;
 use tokio::sync::{Mutex, MutexGuard};
@@ -70,24 +72,6 @@ pub async fn get_routines(
     Ok(dailies)
 }
 
-#[derive(Default, Clone)]
-pub struct DailyGroup {
-    pub group: String,
-}
-
-pub async fn get_all_routine_types(pool: &Pool<Postgres>) -> Vec<String> {
-    sqlx::query_as!(
-        DailyGroup,
-        r#"SELECT DISTINCT "group" FROM dailies.routines ORDER BY "group";"#
-    )
-    .fetch_all(pool)
-    .await
-    .iter()
-    .flatten()
-    .map(|r: &DailyGroup| -> String { r.group.clone() })
-    .collect()
-}
-
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn query_routine_history(
     app: tauri::AppHandle,
@@ -147,38 +131,38 @@ pub async fn query_routine_history(
     Ok(dailies)
 }
 
+#[derive(Default, Serialize, Deserialize, sqlx::Decode, sqlx::Encode, sqlx::FromRow)]
+#[serde_as]
+pub struct WeightedEval {
+    #[serde_as(as = "Decimal")]
+    pub weighted_total: Decimal,
+    #[serde_as(as = "Decimal")]
+    pub total_weight: Decimal,
+}
+
 #[tauri::command(async, rename_all = "snake_case")]
-pub async fn get_total_eval_weight(
+pub async fn get_weighted_eval(
     app: tauri::AppHandle,
     state: State<'_, Mutex<state::AppState>>,
     date: &str,
-) -> Result<Decimal, ()> {
+) -> Result<WeightedEval, ()> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
 
-    struct _Row {
-        total_weight: Option<Decimal>,
-    }
-
-    let row: Result<_Row, sqlx::Error> = sqlx::query_as!(
-        _Row,
-        "SELECT
-           SUM(weight) AS total_weight
+    let row: Result<WeightedEval, sqlx::Error> = sqlx::query_as!(
+        WeightedEval,
+        r#"SELECT
+           SUM(weighted_value) AS "weighted_total!",
+           SUM(weight) AS "total_weight!"
          FROM
            dailies.weighted_values
          WHERE
-           date = $1",
+           date = $1"#,
         NaiveDate::from_str(date).unwrap(),
     )
     .fetch_one(&state.connection_pool)
     .await;
 
-    match row {
-        Ok(row) => Ok(row.total_weight.unwrap()),
-        Err(e) => {
-            utils::emit_app_error(&app, "tauri://error", &e);
-            Ok(rust_decimal::Decimal::new(0, 0))
-        }
-    }
+    row.map_err(|e| utils::emit_app_error(&app, "tauri://error", &e))
 }
 
 /// This function doesn't get called unless the value change is valid.

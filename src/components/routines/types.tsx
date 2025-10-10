@@ -76,8 +76,3 @@ export namespace Routine {
     }
   }
 }
-
-export type Section = {
-  title: string;
-  totalWeight: number;
-};

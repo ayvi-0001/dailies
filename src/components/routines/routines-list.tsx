@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import { useEffect, useState } from "react";
+import * as React from "react";
 
 import * as WindowSize from "@/app/providers/window-size";
 import { invoke } from "@tauri-apps/api/core";
@@ -11,47 +10,58 @@ import SectionHeader from "./section-header";
 import type { Routine } from "./types";
 
 export default function RoutineList({ title }: { title: string }): React.ReactNode {
-  const [routines, setRoutines] = useState<Routine[]>([]);
-  const [totalWeight, settotalWeight] = useState<number>(0);
-  const [refreshRoutines, setRefreshRoutines] = useState<number>(0);
+  const [routines, setRoutines] = React.useState<Routine[]>([]);
+  const [weightedTotal, setWeightedValue] = React.useState<number>(0);
+  const [totalWeight, setTotalWeight] = React.useState<number>(0);
+  const [countRefreshDailies, setCountRefreshDailies] = React.useState<number>(0);
 
   const windowSize: WindowSize.WindowWidthState = WindowSize.useWidth();
 
-  // TODO(ayvi): useEffect individually for each daily, so refresh doesn't pull all dailies
-  // http://ayvi:3000/ayvi/dailies/issues/34
-  useEffect(() => {
-    const get_routines = async () => {
+  const triggerRefreshDailies: () => void = React.useCallback(() => {
+    setCountRefreshDailies(countRefreshDailies + 1);
+  }, [countRefreshDailies]);
+
+  React.useEffect(() => {
+    const get_routines = async (): Promise<void> => {
       await invoke<Routine[]>("get_routines")
         .then(result => setRoutines(result))
         .catch(console.error);
     };
     get_routines();
-  }, [refreshRoutines]);
 
-  useEffect(() => {
-    const get_total_eval_weight = async () => {
-      await invoke<number>("get_total_eval_weight", { date: "2025-10-03" })
-        .then(result => settotalWeight(result))
+    const get_weighted_eval = async (): Promise<void> => {
+      await invoke<WeightedEval>("get_weighted_eval", { date: "2025-10-03" })
+        .then(result => {
+          setTotalWeight(result.total_weight);
+          setWeightedValue(result.weighted_total);
+        })
         .catch(console.error);
     };
-    get_total_eval_weight();
-  }, []);
-
-  const triggerRoutineRefresh = () => {
-    setRefreshRoutines(refreshRoutines + 1);
-  };
+    get_weighted_eval();
+  }, [countRefreshDailies]);
 
   return (
     <div className="mr-3 ml-3 grid gap-3 md:mr-0 md:ml-0 md:gap-4 lg:gap-5">
-      <SectionHeader title={title} totalWeight={totalWeight} />
+      <SectionHeader
+        title={title}
+        totalWeight={totalWeight}
+        weightedTotal={weightedTotal}
+        countRefreshDailies={countRefreshDailies}
+      />
       {routines.map((value, index) => (
         <RoutineCard
           key={index}
           routine={value}
           totalWeight={totalWeight}
           windowWidth={windowSize.windowWidth}
+          onRefreshAction={triggerRefreshDailies}
         />
       ))}
     </div>
   );
 }
+
+type WeightedEval = {
+  weighted_total: number;
+  total_weight: number;
+};
