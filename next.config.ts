@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
   assetPrefix: isProd ? undefined : `http://${internalHost}:3002`,
   experimental: {
     // PPR is implicitly enabled when Cache Components is enabled.
-    cacheComponents: true,
+    // cacheComponents: true,
   },
 };
 

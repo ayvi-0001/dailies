@@ -9,7 +9,7 @@ import CommandDialog from "@/components/command-dialog";
 import "./globals.css";
 import WindowSizeProvider from "./providers/window-size";
 
-export const experimental_ppr = true;
+// export const experimental_ppr = true;
 
 const spaceMono = Space_Mono({
   weight: ["400", "700"],
