@@ -25,8 +25,8 @@ export default function useMousePosition(
       callback?.({ x: clientX - left, y: clientY - top });
     };
 
-    ref?.current?.addEventListener("mousemove", handleMouseMove);
-    ref?.current?.addEventListener("touchmove", handleTouchMove);
+    ref?.current?.addEventListener("mousemove", handleMouseMove, { passive: true });
+    ref?.current?.addEventListener("touchmove", handleTouchMove, { passive: true });
 
     const nodeRef = ref?.current;
     return () => {
