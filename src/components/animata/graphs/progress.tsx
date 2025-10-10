@@ -4,12 +4,10 @@ import { cn } from "@/lib/utils";
 
 export default function Progress<T>({
   progress,
-  deps,
+  ...deps
 }: {
   progress: number;
-  deps?: {
-    [Symbol.iterator](): Iterator<T>;
-  };
+  deps?: { [Symbol.iterator](): Iterator<T> };
 }) {
   const [width, setWidth] = React.useState(0);
 
@@ -21,7 +19,7 @@ export default function Progress<T>({
 
   React.useEffect(() => {
     setWidth(containerRef.current?.offsetWidth ?? 0);
-  }, [...(deps ? deps : [])]);
+  }, [deps]);
 
   const [shouldUseValue, setShouldUseValue] = React.useState(false);
 
