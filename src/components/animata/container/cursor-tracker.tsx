@@ -1,6 +1,6 @@
-import { useCallback, useRef } from "react";
+import * as React from "react";
 
-import { useMousePosition } from "@/hooks/use-mouse-position";
+import useMousePosition from "@/hooks/use-mouse-position";
 
 /**
  * @component @name CursorTracker
@@ -14,15 +14,13 @@ export default function CursorTracker({
 }: {
   children: React.ReactNode[];
 }): React.JSX.Element {
-  let cursor = children.at(0);
-  let components = children.slice(1);
+  const cursor = children.at(0);
+  const components = children.slice(1);
 
-  // @ts-ignore: 2322
-  const divRef: React.RefObject<HTMLDivElement> = useRef(null);
-  // @ts-ignore: 2322
-  const infoRef: React.RefObject<HTMLDivElement> = useRef(null);
+  const divRef = React.useRef<HTMLDivElement>(null);
+  const infoRef = React.useRef<HTMLDivElement>(null);
 
-  const update = useCallback(({ x, y }: { x: number; y: number }) => {
+  const update = React.useCallback(({ x, y }: { x: number; y: number }) => {
     // We need to offset the position to center the info div
     const offsetX = (infoRef.current?.offsetWidth || 0) / 2;
     const offsetY = (infoRef.current?.offsetHeight || 0) / 2;

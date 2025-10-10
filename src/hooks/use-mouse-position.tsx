@@ -1,13 +1,13 @@
-import { useEffect } from "react";
+import * as React from "react";
 
-export function useMousePosition(
-  ref: React.RefObject<HTMLElement>,
+export default function useMousePosition(
+  ref?: React.RefObject<HTMLElement | null>,
   callback?: ({ x, y }: { x: number; y: number }) => void,
 ) {
-  useEffect(() => {
+  React.useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
       const { clientX, clientY } = event;
-      const { top, left } = ref.current?.getBoundingClientRect() || {
+      const { top, left } = ref?.current?.getBoundingClientRect() || {
         top: 0,
         left: 0,
       };
@@ -17,7 +17,7 @@ export function useMousePosition(
 
     const handleTouchMove = (event: TouchEvent) => {
       const { clientX, clientY } = event.touches[0];
-      const { top, left } = ref.current?.getBoundingClientRect() || {
+      const { top, left } = ref?.current?.getBoundingClientRect() || {
         top: 0,
         left: 0,
       };
@@ -25,10 +25,10 @@ export function useMousePosition(
       callback?.({ x: clientX - left, y: clientY - top });
     };
 
-    ref.current?.addEventListener("mousemove", handleMouseMove);
-    ref.current?.addEventListener("touchmove", handleTouchMove);
+    ref?.current?.addEventListener("mousemove", handleMouseMove);
+    ref?.current?.addEventListener("touchmove", handleTouchMove);
 
-    const nodeRef = ref.current;
+    const nodeRef = ref?.current;
     return () => {
       nodeRef?.removeEventListener("mousemove", handleMouseMove);
       nodeRef?.removeEventListener("touchmove", handleTouchMove);
