@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { invoke } from "@tauri-apps/api/core";
 import clsx from "clsx";
 import { Check } from "lucide-react";
+import { ValueOf } from "next/dist/shared/lib/constants";
 import { z } from "zod";
 
 import { camelCaseToTitleCase } from "@/lib/string";
@@ -83,9 +84,9 @@ export default function EditDailyForm({
 }: {
   routine: Routine;
   dailyFormRef: React.RefObject<Option<HTMLFormElement>>;
-  onRefreshAction: () => void;
+  onRefreshAction?: () => void;
 }): React.ReactElement {
-  let originalValues = routine as unknown as z.infer<typeof formSchema>;
+  const originalValues = routine as unknown as z.infer<typeof formSchema>;
 
   const form = useForm<z.infer<typeof formSchema>>({
     /* @ts-expect-error: 2719 */
@@ -96,21 +97,20 @@ export default function EditDailyForm({
 
   const onSubmit = async (values: z.infer<typeof formSchema>): Promise<void> => {
     // TODO(ayvi): send new values only?
-    // import { ValueOf } from "next/dist/shared/lib/constants";
-    // let changes = {};
-    // Object.keys(form.formState.dirtyFields).forEach((key: string) => {
-    //   changes[key as keyof typeof Object.prototype] = values[
-    //     key as keyof Routine
-    //   ] as ValueOf<never>;
-    // });
-    // console.debug(`changes: ${JSON.stringify(changes)}`);
+    const changes = {};
+    Object.keys(form.formState.dirtyFields).forEach((key: string) => {
+      changes[key as keyof typeof Object.prototype] = values[
+        key as keyof Routine
+      ] as ValueOf<never>;
+    });
+    console.debug(`changes: ${JSON.stringify(changes)}`);
 
     await invoke<null>("update_daily", {
       original_daily: originalValues,
       new_daily: values,
     });
 
-    onRefreshAction && onRefreshAction();
+    if (onRefreshAction) onRefreshAction();
   };
 
   const [popoverOpen, setPopoverOpen] = React.useState<boolean>(false);
@@ -128,10 +128,11 @@ export default function EditDailyForm({
         {(Object.keys(routine) as (keyof Routine)[])
           .filter((value: string) => !formExcludeFields.includes(value as ExcludedField))
           .map((attr: keyof Routine, idx: number) => {
-            form.formState.errors[attr] &&
+            if (form.formState.errors[attr]) {
               console.debug(
                 `Error submitting form for field ${attr}: ${form.formState.errors[attr].message}`,
               );
+            }
 
             let render;
             if (attr == "type") {
@@ -185,17 +186,16 @@ export default function EditDailyForm({
                     </p>
                   </FormLabel>
                   <FormControl>
-                    {/* @ts-expect-error: 2322 */}
                     <Input
                       id={`${idx}-${routine.valueId}`}
                       key={`${idx}-${routine.valueId}`}
+                      defaultValue={`${field.value ? field.value : ""}`}
                       placeholder="none"
                       readOnly={formReadOnlyFields.includes(field.name as ReadOnlyField)}
                       autoComplete="false"
                       aria-autocomplete="none"
                       className="px-3 py-1"
                       {...form.register(attr)}
-                      {...field}
                     />
                   </FormControl>
                   <FormDescription className="text-gray-500 italic">

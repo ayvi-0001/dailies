@@ -2,13 +2,9 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-export default function Input<T extends string | number | undefined | readonly string[]>({
-  className,
-  ...props
-}: React.ComponentProps<"input">) {
+export default function Input({ className, ...props }: React.ComponentProps<"input">) {
   return (
     <input
-      value={props.value ?? ("" as T)}
       data-slot="input"
       className={cn(
         "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",

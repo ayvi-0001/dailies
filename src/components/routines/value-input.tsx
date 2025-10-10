@@ -66,13 +66,17 @@ export default function ValueInput({
         } else {
           toast.error("Invalid value", { description: `${inputValue} not a valid numeric value.` });
         }
-      } catch {}
+      } catch {
+        /* empty */
+      }
     }
   };
 
-  const handleOnKeyDownCapture = async (event: React.KeyboardEvent) => {
+  const handleOnKeyDownCapture = async (event: React.KeyboardEvent): Promise<void> => {
     // will blur onKeyDown
-    ["Escape"].includes(event.key) && setCancelInput(true);
+    if (["Escape"].includes(event.key)) {
+      setCancelInput(true);
+    }
   };
 
   const handleOnKeyDown = async (event: React.KeyboardEvent) => {
