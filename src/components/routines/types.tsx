@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 import type { Option } from "@/types/option";
 
 export type Routine = {
@@ -20,8 +21,8 @@ export type Routine = {
   weightedValue: Readonly<Option<number>>;
   timeMin: Option<string>; // convert NaiveTime from rs to ts?
   timeMax: Option<string>;
-  timeBucketMin: number;
-  timeBucketMax: number;
+  timeBucketMin: Option<number>;
+  timeBucketMax: Option<number>;
 };
 
 export namespace Routine {
@@ -34,9 +35,11 @@ export namespace Routine {
     type: "Enum<DailyType>",
     maxValue: "Decimal",
     notes: "Option<String>",
-    streak: "Option<i32>",
     nDays: "Option<i32>",
+    streak: "Option<i32>",
     weekdays: "Option<String>",
+    date: "NaiveDate",
+    dateStarted: "NaiveDate",
     dateArchived: "Option<NaiveDate>",
     value: "Option<Decimal>",
     weight: "Decimal",
