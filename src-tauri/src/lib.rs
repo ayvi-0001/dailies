@@ -21,8 +21,10 @@ lazy_static::lazy_static! {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub async fn run() {
+    #[cfg(debug_assertions)]
     let mut builder = tauri::Builder::default();
 
+    // plugin must be separate or builder wont be found in outer scope
     #[cfg(debug_assertions)]
     {
         builder = builder.plugin(tauri_plugin_devtools::init());
@@ -33,6 +35,10 @@ pub async fn run() {
         .connect(&CONN_STRING)
         .await
         .unwrap();
+
+    #[cfg(not(debug_assertions))]
+    // does not currently need to be mut in production build
+    let builder = tauri::Builder::default();
 
     builder
         .setup(|app: &mut tauri::App| {
