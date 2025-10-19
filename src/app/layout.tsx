@@ -8,6 +8,7 @@ import CommandDialog from "@/components/command-dialog";
 import "./globals.css";
 
 import BackgroundImage from "./background";
+import Toaster from "./listener";
 import WindowSizeProvider from "./providers/window-size";
 
 // export const experimental_ppr = true;
@@ -33,6 +34,7 @@ export default function RootLayout({
         ) : undefined}
       </head>
       <body className={`${spaceMono.className} antialiased`}>
+        <Toaster />
         <CommandDialog />
         <WindowSizeProvider>
           <div className="sm:m-5 lg:m-20">{children}</div>
