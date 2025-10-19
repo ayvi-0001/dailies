@@ -16,7 +16,7 @@ const WindowSizeContext = React.createContext<WindowWidthState | null>(null);
 
 export default function WindowSizeProvider({
   children,
-}: Readonly<{ children: React.ReactNode }>): React.ReactNode {
+}: Readonly<{ children?: React.ReactNode }>): React.ReactNode {
   const [windowWidth, setWindowWidth] = React.useState<number>(0);
 
   React.useEffect(() => {

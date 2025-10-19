@@ -4,10 +4,11 @@ plugins:
 importOrder:
   - "^react"
   - "<THIRD_PARTY_MODULES>"
-  - "^@/lib/(.*)$"
+  - "^@/(.*)$"
   - "^@/utils/(.*)$"
   - "^@(.*)/components/(.*)$"
   - "^@/types/(.*)$"
+  - "^\\..*\\.css$"
   - "^[./]"
 importOrderSeparation: true
 importOrderSortSpecifiers: true

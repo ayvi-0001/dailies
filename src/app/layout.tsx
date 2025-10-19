@@ -9,7 +9,7 @@ import "./globals.css";
 
 import BackgroundImage from "./background";
 import Toaster from "./listener";
-import WindowSizeProvider from "./providers/window-size";
+import Providers from "./providers";
 
 // export const experimental_ppr = true;
 
@@ -36,9 +36,7 @@ export default function RootLayout({
       <body className={`${spaceMono.className} antialiased`}>
         <Toaster />
         <CommandDialog />
-        <WindowSizeProvider>
-          <div className="sm:m-5 lg:m-20">{children}</div>
-        </WindowSizeProvider>
+        <Providers>{<div className="sm:m-5 lg:m-20">{children}</div>}</Providers>
         <BackgroundImage src="/images/background.png" />
       </body>
     </html>

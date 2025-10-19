@@ -10,6 +10,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@heroui/react": "^2.8.5",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-hover-card": "^1.1.15",
@@ -24,6 +25,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "framer-motion": "^12.23.24",
     "lucide-react": "^0.544.0",
     "next": "^15.6.0-canary.43",
     "next-themes": "^0.4.6",
