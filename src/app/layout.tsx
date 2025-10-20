@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 
 import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
@@ -36,7 +36,7 @@ export default function RootLayout({
       <body className={`${spaceMono.className} antialiased`}>
         <Toaster />
         <CommandDialog />
-        <Providers>{<div className="sm:m-5 lg:m-20">{children}</div>}</Providers>
+        <Providers>{children}</Providers>
         <BackgroundImage src="/images/background.png" />
       </body>
     </html>

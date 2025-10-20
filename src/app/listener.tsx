@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import * as React from "react";
 
 import { Event, listen } from "@tauri-apps/api/event";
 import dynamic from "next/dynamic";

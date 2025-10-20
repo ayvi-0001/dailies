@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { UnlistenFn, listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import ok from "assert";
 
 import type { TauriWindowResizeEvent } from "@/types/events";
 
@@ -43,12 +44,6 @@ export default function WindowSizeProvider({
 
 export function useWidth(): WindowWidthState {
   const context = React.useContext(WindowSizeContext);
-
-  function assert<T>(value: T | null | undefined, err: Error): asserts value is T {
-    if (value === null || value === undefined) throw err;
-  }
-
-  assert(context, Error("Called WindowSizeProvider before window was defined."));
-
+  ok(context, Error("Called WindowSizeProvider before window was defined."));
   return context;
 }

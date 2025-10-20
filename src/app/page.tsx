@@ -1,11 +1,21 @@
-import React from "react";
+import * as React from "react";
 
-import { RoutineList } from "@/components/routines";
+import UserProvider from "@/app/providers/user";
+import { DailyList } from "@/components/daily";
 
-export default function Home(): React.ReactNode {
+export default async function Page(_props: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}): Promise<React.ReactElement> {
   return (
-    <main>
-      <RoutineList title="Dailies" />
-    </main>
+    <UserProvider>
+      <DailyList title="Dailies" />
+    </UserProvider>
   );
+}
+
+export async function generateMetadata(_: {
+  params: Promise<{ slug: string }>;
+}): Promise<{ title: string }> {
+  return { title: `Dailies` };
 }

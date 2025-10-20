@@ -1,8 +1,7 @@
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
-
 import DonutChart from "@/components/animata/graphs/donut-chart";
+import { cn } from "@/lib/utils";
 
 type RingItem = {
   progress: number;

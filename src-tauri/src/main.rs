@@ -1,8 +1,10 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
+#![deny(elided_lifetimes_in_paths)]
 #![cfg_attr(
     not(debug_assertions),
     windows_subsystem = "windows"
 )]
 
-#[tokio::main]
-async fn main() { app_lib::run().await; }
+fn main() {
+    app_lib::run();
+}

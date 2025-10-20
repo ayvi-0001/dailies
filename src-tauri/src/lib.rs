@@ -1,48 +1,47 @@
-use sqlx::{Pool, Postgres, postgres::PgPoolOptions};
+use std::path::PathBuf;
+
 use tauri::Manager;
 use tokio::sync::Mutex;
 
 pub(crate) mod macros;
-crate::mod_flat!(messages, routines, state, utils);
+crate::mod_flat!(dailies, state, db, errors);
 
 lazy_static::lazy_static! {
-    // TODO(ayvi): decide how db credentials will be passed to application
-    // http://ayvi:3000/ayvi/dailies/issues/20
-    // This is a temporary solution for development only.
-    #[cfg(dev)]
-    pub static ref CONN_STRING: String = {
-        let path_to_askconn: String = std::env::var("DAILIES_ASKCONN")
-            .expect("Env var DAILIES_ASKCONN should be set.");
-        let mut command = std::process::Command::new("bash");
-        let stdout = command.arg(path_to_askconn).output().unwrap().stdout;
-        String::from_utf8_lossy(&stdout).into_owned()
-    };
+    pub static ref JWT_SECRET: String = std::env::var("JWT_SECRET")
+        .expect("Env var `JWT_SECRET` should be set.");
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub async fn run() {
-    #[cfg(debug_assertions)]
+pub fn run() {
+    #[allow(unused_mut)]
     let mut builder = tauri::Builder::default();
 
-    // plugin must be separate or builder wont be found in outer scope
-    #[cfg(debug_assertions)]
+    #[cfg(test)]
     {
         builder = builder.plugin(tauri_plugin_devtools::init());
     }
 
-    let connection_pool: Pool<Postgres> = PgPoolOptions::new()
-        .max_connections(20)
-        .connect(&CONN_STRING)
-        .await
-        .unwrap();
-
-    #[cfg(not(debug_assertions))]
-    // does not currently need to be mut in production build
-    let builder = tauri::Builder::default();
-
     builder
-        .setup(|app: &mut tauri::App| {
+        .plugin(
+            tauri_plugin_log::Builder::default()
+                .level(log::LevelFilter::Info)
+                .build(),
+        )
+        .setup(move |app: &mut tauri::App| {
+            state::APP_HANDLE
+                .set(app.app_handle().to_owned())
+                .unwrap();
+
+            let app_dir: PathBuf = app
+                .path()
+                .app_data_dir()
+                .expect("failed to get app dir");
+
+            std::fs::create_dir_all(&app_dir).expect("failed to ensure app dir");
+
             let window: tauri::WebviewWindow = app.get_webview_window("main").unwrap();
+
+            #[cfg(desktop)]
             window.center()?;
 
             #[cfg(debug_assertions)]
@@ -51,15 +50,32 @@ pub async fn run() {
                 window.close_devtools();
             }
 
-            app.manage(Mutex::new(state::AppState { connection_pool }));
+            tauri::async_runtime::block_on(async {
+                let database = db::Database::new(app_dir.clone())
+                    .await
+                    .expect("failed to initialize database");
+
+                app.manage(Mutex::new(state::AppState::new(
+                    database,
+                    JWT_SECRET.to_string(),
+                )));
+            });
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            routines::get_routines,
-            routines::handle_value_change,
-            routines::query_routine_history,
-            routines::get_weighted_eval,
-            routines::update_daily,
+            dailies::get_total_points,
+            dailies::handle_point_change,
+            dailies::query_dailies,
+            dailies::update_daily,
+            db::create_user,
+            db::delete_session,
+            db::get_session,
+            db::get_user,
+            db::save_session,
+            db::truncate_sessions,
+            db::verify_user,
+            state::get_jwt_secret,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

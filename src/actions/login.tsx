@@ -1,0 +1,65 @@
+import { invoke } from "@tauri-apps/api/core";
+import { RedirectType, redirect } from "next/navigation";
+import { z } from "zod";
+
+import type { Session } from "@/app/providers/user";
+import { createSession } from "@/lib/session";
+
+export const LoginFormSchema = z.object({
+  username: z.string().min(3, { message: "Username must be at least 3 characters long." }).trim(),
+  password: z
+    .string()
+    .min(8, { message: "Be at least 8 characters long" })
+    .regex(/[a-zA-Z]/, { message: "Contain at least one letter." })
+    .regex(/[0-9]/, { message: "Contain at least one number." })
+    .regex(/[^a-zA-Z0-9]/, {
+      message: "Contain at least one special character.",
+    })
+    .trim(),
+});
+
+export type LoginErrors = {
+  errors?: {
+    username?: string[];
+    password?: string[];
+    other?: string[];
+  };
+};
+
+export type LoginState = LoginErrors | undefined;
+
+type AppError = {
+  kind: string;
+  message: string;
+};
+
+export default async function login(_: LoginState, formData: FormData): Promise<LoginErrors> {
+  const validatedFields = LoginFormSchema.safeParse({
+    username: formData.get("username"),
+    password: formData.get("password"),
+  });
+
+  if (!validatedFields.success) {
+    const errTree = z.treeifyError(validatedFields.error);
+    return {
+      errors: {
+        username: errTree.properties?.username?.errors,
+        password: errTree.properties?.password?.errors,
+      },
+    };
+  }
+
+  const verifiedResult = await invoke<AppError | null>("verify_user", validatedFields.data).catch(
+    err => {
+      return err as AppError;
+    },
+  );
+
+  if (verifiedResult) return { errors: { other: [verifiedResult.message] } };
+
+  const session = await invoke<Session | null>("get_session");
+
+  if (!session) await createSession(validatedFields.data.username);
+
+  redirect("/", RedirectType.replace);
+}
