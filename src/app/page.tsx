@@ -8,9 +8,11 @@ export default async function Page(_props: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }): Promise<React.ReactElement> {
   return (
-    <UserProvider>
-      <DailyList title="Dailies" />
-    </UserProvider>
+    <>
+      <UserProvider>
+        <DailyList title="Dailies" />
+      </UserProvider>
+    </>
   );
 }
 

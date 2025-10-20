@@ -3,6 +3,7 @@ import * as React from "react";
 import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
 
+import AppBuildFooter from "@/components/app-build-footer";
 import CommandDialog from "@/components/command-dialog";
 
 import "./globals.css";
@@ -37,6 +38,7 @@ export default function RootLayout({
         <Toaster />
         <CommandDialog />
         <Providers>{children}</Providers>
+        <AppBuildFooter />
         <BackgroundImage src="/images/background.png" />
       </body>
     </html>
