@@ -1,45 +1,54 @@
 "use client";
 
 import * as React from "react";
+import { useHotkeys } from "react-hotkeys-hook";
+
+import { useRouter } from "next/navigation";
 
 import * as Command from "@/components/ui/command";
+import { truncate_sessions } from "@/actions/logout";
 
 export default function CommandDialog() {
   const [open, setOpen] = React.useState<boolean>(false);
+  const router = useRouter();
 
-  React.useEffect(() => {
-    const down = (event: KeyboardEvent): void => {
-      if (event.key === "/") {
-        event.preventDefault();
-        setOpen(open => !open);
-      }
-    };
+  useHotkeys("Slash", () => setOpen(open => !open), { preventDefault: true }, []);
 
-    document.addEventListener("keydown", down);
-
-    return (): void => document.removeEventListener("keydown", down);
-  }, []);
-
-  const commandItems: React.ReactElement[] = [
-    <Command.CommandItem
-      key={`command_1`}
-      onSelect={async () => {
-        console.log(`called add daily`);
-        setOpen(open => !open);
-      }}
-    >
-      <span>add daily</span>
-    </Command.CommandItem>,
-    <Command.CommandItem
-      key={`command_2`}
-      onSelect={async () => {
-        console.log(`called delete daily`);
-        setOpen(open => !open);
-      }}
-    >
-      <span>delete daily</span>
-    </Command.CommandItem>,
+  // NOTE: These are just helper functions for development and aren't meant to be included
+  // in the final app.
+  const commandOptions = [
+    {
+      name: "goto home",
+      callback: async () => router.push("/"),
+    },
+    {
+      name: "goto login",
+      callback: async () => router.push("/login"),
+    },
+    {
+      name: "goto signup",
+      callback: async () => router.push("/signup"),
+    },
+    {
+      name: "logout",
+      callback: async () => {
+        await truncate_sessions();
+        router.push("/login");
+      },
+    },
   ];
+
+  const commandItems: React.ReactElement[] = commandOptions.map((options, idx: number) => {
+    const callback = () => {
+      setOpen(open => !open);
+      options.callback();
+    };
+    return (
+      <Command.CommandItem key={`command_${idx}`} onSelect={callback}>
+        <span>{options.name}</span>
+      </Command.CommandItem>
+    );
+  });
 
   return (
     <div className="dark">
