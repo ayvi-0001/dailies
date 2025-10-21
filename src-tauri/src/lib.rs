@@ -39,15 +39,16 @@ pub fn run() {
 
             std::fs::create_dir_all(&app_dir).expect("failed to ensure app dir");
 
-            let window: tauri::WebviewWindow = app.get_webview_window("main").unwrap();
-
             #[cfg(desktop)]
-            window.center()?;
-
-            #[cfg(debug_assertions)]
             {
-                window.open_devtools();
-                window.close_devtools();
+                let window: tauri::WebviewWindow = app.get_webview_window("main").unwrap();
+                window.center()?;
+
+                #[cfg(debug_assertions)]
+                {
+                    window.open_devtools();
+                    window.close_devtools();
+                }
             }
 
             tauri::async_runtime::block_on(async {
