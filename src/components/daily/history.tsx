@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { ScrollShadow } from "@heroui/react";
 import { ok } from "assert";
 
 import * as User from "@/app/providers/user";
@@ -15,7 +16,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Option } from "@/types/option";
 
 import getAccentClasses from "./actions/accents";
@@ -89,8 +89,11 @@ function HistoryCards({
   totalWeight: number;
 }): React.ReactElement {
   return (
-    <ScrollArea
-      className="h-[32rem] overflow-y-auto rounded-md [scrollbarWidth:none]"
+    <ScrollShadow
+      offset={80}
+      size={10}
+      hideScrollBar
+      className="h-[32rem] overflow-y-auto rounded-md"
       style={{ scrollbarWidth: "none" }}
     >
       <React.Suspense fallback={<div>Loading...</div>}>
@@ -100,7 +103,7 @@ function HistoryCards({
           </div>
         ))}
       </React.Suspense>
-    </ScrollArea>
+    </ScrollShadow>
   );
 }
 

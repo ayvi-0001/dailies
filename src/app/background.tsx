@@ -34,10 +34,7 @@ export default function BackgroundImage(background_props: BackgroundProps): Reac
   return (
     <div
       id="background"
-      className={cn(
-        "no-scrollbar fixed inset-0 top-0 left-0 -z-1 h-screen w-screen",
-        props?.className,
-      )}
+      className={cn("fixed inset-0 top-0 left-0 -z-1 h-screen w-screen", props?.className)}
       {...props}
     >
       <Image

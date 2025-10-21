@@ -1,5 +1,7 @@
 import * as React from "react";
 
+import { ScrollShadow } from "@heroui/react";
+
 import { EditSquare } from "@/components/svgs";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +14,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Option } from "@/types/option";
 
 import EditDailyForm from "../forms/edit";
@@ -41,7 +42,7 @@ export default function EditDailyDialog({
         </Button>
       </DialogTrigger>
       <DialogContent className="h-[80vh] bg-black/90 text-white">
-        <ScrollArea className="h-[70vh] rounded-md">
+        <ScrollShadow className="h-[70vh] rounded-md" hideScrollBar>
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription className="mb-5">
@@ -72,7 +73,7 @@ export default function EditDailyDialog({
               </Button>
             </DialogClose>
           </DialogFooter>
-        </ScrollArea>
+        </ScrollShadow>
       </DialogContent>
     </Dialog>
   );

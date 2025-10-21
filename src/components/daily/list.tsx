@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { ScrollShadow } from "@heroui/react";
 import { invoke } from "@tauri-apps/api/core";
 
 import * as User from "@/app/providers/user";
@@ -69,18 +70,30 @@ export default function DailyList({ title }: { title: string }): React.ReactNode
             countRefreshDailies={countRefreshDailies}
           />
         </div>
-        <div className="grid gap-3 md:gap-4 lg:gap-5">
-          {dailies.map((value, index) => (
-            <DailyCard
-              key={index}
-              daily={value}
-              totalWeight={totalWeight}
-              windowWidth={windowSize.windowWidth}
-              onRefreshAction={triggerRefreshDailies}
-            />
-          ))}
+        <div className="h-full">
+          <ScrollShadow
+            className="h-[78vh]"
+            orientation="vertical"
+            visibility="auto"
+            hideScrollBar
+            offset={40}
+            size={40}
+          >
+            <div className="grid gap-3 md:gap-4 lg:gap-5">
+              {dailies.map((value, index) => (
+                <DailyCard
+                  key={index}
+                  daily={value}
+                  totalWeight={totalWeight}
+                  windowWidth={windowSize.windowWidth}
+                  onRefreshAction={triggerRefreshDailies}
+                />
+              ))}
+            </div>
+          </ScrollShadow>
         </div>
       </div>
+      <div className="h-20">{/* buffer after last daily card */}</div>
     </div>
   );
 }
