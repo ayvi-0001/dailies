@@ -5,6 +5,10 @@
   "windows": [
     "main"
   ],
+  "platforms": [
+    "windows",
+    "android"
+  ],
   "permissions": [
     "core:default",
     "core:window:allow-center",
