@@ -22,13 +22,17 @@ type BackgroundProps = {
 export default function BackgroundImage(background_props: BackgroundProps): React.ReactElement {
   const { src, alt, props, imageProps, children } = background_props;
 
+  const handleWindowDrag = async (event: MouseEvent): Promise<void> => {
+    const appWindow: Window = getCurrentWindow();
+    if (event.buttons === 1) {
+      event.detail === 2 ? appWindow.toggleMaximize() : appWindow.startDragging();
+    }
+  };
+
   React.useEffect(() => {
-    document.getElementById("background")?.addEventListener("mousedown", (event: MouseEvent) => {
-      const appWindow: Window = getCurrentWindow();
-      if (event.buttons === 1) {
-        event.detail === 2 ? appWindow.toggleMaximize() : appWindow.startDragging();
-      }
-    });
+    const backgroundElement: HTMLElement | null = document.getElementById("background");
+    backgroundElement?.addEventListener("mousedown", handleWindowDrag);
+    return () => backgroundElement?.removeEventListener("mousedown", handleWindowDrag);
   }, []);
 
   return (
@@ -38,6 +42,7 @@ export default function BackgroundImage(background_props: BackgroundProps): Reac
       {...props}
     >
       <Image
+        data-tauri-drag-region
         alt={alt ?? "background image"}
         fill
         priority

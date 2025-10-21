@@ -37,8 +37,9 @@ export default function RootLayout({
       <body className={`${spaceMono.className} antialiased`}>
         <Toaster />
         <CommandDialog />
-        <Providers>{children}</Providers>
-        <AppBuildFooter />
+        <div className="relative z-1">
+          <Providers>{children}</Providers>
+        </div>
         <BackgroundImage src="/images/background.png" />
       </body>
     </html>

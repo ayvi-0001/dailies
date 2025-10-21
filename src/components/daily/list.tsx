@@ -29,13 +29,14 @@ export default function DailyList({ title }: { title: string }): React.ReactNode
   const userName: Option<string> = userState?.user?.name || null;
 
   React.useEffect(() => {
+    const today: string = new Date().toISOString().substring(0, 10);
+
     const query_dailies = async (): Promise<void> => {
       await invoke<Daily[]>("query_dailies", {
         user: userName,
         quest_id: null, // pull all dailies
-        // TODO(ayvi): pulling fixed date for dev
-        start_date: "2025-10-03",
-        end_date: "2025-10-03",
+        start_date: today,
+        end_date: today,
       })
         .then(result => setDailies(result))
         .catch(console.error);
@@ -48,7 +49,7 @@ export default function DailyList({ title }: { title: string }): React.ReactNode
         total_weight: number;
       }>("get_total_points", {
         user: userName,
-        date: "2025-10-03",
+        date: today,
       })
         .then(result => {
           setTotalWeight(result.total_weight);
