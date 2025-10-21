@@ -22,8 +22,6 @@ impl Database {
     pub async fn new(app_dir: PathBuf) -> Result<Self> {
         let db_path: PathBuf = app_dir.join(format!("{}.db", Database::NAME));
 
-        std::env::set_var("DATABASE_URL", format!("sqlite://{}", db_path.display()));
-
         println!("Initializing database at: {:?}", db_path);
 
         let connection_options = SqliteConnectOptions::new()
