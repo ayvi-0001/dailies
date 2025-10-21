@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 
-import { Daily } from "../types";
+import { Daily } from "./types";
 
 export default function getAccentClasses<_T extends keyof typeof Daily.QuestChain>(
   _chain: string,

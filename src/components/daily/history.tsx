@@ -4,6 +4,7 @@ import { ScrollShadow } from "@heroui/react";
 import { ok } from "assert";
 
 import * as User from "@/app/providers/user";
+import { cachedQueryDailyHistory } from "@/actions/query";
 import { ManageHistory } from "@/components/svgs";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,8 +19,7 @@ import {
 } from "@/components/ui/drawer";
 import type { Option } from "@/types/option";
 
-import getAccentClasses from "./actions/accents";
-import { cachedQueryDailyHistory } from "./actions/query";
+import getAccentClasses from "./accents";
 import CardBorder from "./border";
 import QuestChainLabel from "./chain";
 import Details from "./details";

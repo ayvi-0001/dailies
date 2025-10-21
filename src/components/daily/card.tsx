@@ -5,7 +5,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import type { Option } from "@/types/option";
 
-import getAccentClasses from "./actions/accents";
+import getAccentClasses from "./accents";
 import CardBorder from "./border";
 import QuestChainLabel from "./chain";
 import Details from "./details";
