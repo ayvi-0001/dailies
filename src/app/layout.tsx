@@ -41,6 +41,7 @@ export default function RootLayout({
           <Providers>{children}</Providers>
         </div>
         <BackgroundImage src="/images/background.png" />
+        <AppBuildFooter />
       </body>
     </html>
   );
