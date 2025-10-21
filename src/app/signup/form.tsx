@@ -16,7 +16,7 @@ export default function SignupForm() {
   React.useEffect(() => setIsLoading(pending), [pending]);
 
   return (
-    <div className="dark fixed inset-0 flex h-screen items-center justify-center">
+    <div className="dark fixed inset-0 flex h-screen items-center justify-center select-none">
       <div className="flex h-full w-full items-center justify-center bg-transparent">
         <div className="rounded-large flex w-full max-w-sm flex-col gap-4">
           <div className="flex flex-col items-center pb-6">
