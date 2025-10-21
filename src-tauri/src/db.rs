@@ -6,7 +6,8 @@ use anyhow::Result;
 use argon2::{Argon2, password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString, rand_core::OsRng}};
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-use sqlx::{Acquire, Pool, Sqlite, SqliteConnection, pool::PoolConnection, sqlite::{SqliteConnectOptions, SqlitePool, SqlitePoolOptions, SqliteQueryResult}};
+use sqlite_hashes::{register_sha1_functions, rusqlite::Connection};
+use sqlx::{Acquire, Pool, Sqlite, SqliteConnection, pool::PoolConnection, sqlite::{LockedSqliteHandle, SqliteConnectOptions, SqlitePool, SqlitePoolOptions, SqliteQueryResult}};
 use tokio::sync::{Mutex, MutexGuard};
 
 use crate::{errors::{Error, UserError}, state};
@@ -40,6 +41,14 @@ impl Database {
         sqlx::migrate!("./migrations").run(&pool).await?;
 
         Ok(Self { pool })
+    }
+
+    pub async fn register_sqlite_sha1_functions(&self, sqlx_conn: &mut SqliteConnection) {
+        let mut handle_lock: LockedSqliteHandle<'_> = sqlx_conn.lock_handle().await.unwrap();
+        let handle = handle_lock.as_raw_handle().as_ptr();
+        let rusqlite_conn: Connection = unsafe { Connection::from_handle(handle) }.unwrap();
+
+        register_sha1_functions(&rusqlite_conn).unwrap();
     }
 }
 

@@ -66,6 +66,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             dailies::get_total_points,
             dailies::handle_point_change,
+            dailies::insert_dailies,
             dailies::query_dailies,
             dailies::update_daily,
             db::create_user,

@@ -36,6 +36,10 @@ export default function CommandDialog() {
         router.push("/login");
       },
     },
+    {
+      name: "insert dailies",
+      callback: async () => (await import("@tauri-apps/api/core")).invoke("insert_dailies", {}),
+    },
   ];
 
   const commandItems: React.ReactElement[] = commandOptions.map((options, idx: number) => {

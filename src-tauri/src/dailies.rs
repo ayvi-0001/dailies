@@ -3,7 +3,7 @@ use std::str::FromStr;
 use anyhow::Result;
 use chrono::{NaiveDate, NaiveTime};
 use serde_json::Value;
-use sqlx::types::Json;
+use sqlx::{Acquire, Sqlite, SqliteConnection, Transaction, pool::PoolConnection, types::Json};
 use tokio::sync::{Mutex, MutexGuard};
 
 crate::mod_flat!(daily, enums);
@@ -218,16 +218,16 @@ pub async fn update_daily(
 
     match original_daily.note {
         Some(note) => {
-            if let Some(new_note) = new_daily.note {
-                if !note.eq(&new_note) {
-                    sqlx::query!(
-                        r#"UPDATE "quests" SET note = $1 WHERE id = $2"#,
-                        new_note,
-                        original_daily.quest_id,
-                    )
-                    .execute(pool)
-                    .await?;
-                }
+            if let Some(new_note) = new_daily.note
+                && !note.eq(&new_note)
+            {
+                sqlx::query!(
+                    r#"UPDATE "quests" SET note = $1 WHERE id = $2"#,
+                    new_note,
+                    original_daily.quest_id,
+                )
+                .execute(pool)
+                .await?;
             }
         }
         None => {
@@ -245,23 +245,23 @@ pub async fn update_daily(
 
     match original_daily.requirements {
         Some(requirements) => {
-            if let Some(new_requirements) = new_daily.requirements {
-                if !requirements.eq(&new_requirements) {
-                    sqlx::query!(
-                        r#"UPDATE "quests" SET requirements = $1 WHERE id = $2"#,
-                        new_requirements,
-                        original_daily.quest_id,
-                    )
-                    .execute(pool)
-                    .await?;
-                    sqlx::query!(
-                        r#"UPDATE "dailies" SET requirements = $1 WHERE point_id = $2"#,
-                        new_requirements,
-                        original_daily.point_id,
-                    )
-                    .execute(pool)
-                    .await?;
-                }
+            if let Some(new_requirements) = new_daily.requirements
+                && !requirements.eq(&new_requirements)
+            {
+                sqlx::query!(
+                    r#"UPDATE "quests" SET requirements = $1 WHERE id = $2"#,
+                    new_requirements,
+                    original_daily.quest_id,
+                )
+                .execute(pool)
+                .await?;
+                sqlx::query!(
+                    r#"UPDATE "dailies" SET requirements = $1 WHERE point_id = $2"#,
+                    new_requirements,
+                    original_daily.point_id,
+                )
+                .execute(pool)
+                .await?;
             }
         }
         None => {
@@ -286,16 +286,16 @@ pub async fn update_daily(
 
     match original_daily.days {
         Some(days) => {
-            if let Some(new_days) = new_daily.days {
-                if !days.eq(&new_days) {
-                    sqlx::query!(
-                        r#"UPDATE "quests" SET days = $1 WHERE id = $2"#,
-                        new_days,
-                        original_daily.quest_id,
-                    )
-                    .execute(pool)
-                    .await?;
-                }
+            if let Some(new_days) = new_daily.days
+                && !days.eq(&new_days)
+            {
+                sqlx::query!(
+                    r#"UPDATE "quests" SET days = $1 WHERE id = $2"#,
+                    new_days,
+                    original_daily.quest_id,
+                )
+                .execute(pool)
+                .await?;
             }
         }
         None => {
@@ -313,16 +313,16 @@ pub async fn update_daily(
 
     match original_daily.archived {
         Some(archived) => {
-            if let Some(new_archived) = new_daily.archived {
-                if !archived.eq(&new_archived) {
-                    sqlx::query!(
-                        r#"UPDATE "quests" SET archived = $1 WHERE id = $2"#,
-                        new_archived,
-                        original_daily.quest_id,
-                    )
-                    .execute(pool)
-                    .await?;
-                }
+            if let Some(new_archived) = new_daily.archived
+                && !archived.eq(&new_archived)
+            {
+                sqlx::query!(
+                    r#"UPDATE "quests" SET archived = $1 WHERE id = $2"#,
+                    new_archived,
+                    original_daily.quest_id,
+                )
+                .execute(pool)
+                .await?;
             }
         }
         None => {
@@ -340,23 +340,23 @@ pub async fn update_daily(
 
     match original_daily.time_min {
         Some(time_min) => {
-            if let Some(new_time_min) = new_daily.time_min {
-                if !time_min.eq(&new_time_min) {
-                    sqlx::query!(
-                        r#"UPDATE "quests" SET time_min = $1 WHERE id = $2"#,
-                        new_time_min,
-                        original_daily.quest_id,
-                    )
-                    .execute(pool)
-                    .await?;
-                    sqlx::query!(
-                        r#"UPDATE "dailies" SET time_min = $1 WHERE point_id = $2"#,
-                        new_time_min,
-                        original_daily.point_id,
-                    )
-                    .execute(pool)
-                    .await?;
-                }
+            if let Some(new_time_min) = new_daily.time_min
+                && !time_min.eq(&new_time_min)
+            {
+                sqlx::query!(
+                    r#"UPDATE "quests" SET time_min = $1 WHERE id = $2"#,
+                    new_time_min,
+                    original_daily.quest_id,
+                )
+                .execute(pool)
+                .await?;
+                sqlx::query!(
+                    r#"UPDATE "dailies" SET time_min = $1 WHERE point_id = $2"#,
+                    new_time_min,
+                    original_daily.point_id,
+                )
+                .execute(pool)
+                .await?;
             }
         }
         None => {
@@ -381,23 +381,23 @@ pub async fn update_daily(
 
     match original_daily.time_max {
         Some(time_max) => {
-            if let Some(new_time_max) = new_daily.time_max {
-                if !time_max.eq(&new_time_max) {
-                    sqlx::query!(
-                        r#"UPDATE "quests" SET time_max = $1 WHERE id = $2"#,
-                        new_time_max,
-                        original_daily.quest_id,
-                    )
-                    .execute(pool)
-                    .await?;
-                    sqlx::query!(
-                        r#"UPDATE "dailies" SET time_max = $1 WHERE point_id = $2"#,
-                        new_time_max,
-                        original_daily.point_id,
-                    )
-                    .execute(pool)
-                    .await?;
-                }
+            if let Some(new_time_max) = new_daily.time_max
+                && !time_max.eq(&new_time_max)
+            {
+                sqlx::query!(
+                    r#"UPDATE "quests" SET time_max = $1 WHERE id = $2"#,
+                    new_time_max,
+                    original_daily.quest_id,
+                )
+                .execute(pool)
+                .await?;
+                sqlx::query!(
+                    r#"UPDATE "dailies" SET time_max = $1 WHERE point_id = $2"#,
+                    new_time_max,
+                    original_daily.point_id,
+                )
+                .execute(pool)
+                .await?;
             }
         }
         None => {
@@ -419,6 +419,147 @@ pub async fn update_daily(
             }
         }
     }
+
+    Ok(())
+}
+
+#[tauri::command(async)]
+pub async fn insert_dailies(
+    state: tauri::State<'_, Mutex<state::AppState>>,
+) -> Result<(), crate::errors::Error> {
+    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+    let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
+    let conn: &mut SqliteConnection = pool.acquire().await?;
+
+    state
+        .db
+        .register_sqlite_sha1_functions(conn)
+        .await;
+
+    let mut tx: Transaction<'_, Sqlite> = conn.begin().await?;
+
+    sqlx::query!(
+        r#"
+            DROP TABLE IF EXISTS _staging_dailies_added;
+            CREATE TABLE IF NOT EXISTS _staging_dailies_added AS
+            SELECT quest_id
+            FROM
+              "points"
+            WHERE 
+              date = DATE(CURRENT_TIMESTAMP, 'localtime');
+        "#,
+    )
+    .execute(&mut *tx)
+    .await?;
+
+    sqlx::query!(
+        r#"
+            DROP TABLE IF EXISTS _staging_dailies_missing;
+            CREATE TABLE IF NOT EXISTS _staging_dailies_missing AS
+            SELECT *
+            FROM
+              "quests"
+            WHERE
+              id NOT IN (
+                SELECT quest_id
+                FROM
+                  _staging_dailies_added
+              );
+        "#,
+    )
+    .execute(&mut *tx)
+    .await?;
+
+    sqlx::query!(
+        r#"
+            DROP TABLE IF EXISTS _staging_dailies_to_add;
+            CREATE TABLE IF NOT EXISTS _staging_dailies_to_add AS
+            SELECT
+              LOWER(SHA1_HEX(id || STRFTIME('%Y-%m-%d', DATE(CURRENT_TIMESTAMP, 'localtime')))) AS point_id,
+              id AS quest_id,
+              DATE(CURRENT_TIMESTAMP, 'localtime') AS date,
+              CASE
+                WHEN archived IS NOT NULL THEN NULL
+                WHEN type_id LIKE "q-x" THEN NULL
+                WHEN type_id LIKE "q-w-%" AND INSTR(days, STRFTIME('%w', 'now')) < 1 THEN NULL
+                WHEN type_id LIKE '%-n' THEN 1
+                WHEN type_id = 'q-d-cy' THEN (
+                  SELECT COALESCE(points, 0)
+                  FROM
+                    "points" AS p1
+                  WHERE
+                    p1.quest_id = q.id
+                    AND p1.date = DATE(DATE(CURRENT_TIMESTAMP, 'localtime'), '-1 days')
+                  LIMIT 1
+                )
+                WHEN (type_id LIKE 'q-d-%' OR type_id LIKE 'q-w-%') THEN 0
+                WHEN type_id LIKE 'q-ln-%' THEN (
+                  CASE
+                    WHEN type_id LIKE '%-b' THEN (
+                      WITH
+                        p2 AS (
+                          SELECT
+                            points,
+                            total
+                          FROM
+                            "points"
+                          WHERE
+                            quest_id = q.id
+                            AND date > DATE(
+                              DATE(CURRENT_TIMESTAMP, 'localtime'), '-'
+                              || CAST(COALESCE(CAST(q.requirements AS INT), 0) + 1 AS TEXT)
+                              || ' days'
+                            )
+                        )
+                      SELECT CASE WHEN MAX(p2.points) / MAX(p2.total) = 1 THEN NULL ELSE 0 END
+                      FROM
+                        p2
+                    )
+                    WHEN type_id LIKE '%-n' THEN (
+                      WITH
+                        p2 AS (
+                          SELECT
+                            points,
+                            total
+                          FROM
+                            "points"
+                          WHERE
+                            quest_id = q.id
+                            AND date > DATE(
+                              DATE(CURRENT_TIMESTAMP, 'localtime'), '-'
+                              || CAST(COALESCE(CAST(q.requirements AS INT), 0) + 1 AS TEXT)
+                              || ' days'
+                            )
+                        )
+                      SELECT CASE WHEN SUM(p2.points) / SUM(p2.total) = 1 THEN NULL ELSE 1 END
+                      FROM
+                        p2
+                    )
+                  END
+                )
+                ELSE NULL
+              END AS points,
+              weight,
+              total,
+              streak_target,
+              requirements,
+              time_min,
+              time_max,
+              DATETIME(CURRENT_TIMESTAMP, 'localtime') AS updated
+            FROM
+              _staging_dailies_missing AS q
+            ORDER BY
+              q.sequence;
+        "#,
+    )
+    .execute(&mut *tx)
+    .await?;
+
+    sqlx::query!(r#"INSERT INTO "points" SELECT * FROM _staging_dailies_to_add;"#,)
+        .execute(&mut *tx)
+        .await?;
+
+    tx.commit().await?;
 
     Ok(())
 }
