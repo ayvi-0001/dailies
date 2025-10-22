@@ -20,9 +20,6 @@ resizable = true
 fullscreen = false
 decorations = false
 
-[app.security]
-csp = ""
-
 [bundle]
 active = true
 targets = "all"
