@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import Input from "@/components/ui/input";
+import { toISO8601 } from "@/lib/dates";
 import { camelCaseToTitleCase } from "@/lib/string";
 import { cn } from "@/lib/utils";
 import type { Option } from "@/types/option";
@@ -30,7 +31,7 @@ import { Daily } from "../types";
 const formSchema = z.object({
   user: z.string().readonly(),
   // prettier-ignore
-  date:  z.coerce.date<Date>().nullable().transform((arg: Option<Date>) => (arg ? arg.toISOString().substring(0, 10) : null)),
+  date:  z.coerce.date<Date>().nullable().transform((arg: Option<Date>) => (arg ? toISO8601(arg) : null)),
   // date: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: Option<string>): Option<Date> => isoString ? new Date(isoString) : null, encode: (date: Option<Date>): Option<string> => date ? date.toISOString().substring(0, 10) : null, }),
   pointId: z.string().readonly(),
   questId: z.string().readonly(),
@@ -47,7 +48,7 @@ const formSchema = z.object({
   timeMin: z.iso.time().nullable(),
   timeMax: z.iso.time().nullable(),
   // prettier-ignore
-  accepted:  z.coerce.date().nullable().transform((arg: Option<Date>) => (arg ? arg.toISOString().substring(0, 10) : null)),
+  accepted:  z.coerce.date().nullable().transform((arg: Option<Date>) => (arg ? toISO8601( arg) : null)),
   // accepted: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: Option<string>): Option<Date> => isoString ? new Date(isoString) : null, encode: (date: Option<Date>): Option<string> => date ? date.toISOString().substring(0, 10) : null, }),
   archived: z.iso.date().nullable(),
   // archived: z.codec(z.iso.datetime().nullable(), z.date().nullable(), { decode: (isoString: Option<string>): Option<Date> => isoString ? new Date(isoString) : null, encode: (date: Option<Date>): Option<string> => date ? date.toISOString().substring(0, 10) : null, }),

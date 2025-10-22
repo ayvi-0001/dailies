@@ -7,6 +7,7 @@ import { invoke } from "@tauri-apps/api/core";
 
 import * as User from "@/app/providers/user";
 import * as WindowSize from "@/app/providers/window-size";
+import { toISO8601 } from "@/lib/dates";
 import type { Option } from "@/types/option";
 
 import DailyCard from "./card";
@@ -29,7 +30,7 @@ export default function DailyList({ title }: { title: string }): React.ReactNode
   const userName: Option<string> = userState?.user?.name || null;
 
   React.useEffect(() => {
-    const today: string = new Date().toISOString().substring(0, 10);
+    const today = toISO8601(new Date());
 
     const query_dailies = async (): Promise<void> => {
       await invoke<Daily[]>("query_dailies", {
