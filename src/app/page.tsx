@@ -4,6 +4,7 @@ import type { Metadata, ResolvingMetadata } from "next";
 
 import { QuestList } from "@/components/daily";
 import DailiesProvider from "@/components/daily/context";
+import ExpBar from "@/components/exp/exp-bar";
 import type { PageProps } from "@/types/props";
 
 export default async function Page(_: PageProps): Promise<React.ReactElement> {
@@ -16,6 +17,9 @@ export default async function Page(_: PageProps): Promise<React.ReactElement> {
             id="main-content"
           >
             <QuestList title="Quests" />
+          </div>
+          <div className="mr-7 mb-4 ml-20 w-full touch-none self-end">
+            <ExpBar />
           </div>
         </div>
       </React.Suspense>
