@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
     // PPR is implicitly enabled when Cache Components is enabled.
     // cacheComponents: true,
   },
+  crossOrigin: "anonymous",
   env: {
     NEXT_VERSION: dependencies.next,
   },
