@@ -1,0 +1,86 @@
+[language-server.rust-analyzer]
+command = "rust-analyzer"
+
+  [language-server.rust-analyzer.config]
+  check.command        = "clippy"
+  cargo.features       = "all"
+  diagnostics.disabled = ["unlinked-file"]
+
+[[language]]
+name                          = "rust"
+shebangs                      = ["rust-script", "cargo"]
+auto-format                   = true
+language-servers              = ["rust-analyzer", "tailwindcss-ls"]
+indent                        = { tab-width = 4, unit = "    " }
+persistent-diagnostic-sources = ["rustc", "clippy"]
+
+  [language.formatter]
+  command = "rustfmt"
+  args    = ["+nightly"]
+
+[language-server.tailwindcss-ls]
+command = "tailwindcss-language-server"
+args    = ["--stdio"]
+
+  [language-server.tailwindcss-ls.config]
+  userLanguages = { rust = "html", "*.rs" = "html" }
+
+[language-server.typescript-language-server]
+command = "typescript-language-server"
+args    = ["--stdio"]
+
+  [language-server.typescript-language-server.config]
+  hostInfo = "helix"
+
+[[language]]
+name             = "typescript"
+language-servers = ["vscode-eslint-language-server", "tailwindcss-ls", "typescript-language-server"]
+auto-format      = true
+
+  [language.formatter]
+  command = "prettier"
+  args    = ["--parser=typescript", "--stdin-filepath", "%{buffer_name}"]
+
+[[language]]
+name             = "tsx"
+language-servers = ["vscode-eslint-language-server", "tailwindcss-ls", "typescript-language-server"]
+auto-format      = true
+
+  [language.formatter]
+  command = "prettier"
+  args    = ["--parser=typescript", "--stdin-filepath", "%{buffer_name}"]
+
+[[language]]
+name             = "javascript"
+language-servers = ["vscode-eslint-language-server", "tailwindcss-ls", "typescript-language-server"]
+auto-format      = true
+
+  [language.formatter]
+  command = "prettier"
+  args    = ["--parser=typescript", "--stdin-filepath", "%{buffer_name}"]
+
+[[language]]
+name             = "jsx"
+language-servers = ["vscode-eslint-language-server", "tailwindcss-ls", "typescript-language-server"]
+auto-format      = true
+
+  [language.formatter]
+  command = "prettier"
+  args    = ["--parser=typescript", "--stdin-filepath", "%{buffer_name}"]
+
+[[language]]
+name             = "html"
+language-servers = ["vscode-html-language-server", "tailwindcss-ls"]
+
+[[language]]
+name        = "xml"
+auto-format = true
+
+  [language.formatter]
+  command = "prettier"
+  args    = ["--parser=html", "--stdin-filepath", "%{buffer_name}"]
+
+[[language]]
+name             = "css"
+file-types       = ["css", "scss", "tcss"]
+language-servers = ["vscode-css-language-server", "tailwindcss-ls"]
