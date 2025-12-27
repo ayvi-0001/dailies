@@ -19,6 +19,7 @@
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
+    "@reactuses/core": "^6.1.5",
     "@tailwindcss/line-clamp": "^0.4.4",
     "@tauri-apps/api": "^2.9.0",
     "@tauri-apps/cli": "^2.9.0",
