@@ -13,6 +13,15 @@ removeUnusedCommands = true
 [app]
 withGlobalTauri = true
 
+[app.security]
+csp = "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'"
+
+[app.security.assetProtocol]
+enable = true
+
+[app.security.assetProtocol.scope]
+allow = ["$APPDATA/**", "$RESOURCE/**"]
+
 [[app.windows]]
 title = "dailies"
 width = 411
