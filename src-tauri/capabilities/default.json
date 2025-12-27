@@ -10,6 +10,7 @@
     "android"
   ],
   "permissions": [
+    "android-fs:default",
     "core:default",
     "core:window:allow-center",
     "core:window:allow-close",
@@ -17,6 +18,13 @@
     "core:window:allow-toggle-maximize",
     "core:window:allow-start-dragging",
     "os:default",
-    "fs:default"
+    "core:app:allow-register-listener",
+    "core:app:allow-remove-listener",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "fs:default",
+    "http:default",
+    "process:default",
+    "log:default"
   ]
 }
