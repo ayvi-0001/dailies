@@ -11,7 +11,7 @@ import CommandDialog from "./command-dialog";
 import Toaster from "./listener";
 import Providers from "./providers";
 
-// export const experimental_ppr = true;
+import Speeddial from "./speed-dial";
 
 const spaceMono = Space_Mono({
   weight: ["400", "700"],
@@ -41,6 +41,9 @@ export default function RootLayout(pages: Pages): React.ReactNode {
       <body>
         <Toaster />
         {process.env.NODE_ENV === "development" && <CommandDialog />}
+        <React.Suspense>
+          <Speeddial />
+        </React.Suspense>
         <div className="relative z-1 select-none">
           <Providers>
             {modals}
