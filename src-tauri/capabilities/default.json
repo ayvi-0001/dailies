@@ -11,20 +11,20 @@
   ],
   "permissions": [
     "android-fs:default",
+    "core:app:allow-register-listener",
+    "core:app:allow-remove-listener",
     "core:default",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
     "core:window:allow-center",
     "core:window:allow-close",
     "core:window:allow-minimize",
-    "core:window:allow-toggle-maximize",
     "core:window:allow-start-dragging",
-    "os:default",
-    "core:app:allow-register-listener",
-    "core:app:allow-remove-listener",
-    "core:event:allow-listen",
-    "core:event:allow-unlisten",
+    "core:window:allow-toggle-maximize",
     "fs:default",
     "http:default",
-    "process:default",
-    "log:default"
+    "log:default",
+    "os:default",
+    "process:default"
   ]
 }
