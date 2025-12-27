@@ -3,12 +3,12 @@ import * as React from "react";
 import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
 
-import AppBuildFooter from "@/components/app-build-footer";
 import CommandDialog from "@/components/command-dialog";
 
 import "./globals.css";
 
 import BackgroundImage from "./background";
+import AppBuildInfo from "./build-info";
 import Toaster from "./listener";
 import Providers from "./providers";
 
@@ -47,8 +47,8 @@ export default function RootLayout(pages: Pages): React.ReactNode {
             {children}
           </Providers>
         </div>
+        <AppBuildInfo as="header" />
         <BackgroundImage src="/images/background.png" />
-        <AppBuildFooter />
       </body>
     </html>
   );
