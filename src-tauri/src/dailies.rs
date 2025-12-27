@@ -884,5 +884,89 @@ pub async fn insert_dailies(
     Ok(())
 }
 
+#[tauri::command(async)]
+pub async fn backfill_dailies(app_handle: tauri::AppHandle) -> Result<(), crate::errors::Error> {
+    let state = app_handle.state::<Mutex<state::AppState>>();
+
+    let guard: MutexGuard<'_, state::AppState> = state.lock().await;
+    let mut pool: PoolConnection<Sqlite> = guard.db.pool.acquire().await?;
+    let conn: &mut SqliteConnection = pool.acquire().await?;
+
+    let users: Vec<User> =
+        sqlx::query_as!(User, r#"SELECT id, name, created, updated FROM "users";"#,)
+            .fetch_all(&mut *conn)
+            .await?;
+
+    std::mem::drop(guard);
+
+    let current_datetime: DateTime<Local> = chrono::Local::now();
+    let current_date = current_datetime.date_naive();
+
+    for user in users {
+        let guard: MutexGuard<'_, state::AppState> = state.lock().await;
+        let mut pool: PoolConnection<Sqlite> = guard.db.pool.acquire().await?;
+        let conn: &mut SqliteConnection = pool.acquire().await?;
+
+        let last_point_date: Option<NaiveDate> = sqlx::query_scalar!(
+            r#"
+                SELECT DISTINCT date
+                FROM "points"
+                LEFT JOIN
+                    "quests"
+                ON
+                    "quests".id = "points".quest_id
+                WHERE
+                    "quests".user_id  = $1
+                ORDER BY
+                    date DESC
+                LIMIT 1 OFFSET 1;
+            "#,
+            user.id,
+        )
+        .fetch_optional(&mut *conn)
+        .await?;
+
+        if let Some(date) = last_point_date {
+            let target_date = current_date - Duration::days(1);
+
+            if target_date == date {
+                continue;
+            };
+
+            let mut missing_date = date;
+
+            std::mem::drop(guard);
+
+            while missing_date < current_date {
+                missing_date += Duration::days(1);
+
+                let local_dt = missing_date
+                    .and_time(NaiveTime::default())
+                    .and_local_timezone(Local)
+                    .earliest()
+                    .unwrap();
+
+                let duration = std::time::Duration::from_secs(20);
+                let insert_dailies_future = insert_dailies(app_handle.clone(), local_dt);
+                match tokio::time::timeout(duration, insert_dailies_future).await {
+                    Ok(_) => {
+                        log::debug!(
+                            "Backfilled points for user {0} on {1}",
+                            user.id,
+                            missing_date
+                        )
+                    }
+                    Err(_) => {
+                        log::error!(
+                            "Timed out on backfill for user {0} on {1}",
+                            user.id,
+                            missing_date
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     Ok(())
 }

@@ -73,6 +73,9 @@ pub fn run() {
                 dailies::insert_dailies(app.app_handle().to_owned(), chrono::Local::now()).await;
             });
 
+            #[allow(unused_must_use)]
+            tauri::async_runtime::spawn(dailies::backfill_dailies(app.app_handle().to_owned()));
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
