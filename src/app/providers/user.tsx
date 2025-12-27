@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { invoke } from "@tauri-apps/api/core";
 import ok from "assert";
+import { toast } from "sonner";
 
 import logout from "@/actions/logout";
 import { decrypt } from "@/lib/session";
@@ -37,31 +38,28 @@ export default function UserProvider({
   const [user, setUser] = React.useState<User | null>(null);
 
   React.useEffect(() => {
-    const get_user_session = async () => {
-      // TODO(ayvi): show user error on catch
+    const get_session = async () => {
       try {
         const session = await invoke<string | null>("get_session");
-
         const token = await decrypt<DecodedToken>(session);
-
-        await invoke<User>("get_user", { username: token?.userName })
-          .then(result => setUser(result))
-          .catch(console.error);
-      } catch (_: unknown) {
+        const payload = { username: token?.userName };
+        await invoke<User>("get_user", payload).then(result => setUser(result));
+      } catch (err: unknown) {
+        console.log(err);
+        toast.error(`${err}`);
         await logout();
       }
     };
-
-    get_user_session();
+    get_session();
   }, []);
 
-  const value: UserState = { user, setUser };
-
-  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+  return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
 }
 
-export function useState(): UserState {
+export function useState<
+  State = { user: User | null; setUser: React.Dispatch<React.SetStateAction<User>> },
+>(): State {
   const context = React.useContext<UserState | null>(UserContext);
-  ok(context, Error("Cannot determine user."));
-  return context;
+  ok(context, new Error("User state was used outside of its Provider"));
+  return context as State;
 }
