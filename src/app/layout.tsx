@@ -22,23 +22,30 @@ const spaceMono = Space_Mono({
 
 export const metadata: Metadata = { title: "Dailies" };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>): React.ReactNode {
+type Pages = Readonly<{
+  modals: React.ReactNode;
+  children: React.ReactNode;
+}>;
+
+export default function RootLayout(pages: Pages): React.ReactNode {
+  const { modals, children } = pages;
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html suppressHydrationWarning className={`${spaceMono.className} antialiased`} lang="en">
       <head>
-        {process.env.NODE_ENV !== "production" ? (
+        {process.env.NODE_ENV === "development" && (
           // Connect to react-devtools server.
           // eslint-disable-next-line @next/next/no-sync-scripts
           <script src="http://localhost:8097"></script>
-        ) : undefined}
+        )}
       </head>
-      <body className={`${spaceMono.className} antialiased`}>
+      <body>
         <Toaster />
-        <CommandDialog />
-        <div className="relative z-1">
-          <Providers>{children}</Providers>
+        <div className="relative z-1 select-none">
+          <Providers>
+            {modals}
+            {children}
+          </Providers>
         </div>
         <BackgroundImage src="/images/background.png" />
         <AppBuildFooter />
