@@ -10,7 +10,7 @@
     "android"
   ],
   "permissions": [
-    "android-fs:default",
+    "android-fs:all",
     "core:app:allow-register-listener",
     "core:app:allow-remove-listener",
     "core:default",
@@ -21,6 +21,8 @@
     "core:window:allow-minimize",
     "core:window:allow-start-dragging",
     "core:window:allow-toggle-maximize",
+    "fs:allow-app-read-recursive",
+    "fs:allow-app-write-recursive",
     "fs:default",
     "http:default",
     "log:default",
