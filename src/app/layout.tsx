@@ -3,12 +3,11 @@ import * as React from "react";
 import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
 
-import CommandDialog from "@/components/command-dialog";
-
 import "./globals.css";
 
 import BackgroundImage from "./background";
 import AppBuildInfo from "./build-info";
+import CommandDialog from "./command-dialog";
 import Toaster from "./listener";
 import Providers from "./providers";
 
@@ -41,6 +40,7 @@ export default function RootLayout(pages: Pages): React.ReactNode {
       </head>
       <body>
         <Toaster />
+        {process.env.NODE_ENV === "development" && <CommandDialog />}
         <div className="relative z-1 select-none">
           <Providers>
             {modals}

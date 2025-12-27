@@ -3,22 +3,39 @@
 import * as React from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
+import { OnBackButtonPressPayload, onBackButtonPress } from "@tauri-apps/api/app";
+import { platform } from "@tauri-apps/plugin-os";
+import type { Platform } from "@tauri-apps/plugin-os";
+import { relaunch } from "@tauri-apps/plugin-process";
 import { useRouter } from "next/navigation";
 
 import * as Command from "@/components/ui/command";
 import { truncate_sessions } from "@/actions/logout";
 
-export default function CommandDialog() {
+// NOTE: This component is just to access helper functions during development.
+// It's only mounted when process.env.NODE_ENV === "development".
+export default function CommandDialog(): React.ReactElement {
   const [open, setOpen] = React.useState<boolean>(false);
+  const [currentPlatform, setCurrentPlatform] = React.useState<Platform | null>(null);
   const router = useRouter();
 
   useHotkeys("Slash", () => setOpen(open => !open), { preventDefault: true }, []);
 
-  // NOTE: These are just helper functions for development and aren't meant to be included
-  // in the final app.
+  React.useEffect((): void => setCurrentPlatform(platform()), []);
+
+  if (currentPlatform == "android") {
+    onBackButtonPress((_: OnBackButtonPressPayload): void => {
+      setOpen(open => !open);
+    });
+  }
+
   const commandOptions = [
     {
-      name: "goto home",
+      name: "relaunch",
+      callback: async () => await relaunch(),
+    },
+    {
+      name: "goto root",
       callback: async () => router.push("/"),
     },
     {
@@ -37,15 +54,19 @@ export default function CommandDialog() {
       },
     },
     {
-      name: "insert dailies",
-      callback: async () => (await import("@tauri-apps/api/core")).invoke("insert_dailies", {}),
+      name: "export-db",
+      callback: async () => (await import("@tauri-apps/api/core")).invoke("export_db", {}),
+    },
+    {
+      name: "import-db",
+      callback: async () => (await import("@tauri-apps/api/core")).invoke("import_db", {}),
     },
   ];
 
   const commandItems: React.ReactElement[] = commandOptions.map((options, idx: number) => {
     const callback = () => {
-      setOpen(open => !open);
       options.callback();
+      setOpen(open => !open);
     };
     return (
       <Command.CommandItem key={`command_${idx}`} onSelect={callback}>
