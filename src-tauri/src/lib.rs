@@ -6,6 +6,9 @@ use tokio::sync::Mutex;
 pub(crate) mod macros;
 crate::mod_flat!(dailies, state, db, errors);
 
+#[cfg(target_os = "android")]
+mod android;
+
 lazy_static::lazy_static! {
     pub static ref JWT_SECRET: String = std::env::var("JWT_SECRET")
         .expect("Env var `JWT_SECRET` should be set.");
@@ -13,6 +16,7 @@ lazy_static::lazy_static! {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Must be mutable in either of the following 2 cfg's apply.
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
@@ -23,6 +27,11 @@ pub fn run() {
     #[cfg(test)]
     {
         builder = builder.plugin(tauri_plugin_devtools::init());
+    }
+
+    #[cfg(target_os = "android")]
+    {
+        builder = builder.plugin(tauri_plugin_android_fs::init());
     }
 
     builder
@@ -79,6 +88,10 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            #[cfg(target_os = "android")]
+            android::export_db,
+            #[cfg(target_os = "android")]
+            android::import_db,
             dailies::delete_daily,
             dailies::get_quest_types,
             dailies::get_total_points,

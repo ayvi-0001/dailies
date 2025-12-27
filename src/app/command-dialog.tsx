@@ -4,26 +4,26 @@ import * as React from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { OnBackButtonPressPayload, onBackButtonPress } from "@tauri-apps/api/app";
-import { platform } from "@tauri-apps/plugin-os";
-import type { Platform } from "@tauri-apps/plugin-os";
 import { relaunch } from "@tauri-apps/plugin-process";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useRouter } from "next/navigation";
 
 import * as Command from "@/components/ui/command";
 import { truncate_sessions } from "@/actions/logout";
 
+import { AppMetaState, useAppMetaState } from "./providers/app-meta";
+
 // NOTE: This component is just to access helper functions during development.
 // It's only mounted when process.env.NODE_ENV === "development".
 export default function CommandDialog(): React.ReactElement {
   const [open, setOpen] = React.useState<boolean>(false);
-  const [currentPlatform, setCurrentPlatform] = React.useState<Platform | null>(null);
-  const router = useRouter();
+  const router: AppRouterInstance = useRouter();
+
+  const appMeta: AppMetaState = useAppMetaState();
 
   useHotkeys("Slash", () => setOpen(open => !open), { preventDefault: true }, []);
 
-  React.useEffect((): void => setCurrentPlatform(platform()), []);
-
-  if (currentPlatform == "android") {
+  if (appMeta.platform == "android") {
     onBackButtonPress((_: OnBackButtonPressPayload): void => {
       setOpen(open => !open);
     });
@@ -53,27 +53,33 @@ export default function CommandDialog(): React.ReactElement {
         router.push("/login");
       },
     },
-    {
-      name: "export-db",
-      callback: async () => (await import("@tauri-apps/api/core")).invoke("export_db", {}),
-    },
-    {
-      name: "import-db",
-      callback: async () => (await import("@tauri-apps/api/core")).invoke("import_db", {}),
-    },
+    appMeta.platform == "android"
+      ? {
+          name: "export-db",
+          callback: async () => (await import("@tauri-apps/api/core")).invoke("export_db", {}),
+        }
+      : null,
+    appMeta.platform == "android"
+      ? {
+          name: "import-db",
+          callback: async () => (await import("@tauri-apps/api/core")).invoke("import_db", {}),
+        }
+      : null,
   ];
 
-  const commandItems: React.ReactElement[] = commandOptions.map((options, idx: number) => {
-    const callback = () => {
-      options.callback();
-      setOpen(open => !open);
-    };
-    return (
-      <Command.CommandItem key={`command_${idx}`} onSelect={callback}>
-        <span>{options.name}</span>
-      </Command.CommandItem>
-    );
-  });
+  const commandItems: React.ReactElement[] = commandOptions
+    .filter(cmd => !!cmd)
+    .map((options, idx: number) => {
+      const callback = () => {
+        options.callback();
+        setOpen(open => !open);
+      };
+      return (
+        <Command.CommandItem key={`command_${idx}`} onSelect={callback}>
+          <span>{options.name}</span>
+        </Command.CommandItem>
+      );
+    });
 
   return (
     <div className="dark">

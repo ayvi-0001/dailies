@@ -5237,12 +5237,14 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-android-fs"
-version = "17.4.0"
+version = "24.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "feaea5bd675dfb807804c46e5e73a20bf2da5f5c2f00e9477eaa3d0c59941c27"
+checksum = "3ea0c0834fbdb7ffb32c87aeeb63af7c0d428b136c4eecc0e8053b3a39dc68fa"
 dependencies = [
  "base64 0.22.1",
+ "glob",
  "percent-encoding",
+ "schemars 0.8.22",
  "serde",
  "serde_json",
  "sync_async",
