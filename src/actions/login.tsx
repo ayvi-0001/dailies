@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import type { Session } from "@/app/providers/user";
 import { createSession } from "@/lib/session";
+import type { AppError } from "@/types/errors";
 
 export const LoginFormSchema = z.object({
   username: z.string().trim(),
@@ -19,11 +20,6 @@ export type LoginErrors = {
 };
 
 export type LoginState = LoginErrors | undefined;
-
-type AppError = {
-  kind: string;
-  message: string;
-};
 
 export default async function login(_: LoginState, formData: FormData): Promise<LoginErrors> {
   const validatedFields = LoginFormSchema.safeParse({

@@ -15,6 +15,8 @@ pub(crate) enum Error {
     Argon2(#[from] argon2::password_hash::Error),
     #[error("{0}")]
     User(#[from] self::UserError),
+    #[error("tauri error: {0}")]
+    Tauri(#[from] tauri::Error),
 }
 
 impl serde::Serialize for Error {
@@ -44,6 +46,10 @@ impl serde::Serialize for Error {
                 emit_app_error(app_handle(), "tauri://error", &self);
                 ErrorKind::User(error_message)
             }
+            Self::Tauri(_) => {
+                emit_app_error(app_handle(), "tauri://error", &self);
+                ErrorKind::Tauri(error_message)
+            }
         };
         error_kind.serialize(serializer)
     }
@@ -58,6 +64,7 @@ enum ErrorKind {
     Sqlx(String),
     Argon2(String),
     User(String),
+    Tauri(String),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -73,9 +80,16 @@ pub struct ErrorMessage<'a> {
     pub message: &'a str,
 }
 
+impl<'a> ErrorMessage<'a> {
+    pub fn new(message: &'a str) -> Self {
+        Self { message }
+    }
+}
+
 pub fn emit_app_error<T>(app: &tauri::AppHandle, event: &str, error: &T)
 where
     T: std::error::Error + std::string::ToString, {
-    let payload = ErrorMessage { message: &error.to_string() };
+    let binding = error.to_string();
+    let payload = ErrorMessage::new(&binding);
     app.emit(event, payload).unwrap()
 }

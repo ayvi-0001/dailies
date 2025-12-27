@@ -14,9 +14,9 @@ withGlobalTauri = false
 
 [[app.windows]]
 title = "dailies"
-width = 1920
-height = 1080
-resizable = true
+width = 411
+height = 923
+resizable = false
 fullscreen = false
 decorations = false
 

@@ -2,36 +2,34 @@
 
 import * as React from "react";
 
+import * as ReactUse from "@reactuses/core";
 import { invoke } from "@tauri-apps/api/core";
 import { type ClassValue, clsx } from "clsx";
 import { TextCursorInput } from "lucide-react";
 import { toast } from "sonner";
 
 import CursorTracker from "@/components/animata/container/cursor-tracker";
-import Input from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { Option } from "@/types/option";
 
 import type { Daily } from "./types";
 
-export default function PointsInput({
-  daily,
-  points,
-  setPointsAction,
-  onRefreshAction,
-}: {
+type PointsInputProps = {
   daily: Daily;
   points: Option<string>;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
   onRefreshAction: () => void;
-}): React.ReactNode {
+};
+
+export default function PointsInput(props: PointsInputProps): React.ReactNode {
+  const { daily, points, setPointsAction, onRefreshAction } = props;
+
   const inputRef = React.useRef<Option<HTMLInputElement>>(null);
 
-  const [cancelInput, setCancelInput] = React.useState<boolean>(false);
+  const { value: inputCancelled, toggle: toggleInputCancel } = ReactUse.useBoolean();
   const [restorePoints, setRestorePoints] = React.useState<Option<string>>(points);
 
   const handleOnChange = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
-    // set max length to 6 characters
     event.currentTarget.value = event.currentTarget.value.slice(0, 6);
     setPointsAction(event.target.value);
   };
@@ -43,8 +41,8 @@ export default function PointsInput({
   };
 
   const handleOnBlurCapture = async (event: React.FocusEvent<HTMLInputElement>): Promise<void> => {
-    if (cancelInput) {
-      setCancelInput(false);
+    if (inputCancelled) {
+      toggleInputCancel();
       setPointsAction(restorePoints);
       event.stopPropagation();
     }
@@ -52,27 +50,26 @@ export default function PointsInput({
 
   const handleOnBlur = async (_: React.FocusEvent<HTMLInputElement>): Promise<void> => {
     if (points != restorePoints) {
-      try {
-        const pointsEval = +`${points}`;
-        if (!Number.isNaN(pointsEval)) {
-          setPointsAction(pointsEval.toString());
-          setRestorePoints(pointsEval.toString());
-          daily.points = pointsEval;
-          onRefreshAction();
-          await invoke<Daily[]>("handle_point_change", { daily: daily });
-        } else {
-          toast.error("Invalid value", { description: `${points} not a valid numeric value.` });
-        }
-      } catch {
-        /* empty */
+      const pointsEval = +`${points}`;
+
+      if (!Number.isNaN(pointsEval)) {
+        setPointsAction(pointsEval.toString());
+        setRestorePoints(pointsEval.toString());
+        daily.points = pointsEval;
+        onRefreshAction();
+        await invoke<Daily[]>("handle_point_change", { daily: daily });
+      } else {
+        toast.error("Invalid value", { description: `${points} not a valid numeric value.` });
       }
     }
+
+    inputRef?.current?.blur();
   };
 
   const handleOnKeyDownCapture = async (event: React.KeyboardEvent): Promise<void> => {
     // will blur onKeyDown
     if (["Escape"].includes(event.key)) {
-      setCancelInput(true);
+      toggleInputCancel();
     }
   };
 
@@ -82,25 +79,33 @@ export default function PointsInput({
       setRestorePoints(null);
       daily.points = null;
       await invoke<Daily[]>("handle_point_change", { daily: daily });
-    } else if (["Escape", "Enter"].includes(event.key)) {
+    } else if (["Escape"].includes(event.key)) {
+      inputRef?.current?.blur();
+    } else if (["Enter"].includes(event.key)) {
+      event.preventDefault();
       inputRef?.current?.blur();
     }
   };
 
-  const borderClasses: ClassValue = cn(
+  const handleFocus = async (event: React.FocusEvent<HTMLInputElement>): Promise<void> => {
+    inputRef?.current?.select();
+    event.target.select();
+  };
+
+  const borderClassValue: ClassValue = cn(
     "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-    "rounded-full border-3 border-dashed",
+    "rounded-full border-1 border-solid",
     "border-transparent",
     clsx(
       +`${points}` >= daily.total && "border-green-700",
       +`${points}` < daily.total && "border-blue-700",
       +`${points}` == 0 && "border-red-700",
-      +`${points}` >= 0 && "outline-2 outline-offset-2 outline-dashed",
+      +`${points}` >= 0 && "outline-1 outline-offset-1 outline-solid",
     ),
   );
 
-  const textClasses: ClassValue = cn(
-    "text-xl font-semibold shadow-xs",
+  const textClassValue: ClassValue = cn(
+    "text-xs font-semibold shadow-xs",
     "text-transparent",
     clsx(
       +`${points}` >= daily.total && "text-green-700",
@@ -114,31 +119,18 @@ export default function PointsInput({
       <TextCursorInput />
       <div
         className={cn(
-          borderClasses,
-          "hover:outline-2 hover:outline-offset-2 hover:outline-dashed",
-          "select-none",
-          "max-w-[20rem] min-w-[20rem] lg:max-w-[25rem] lg:min-w-[25rem]",
+          borderClassValue,
+          "max-w-[6rem] min-w-[6rem] hover:outline-2 hover:outline-offset-2 hover:outline-dashed",
         )}
         onClick={handleOuterDivClick}
       >
-        <div className="mt-1 mb-1 flex place-content-center items-center justify-self-center-safe">
+        <div className="flex place-content-center items-center justify-self-center-safe">
           <Input
-            id={daily.pointId}
-            value={`${points ?? ""}`}
             ref={inputRef}
-            type="number"
-            inputMode="numeric"
             multiple
-            pattern="\d*\.?\d*"
-            onChange={handleOnChange}
-            onKeyDownCapture={handleOnKeyDownCapture}
-            onKeyDown={handleOnKeyDown}
-            onBlurCapture={handleOnBlurCapture}
-            onBlur={handleOnBlur}
             autoComplete="off"
-            height={1}
             className={cn(
-              textClasses,
+              textClassValue,
               "field-sizing-content",
               "border-y border-r border-none",
               `dark:bg-input/30 has-disabled:opacity-50 dark:transition-all`,
@@ -151,13 +143,42 @@ export default function PointsInput({
               "data-[active=true]:ring-[3px]",
               "aria-invalid:border-destructive",
             )}
+            height={1}
+            id={daily.pointId}
+            inputMode="numeric"
+            pattern="\d*\.?\d*"
+            type="number"
+            value={`${points ?? ""}`}
+            onBlur={handleOnBlur}
+            onBlurCapture={handleOnBlurCapture}
+            onChange={handleOnChange}
+            onFocus={handleFocus}
+            onKeyDown={handleOnKeyDown}
+            onKeyDownCapture={handleOnKeyDownCapture}
           />
-          <div className="mr-4 ml-4">
-            <p className={textClasses}>/</p>
+          <div className="mr-2 ml-1">
+            <p className={textClassValue}>/</p>
           </div>
-          <p className={textClasses}>{daily.total}</p>
+          <p className={textClassValue}>{daily.total}</p>
         </div>
       </div>
     </CursorTracker>
+  );
+}
+
+export function Input({ className, ...props }: React.ComponentProps<"input">) {
+  return (
+    <input
+      className={cn(
+        "focus-visible:border-ring focus-visible:ring-ring/50 placeholder:text-muted-foreground dark:bg-input/30 border-input selection:bg-primary selection:text-primary-foreground file:text-foreground",
+        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+        "min-w-2 border bg-transparent text-base shadow-xs transition-[color,box-shadow] outline-none",
+        "file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-[3px]",
+        "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+        className,
+      )}
+      data-slot="input"
+      {...props}
+    />
   );
 }

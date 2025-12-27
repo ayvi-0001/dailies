@@ -4,7 +4,7 @@ use serde_json::Value;
 use serde_with::serde_as;
 use sqlx::types::Json;
 
-use crate::dailies::enums::DailyType;
+use crate::dailies::quest::QuestType;
 
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::Decode, sqlx::Encode)]
 #[serde(rename_all = "camelCase")]
@@ -17,9 +17,10 @@ pub struct Daily {
     pub sequence: i64,
     pub chain: String,
     pub name: String,
-    pub r#type: DailyType,
+    pub r#type: QuestType,
     #[serde_as(as = "Option<f64>")]
     pub points: Option<f64>,
+    pub default_points: f64,
     pub total: f64,
     pub weight: f64,
     #[serde_as(as = "Option<i64>")]
@@ -27,15 +28,17 @@ pub struct Daily {
     #[serde_as(as = "Option<Json<Value>>")]
     pub requirements: Option<Json<Value>>,
     #[serde_as(as = "Option<NaiveTime>")]
-    pub time_min: Option<NaiveTime>,
+    pub time_start: Option<NaiveTime>,
     #[serde_as(as = "Option<NaiveTime>")]
-    pub time_max: Option<NaiveTime>,
+    pub time_end: Option<NaiveTime>,
     #[serde_as(as = "NaiveDateTime")]
     pub accepted: NaiveDateTime,
     #[serde_as(as = "Option<NaiveDateTime>")]
     pub archived: Option<NaiveDateTime>,
     #[serde_as(as = "Option<Json<Vec<i64>>>")]
     pub days: Option<Json<Vec<i64>>>,
+    #[serde_as(as = "Option<String>")]
+    pub description: Option<String>,
     #[serde_as(as = "Option<String>")]
     pub note: Option<String>,
     #[serde_as(as = "Option<i64>")]
@@ -44,11 +47,4 @@ pub struct Daily {
     pub complete: Option<f64>,
     #[serde_as(as = "Option<f64>")]
     pub points_weighted: Option<f64>,
-}
-
-#[derive(Default, Serialize, Deserialize, sqlx::Decode, sqlx::Encode, sqlx::FromRow)]
-#[serde_as]
-pub struct TotalPointEval {
-    pub total_points: f64,
-    pub total_weight: f64,
 }

@@ -3,99 +3,55 @@
 import * as React from "react";
 
 import { ScrollShadow } from "@heroui/react";
-import { invoke } from "@tauri-apps/api/core";
 
 import * as User from "@/app/providers/user";
-import * as WindowSize from "@/app/providers/window-size";
-import { toISO8601 } from "@/lib/dates";
-import type { Option } from "@/types/option";
+import { Option } from "@/types/option";
 
-import DailyCard from "./card";
-import QuestsHeader from "./header";
-import type { Daily } from "./types";
+import { DailiesState, useDailies } from "./context";
+import { QuestChain, QuestsHeader } from "./quest-chain";
+import { Daily } from "./types";
 
-export default function DailyList({ title }: { title: string }): React.ReactNode {
-  const [dailies, setDailies] = React.useState<Daily[]>([]);
-  const [totalPoints, setTotalPoints] = React.useState<number>(0);
-  const [totalWeight, setTotalWeight] = React.useState<number>(0);
-  const [countRefreshDailies, setCountRefreshDailies] = React.useState<number>(0);
-
-  const windowSize: WindowSize.WindowWidthState = WindowSize.useWidth();
-
-  const triggerRefreshDailies: () => void = React.useCallback(() => {
-    setCountRefreshDailies(countRefreshDailies + 1);
-  }, [countRefreshDailies]);
-
+export default function QuestList({ title }: { title: string }): React.ReactNode {
   const userState: User.UserState = User.useState();
-  const userName: Option<string> = userState?.user?.name || null;
+  const dailiesState: DailiesState = useDailies();
 
-  React.useEffect(() => {
-    const today = toISO8601(new Date());
-
-    const query_dailies = async (): Promise<void> => {
-      await invoke<Daily[]>("query_dailies", {
-        user: userName,
-        quest_id: null, // pull all dailies
-        start_date: today,
-        end_date: today,
-      })
-        .then(result => setDailies(result))
-        .catch(console.error);
-    };
-    query_dailies();
-
-    const get_total_points = async (): Promise<void> => {
-      await invoke<{
-        total_points: number;
-        total_weight: number;
-      }>("get_total_points", {
-        user: userName,
-        date: today,
-      })
-        .then(result => {
-          setTotalWeight(result.total_weight);
-          setTotalPoints(result.total_points);
-        })
-        .catch(console.error);
-    };
-    get_total_points();
-  }, [userName, countRefreshDailies]);
+  const groupedDailies = dailiesState.dailies.reduce(
+    (accumulator, currentItem) => {
+      const category = currentItem.chain;
+      if (!accumulator[category]) {
+        accumulator[category] = [];
+      }
+      accumulator[category].push(currentItem);
+      return accumulator;
+    },
+    {} as Record<string, Option<Daily[]>>,
+  );
 
   return (
-    <div className="absolute sm:m-5 sm:w-[calc(100%-40px)] lg:m-20 lg:w-[calc(100%-160px)]">
-      <div className="flex flex-col overflow-hidden">
-        <div className="mb-3 grow md:mb-4 lg:mb-5">
-          <QuestsHeader
-            title={`${title}`}
-            totalWeight={totalWeight}
-            totalPoints={totalPoints}
-            countRefreshDailies={countRefreshDailies}
-          />
-        </div>
-        <div className="h-full">
-          <ScrollShadow
-            className="h-[78vh]"
-            orientation="vertical"
-            visibility="auto"
-            hideScrollBar
-            offset={40}
-            size={40}
-          >
-            <div className="grid gap-3 md:gap-4 lg:gap-5">
-              {dailies.map((value, index) => (
-                <DailyCard
-                  key={index}
-                  daily={value}
-                  totalWeight={totalWeight}
-                  windowWidth={windowSize.windowWidth}
-                  onRefreshAction={triggerRefreshDailies}
-                />
-              ))}
-            </div>
-          </ScrollShadow>
-        </div>
+    <div className="flex h-full w-full flex-col gap-2 overflow-hidden" id="dailies-list">
+      <div className="mx-2">
+        <QuestsHeader title={`${title}`} />
       </div>
-      <div className="h-20">{/* buffer after last daily card */}</div>
+      <ScrollShadow
+        hideScrollBar
+        className="h-[calc(100vh-20vh)]"
+        offset={40}
+        orientation="vertical"
+        size={40}
+        visibility="auto"
+      >
+        {dailiesState.questChains?.map((chain, idx) => (
+          <QuestChain
+            key={idx}
+            chain={chain}
+            dailies={groupedDailies[chain] || []}
+            setDailiesAction={dailiesState.setDailies}
+            totalWeight={dailiesState.totalWeight}
+            userId={userState.user?.id}
+            onUpdateAction={dailiesState.triggerRefreshDailies}
+          />
+        ))}
+      </ScrollShadow>
     </div>
   );
 }

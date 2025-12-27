@@ -1,28 +1,26 @@
+"use client";
+
 import * as React from "react";
 
 import * as heroui from "@heroui/react";
-import { Time, parseDateTime } from "@internationalized/date";
-import { DateValue } from "@internationalized/date";
-import { parseTime } from "@internationalized/date";
+import { Time } from "@internationalized/date";
 
-import type { Option } from "@/types/option";
+import { Option } from "@/types/option";
 
 import * as DailyForm from "./fields";
-import { DailiesState, Daily, Quest, useDailies } from "../../daily";
-import { QuestType, useQuestTypes } from "../providers/quest-types";
+import { DailiesState, Quest, useDailies } from "../../daily";
+import { QuestType } from "../providers/quest-types";
 
-type EditDailyFormProps = {
-  daily: Daily;
+type AddQuestFormProps = {
   formRef: React.RefObject<Option<HTMLFormElement>>;
-  dispatch: (payload: FormData) => void;
-  historic?: boolean;
+  action: (payload: FormData) => void;
+  questTypes: QuestType[];
 };
 
-export default function EditDailyForm(props: EditDailyFormProps): React.ReactElement {
-  const { daily, formRef, dispatch, historic } = props;
+export default function AddQuestForm(props: AddQuestFormProps): React.ReactElement {
+  const { formRef, action, questTypes } = props;
 
   const dailiesState: DailiesState = useDailies();
-  const questTypes: QuestType[] = useQuestTypes();
 
   const [name, setName] = React.useState<Option<string>>(null);
   const nameErrors: React.ReactNode[] = [];
@@ -50,54 +48,35 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
   if (total && defaultPoints && defaultPoints > total)
     defaultPointsErrors.push("Default points cannot be greater than total points.");
 
-  const [archivedDate, setArchivedDate] = React.useState<Option<DateValue>>(null);
-
   const [days, setDays] = React.useState<string[]>([]);
-
-  React.useEffect(() => {
-    setName(daily?.name || "");
-    setDays(daily?.days?.map(v => `${v}`) || []);
-    setArchivedDate(daily?.archived ? parseDateTime(daily.archived.toString()) : null);
-    setQuestType(daily?.type);
-    setTotal(daily?.total);
-    setDefaultPoints(daily?.defaultPoints);
-    setTimeStart(daily?.timeStart ? parseTime(daily!.timeStart) : null);
-    setTimeEnd(daily?.timeEnd ? parseTime(daily!.timeEnd) : null);
-  }, [daily]);
 
   return (
     <heroui.Form
       ref={formRef}
-      action={dispatch}
-      autoCapitalize="off"
-      autoComplete="off"
+      action={action}
+      className="flex flex-col gap-3"
       validationBehavior="native"
     >
-      {!historic && (
-        <DailyForm.NameField name={name} nameErrors={nameErrors} setNameAction={setName} />
-      )}
-      {!historic && (
-        <DailyForm.TypeField
-          daily={daily}
-          questType={questType}
-          questTypes={questTypes}
-          setQuestTypesAction={setQuestType}
-        />
-      )}
-      {!historic && <DailyForm.ChainField daily={daily} questChains={dailiesState.questChains} />}
+      <DailyForm.NameField name={name} nameErrors={nameErrors} setNameAction={setName} />
+      <DailyForm.TypeField
+        questType={questType}
+        questTypes={questTypes}
+        setQuestTypesAction={setQuestType}
+      />
+      <DailyForm.ChainField questChains={dailiesState.questChains} />
       <div className="flex w-full flex-row gap-3">
         <DailyForm.TotalField setTotalAction={setTotal} total={total} />
-        {!historic && (
+        {
           <DailyForm.DefaultPointsField
             defaultPoints={defaultPoints}
             defaultPointsErrors={defaultPointsErrors}
             setDefaultPointsAction={setDefaultPoints}
           />
-        )}
+        }
       </div>
       <div className="flex w-full flex-row gap-3">
-        <DailyForm.WeightField daily={daily} />
-        <DailyForm.StreakTargetField daily={daily} />
+        <DailyForm.WeightField />
+        <DailyForm.StreakTargetField />
       </div>
       <div className="flex w-full flex-row gap-3">
         {questType == Quest.Type.QR && (
@@ -116,18 +95,12 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
         )}
       </div>
       {questType && [`${Quest.Type.QWM}`, `${Quest.Type.QWS}`].includes(questType) && (
-        <DailyForm.RequirementsField daily={daily} />
+        <DailyForm.RequirementsField />
       )}
-      {!historic && questType && [`${Quest.Type.QW}`, `${Quest.Type.QR}`].includes(questType) && (
+      {questType && [`${Quest.Type.QW}`, `${Quest.Type.QR}`].includes(questType) && (
         <DailyForm.DaysField days={days} setDaysAction={setDays} />
       )}
-      {!historic && <DailyForm.DescriptionField daily={daily} />}
-      {!historic && (
-        <DailyForm.ArchivedField
-          archivedDate={archivedDate}
-          setArchivedDateAction={setArchivedDate}
-        />
-      )}
+      <DailyForm.DescriptionField />
     </heroui.Form>
   );
 }

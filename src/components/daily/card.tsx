@@ -2,78 +2,185 @@
 
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
+import * as heroui from "@heroui/react";
+import * as RadixContextMenu from "@radix-ui/react-context-menu";
+import * as ReactUse from "@reactuses/core";
+import { AnimatePresence, motion } from "framer-motion";
+
 import type { Option } from "@/types/option";
 
-import getAccentClasses from "./accents";
 import CardBorder from "./border";
-import QuestChainLabel from "./chain";
+import {
+  DeleteMenuOption,
+  EditMenuOption,
+  HistoryMenuOption,
+  SetNullMenuOption,
+} from "./context-menu/items";
+import Description from "./description";
 import Details from "./details";
-import EditDailyDialog from "./dialogs/edit";
 import HistoryDrawer from "./history";
 import PointsInput from "./input";
-import NameLabel from "./name";
-import Notes from "./notes";
+import EditModal from "./modals/edit";
+import QuestName from "./name";
 import PointsDisplay from "./points";
+import {
+  DEFAULT_QUEST_TYPE_STYLES,
+  QuestType,
+  QuestTypeStyles,
+  useQuestTypes,
+} from "./providers/quest-types";
 import type { Daily } from "./types";
 
-export default function DailyCard({
-  daily,
-  totalWeight,
-  windowWidth,
-  onRefreshAction,
-}: {
+type DailyCardProps = {
   daily: Daily;
   totalWeight: number;
-  windowWidth: number;
   onRefreshAction: () => void;
-}): React.ReactNode {
+};
+
+export default function DailyCard(props: DailyCardProps): React.ReactNode {
+  const { daily, totalWeight, onRefreshAction } = props;
+
   const [points, setPoints] = React.useState<Option<string>>(`${daily.points}`);
 
-  const { bgColor, borderColor } = getAccentClasses(daily.chain);
+  const { value: historyIsOpen, toggle: toggleHistory } = ReactUse.useBoolean();
+  const { value: contextMenuOpen, toggle: toggleContextMenu } = ReactUse.useBoolean();
+
+  const editDisclosure = heroui.useDisclosure();
+
+  const questTypes: QuestType[] = useQuestTypes();
+  const questType: Option<QuestType> =
+    questTypes.find(type => `${type.id}` == `${daily.type}`) || null;
+  const questTypeStyles: QuestTypeStyles = questType?.styles || DEFAULT_QUEST_TYPE_STYLES;
 
   return (
-    <CardBorder className={cn(borderColor, "z-1")}>
-      <div className="flex flex-row self-center" style={{ height: 150 } as React.CSSProperties}>
-        <div className="flex flex-none items-center">
-          <QuestChainLabel daily={daily} borderColor={borderColor} bgColor={bgColor} />
-          <div className="flex flex-col">
-            <div className="ml-4">
-              <NameLabel title={daily.name}>
-                <div className="ml-6">
-                  <div className="mt-2 ml-3 flex flex-wrap items-center gap-4 md:flex-row">
-                    <EditDailyDialog
-                      title={daily.name}
-                      daily={daily}
-                      onRefreshAction={onRefreshAction}
-                    />
-                    <HistoryDrawer daily={daily} totalWeight={totalWeight} />
-                  </div>
-                </div>
-              </NameLabel>
-              <div className="mt-3">
-                <Details daily={daily} />
-              </div>
+    <>
+      <RadixContextMenu.Root modal onOpenChange={toggleContextMenu}>
+        <RadixContextMenu.Trigger className="flex items-center justify-center">
+          <CardBorder daily={daily} divProps={{ className: questTypeStyles.borderClass as string }}>
+            <div className="flex w-full min-w-0 flex-row justify-between gap-2 p-1">
+              <CardContent
+                daily={daily}
+                name={daily.name}
+                questType={questType}
+                questTypeStyles={questTypeStyles}
+              />
+              <CardStats
+                daily={daily}
+                points={points}
+                setPointsAction={setPoints}
+                totalWeight={totalWeight}
+                onRefreshAction={onRefreshAction}
+              />
             </div>
-          </div>
-        </div>
-        <div className="mr-7 ml-7 grow items-center justify-self-center py-6">
-          <Notes title={daily.note} windowWidth={windowWidth} />
-        </div>
-        <div className="flex flex-none items-center">
-          <div>
-            <div className="mb-2 justify-self-end">
-              <PointsDisplay daily={daily} points={points} totalWeight={totalWeight} />
-            </div>
-            <PointsInput
-              daily={daily}
-              points={points}
-              setPointsAction={setPoints}
-              onRefreshAction={onRefreshAction}
-            />
-          </div>
-        </div>
+          </CardBorder>
+        </RadixContextMenu.Trigger>
+        <RadixContextMenu.Portal>
+          <AnimatePresence>
+            {contextMenuOpen && (
+              <ContextMenuContent
+                daily={daily}
+                editOnOpenAction={editDisclosure.onOpen}
+                setPointsAction={setPoints}
+                toggleHistoryAction={toggleHistory}
+                onRefreshAction={onRefreshAction}
+              />
+            )}
+          </AnimatePresence>
+        </RadixContextMenu.Portal>
+      </RadixContextMenu.Root>
+      <EditModal
+        daily={daily}
+        isOpen={editDisclosure.isOpen}
+        title={daily.name}
+        onOpenChange={editDisclosure.onOpenChange}
+      />
+      <HistoryDrawer
+        daily={daily}
+        isOpen={historyIsOpen}
+        setHistoryIsOpenAction={toggleHistory}
+        totalWeight={totalWeight}
+      />
+    </>
+  );
+}
+
+type CardContentProps = {
+  name: string;
+  daily: Daily;
+  questType: Option<QuestType>;
+  questTypeStyles: QuestTypeStyles;
+};
+
+export function CardContent(props: CardContentProps): React.ReactElement {
+  const { name, daily, questType, questTypeStyles } = props;
+
+  return (
+    <div className="flex min-w-0 grow flex-col items-start gap-1">
+      <QuestName name={name} />
+      <Details daily={daily} questType={questType} questTypeStyles={questTypeStyles} />
+      <heroui.Divider />
+      <Description description={daily.description} />
+    </div>
+  );
+}
+
+type CardStatsProps = {
+  daily: Daily;
+  points: Option<string>;
+  totalWeight: number;
+  setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
+  onRefreshAction: () => void;
+};
+
+export function CardStats(props: CardStatsProps): React.ReactElement {
+  const { daily, points, totalWeight, setPointsAction, onRefreshAction } = props;
+
+  return (
+    <div className="flex flex-none flex-col justify-between gap-1">
+      <div className="place-items-end justify-self-end-safe">
+        <PointsDisplay daily={daily} points={points} totalWeight={totalWeight} />
       </div>
-    </CardBorder>
+      <div className="place-items-end justify-self-end-safe">
+        <PointsInput
+          daily={daily}
+          points={points}
+          setPointsAction={setPointsAction}
+          onRefreshAction={onRefreshAction}
+        />
+      </div>
+    </div>
+  );
+}
+
+type ContextMenuContentProps = {
+  daily: Daily;
+  setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
+  onRefreshAction: () => void;
+  editOnOpenAction: () => void;
+  toggleHistoryAction?: () => void;
+};
+
+export function ContextMenuContent(props: ContextMenuContentProps): React.ReactElement {
+  const { daily, setPointsAction, onRefreshAction, editOnOpenAction, toggleHistoryAction } = props;
+
+  return (
+    <RadixContextMenu.Content asChild forceMount className="dark relative z-100 bg-black p-2">
+      <motion.div
+        animate={{ opacity: 1, scale: 1 }}
+        className="z-10 flex flex-col gap-3 border-2 border-black bg-black/90"
+        exit={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.9 }}
+        transition={{ duration: 0.2 }}
+      >
+        <SetNullMenuOption
+          daily={daily}
+          setPointsAction={setPointsAction}
+          onRefreshAction={onRefreshAction}
+        />
+        <EditMenuOption onOpen={editOnOpenAction} />
+        {toggleHistoryAction && <HistoryMenuOption toggleHistory={toggleHistoryAction} />}
+        <DeleteMenuOption pointId={daily.pointId} />
+      </motion.div>
+    </RadixContextMenu.Content>
   );
 }

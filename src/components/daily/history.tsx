@@ -1,105 +1,125 @@
 import * as React from "react";
 
+import * as heroui from "@heroui/react";
+import * as RadixContextMenu from "@radix-ui/react-context-menu";
+import * as ReactUse from "@reactuses/core";
+import {
+  Button,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+} from "@heroui/react";
 import { ScrollShadow } from "@heroui/react";
 import { ok } from "assert";
+import { AnimatePresence } from "framer-motion";
 
 import * as User from "@/app/providers/user";
 import { cachedQueryDailyHistory } from "@/actions/query";
-import { ManageHistory } from "@/components/svgs";
-import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+import { formatDateISO8601 } from "@/lib/dates";
+import { call } from "@/lib/utils";
 import type { Option } from "@/types/option";
 
-import getAccentClasses from "./accents";
 import CardBorder from "./border";
-import QuestChainLabel from "./chain";
-import Details from "./details";
-import EditDailyDialog from "./dialogs/edit";
-import PointsInput from "./input";
-import NameLabel from "./name";
-import PointsDisplay from "./points";
+import { CardContent, CardStats, ContextMenuContent } from "./card";
+import EditModal from "./modals/edit";
+import {
+  DEFAULT_QUEST_TYPE_STYLES,
+  QuestType,
+  QuestTypeStyles,
+  useQuestTypes,
+} from "./providers/quest-types";
 import type { Daily } from "./types";
 
 // TODO(ayvi): history days options/streaming http://ayvi:3000/ayvi/dailies/issues/32
-// TODO(ayvi): move to generic drawer component
 
-export default function HistoryDrawer({
-  daily,
+type HistoryDrawerProps = {
+  isOpen: boolean;
+  setHistoryIsOpenAction: React.Dispatch<React.SetStateAction<boolean>>;
+  daily: Daily;
   // TODO(ayvi): totalWeight for history should eval for the respective day
   // http://ayvi:3000/ayvi/dailies/issues/35
-  totalWeight,
-}: {
-  daily: Daily;
   totalWeight: number;
-}): React.ReactElement {
-  const [openHistory, setOpenHistory] = React.useState<boolean>(false);
+};
+
+export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactElement {
+  const { isOpen, setHistoryIsOpenAction, daily, totalWeight } = props;
 
   const userState: User.UserState = User.useState();
   const userName: Option<string> = userState?.user?.name || null;
-  ok(userName, Error("Cannot query history when user is unknown."));
+  ok(userName, Error("Cannot query history for unknown user."));
 
   return (
-    <Drawer open={openHistory} onOpenChange={setOpenHistory}>
-      <DrawerTrigger asChild>
-        <Button variant="default" size="sm">
-          <ManageHistory />
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent className="border-1 border-white bg-black/80">
-        <DrawerHeader className="text-left">
-          <DrawerTitle className="text-white">{daily.name}</DrawerTitle>
-          {<DrawerDescription className="text-white"></DrawerDescription>}
+    <Drawer
+      hideCloseButton
+      isDismissable
+      isKeyboardDismissDisabled
+      className="border-1 border-white bg-black/85"
+      isOpen={isOpen}
+      placement="bottom"
+      radius="none"
+      size="2xl"
+    >
+      <DrawerContent>
+        {onClose => (
           <div>
-            {openHistory && (
-              <HistoryCards
-                daily={cachedQueryDailyHistory(userName, daily.questId, 6)}
-                totalWeight={totalWeight}
-              />
-            )}
+            <DrawerHeader className="flex flex-col gap-1 text-white">{daily.name}</DrawerHeader>
+            <DrawerBody>
+              <div>
+                <HistoryCards
+                  query={cachedQueryDailyHistory(userName, daily.questId, 6)}
+                  totalWeight={totalWeight}
+                />
+              </div>
+            </DrawerBody>
+            <DrawerFooter className="mt-4 mb-3 flex justify-center gap-2 leading-none">
+              <Button
+                color="danger"
+                size="sm"
+                variant="flat"
+                onPress={() => {
+                  setHistoryIsOpenAction(!history);
+                  onClose();
+                }}
+              >
+                Close
+              </Button>
+            </DrawerFooter>
           </div>
-        </DrawerHeader>
-        <div className="px-4"></div>
-        <DrawerFooter className="pt-2">
-          <DrawerClose asChild>
-            <Button variant="outline" size="sm">
-              close
-            </Button>
-          </DrawerClose>
-        </DrawerFooter>
+        )}
       </DrawerContent>
     </Drawer>
   );
 }
 
-// TODO(ayvi): infinite scroll history http://ayvi:3000/ayvi/dailies/issues/33
-function HistoryCards({
-  daily,
-  totalWeight,
-}: {
-  daily: Promise<Daily[]>;
+type HistoryCardsProps = {
+  query: Promise<Daily[]>;
   totalWeight: number;
-}): React.ReactElement {
+};
+
+// TODO(ayvi): infinite scroll history http://ayvi:3000/ayvi/dailies/issues/33
+export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
+  const { query, totalWeight } = props;
+
+  const [dailies, setDailies] = React.useState<Daily[]>([]);
+
+  React.useEffect(() => {
+    call(async () => setDailies(await query));
+  }, [query]);
+
   return (
     <ScrollShadow
+      hideScrollBar
+      className="h-[calc(100vh-60vh)] rounded-md"
       offset={80}
       size={10}
-      hideScrollBar
-      className="h-[32rem] overflow-y-auto rounded-md"
       style={{ scrollbarWidth: "none" }}
     >
       <React.Suspense fallback={<div>Loading...</div>}>
-        {React.use(daily).map((daily: Daily, index: number) => (
-          <div key={`${daily.pointId}-${index}`} className="m-4">
-            {HistoryDailyCard(daily, index, totalWeight)}
+        {dailies?.map((daily: Daily, index: number) => (
+          <div key={`${daily.pointId}-${index}`} className="mr-2 mb-4 ml-2">
+            <HistoryDailyCard daily={daily} index={index} totalWeight={totalWeight} />
           </div>
         ))}
       </React.Suspense>
@@ -107,56 +127,67 @@ function HistoryCards({
   );
 }
 
-const HistoryDailyCard = (daily: Daily, index: number, totalWeight: number) => {
-  const [points, setPoints] = React.useState<Option<string>>(`${daily.points}`);
+type HistoryDailyCardProps = {
+  daily: Daily;
+  index: number;
+  totalWeight: number;
+};
 
-  const { bgColor, borderColor } = getAccentClasses(daily.chain);
+export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactElement {
+  const { daily, index, totalWeight } = props;
+
+  const questTypes: QuestType[] = useQuestTypes();
+  const questType: Option<QuestType> =
+    questTypes.find(type => `${type.id}` == `${daily.type}`) || null;
+  const questTypeStyles: QuestTypeStyles = questType?.styles || DEFAULT_QUEST_TYPE_STYLES;
+
+  const [points, setPoints] = React.useState<Option<string>>(`${daily.points}`);
+  const { isOpen, onOpen, onOpenChange } = heroui.useDisclosure();
+  const { value: contextMenuOpen, toggle: toggleContextMenu } = ReactUse.useBoolean();
 
   return (
-    <CardBorder key={`${daily.pointId}-${index}`} className={borderColor}>
-      <div
+    <>
+      <RadixContextMenu.Root modal onOpenChange={toggleContextMenu}>
+        <RadixContextMenu.Trigger className="flex items-center justify-center">
+          <CardBorder daily={daily} divProps={{ className: questTypeStyles.borderClass as string }}>
+            <div className="flex w-full min-w-0 flex-row justify-between gap-2 p-1">
+              <CardContent
+                daily={daily}
+                name={formatDateISO8601(daily.date)}
+                questType={questType}
+                questTypeStyles={questTypeStyles}
+              />
+              <CardStats
+                daily={daily}
+                points={points}
+                setPointsAction={setPoints}
+                totalWeight={totalWeight}
+                onRefreshAction={() => {}}
+              />
+            </div>
+          </CardBorder>
+        </RadixContextMenu.Trigger>
+        <RadixContextMenu.Portal>
+          <AnimatePresence>
+            {contextMenuOpen && (
+              <ContextMenuContent
+                daily={daily}
+                editOnOpenAction={onOpen}
+                setPointsAction={setPoints}
+                onRefreshAction={() => {}}
+              />
+            )}
+          </AnimatePresence>
+        </RadixContextMenu.Portal>
+      </RadixContextMenu.Root>
+      <EditModal
         key={`${daily.pointId}-${index}`}
-        className="flex flex-row self-center"
-        style={{ height: 150 } as React.CSSProperties}
-      >
-        <div className="flex flex-none items-center">
-          <QuestChainLabel daily={daily} borderColor={borderColor} bgColor={bgColor} />
-          <div className="flex flex-col">
-            <div className="ml-4">
-              <NameLabel title={daily.date.toString()}>
-                <div className="mt-1 ml-6">
-                  <div className="flex flex-wrap items-center gap-4 md:flex-row">
-                    <EditDailyDialog
-                      title={`${daily.name} (${daily.date})`}
-                      daily={daily}
-                      onRefreshAction={() => {}}
-                    />
-                  </div>
-                </div>
-              </NameLabel>
-              <div className="mt-4">
-                <Details daily={daily} />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="mr-7 ml-7 grow items-center justify-self-center py-6">{/* Notes */}</div>
-        <div className="flex flex-none items-center justify-self-center">
-          <div>
-            <div className="mb-2 justify-self-end">
-              <PointsDisplay daily={daily} points={points} totalWeight={totalWeight} />
-            </div>
-            <PointsInput
-              daily={daily}
-              points={points}
-              setPointsAction={setPoints}
-              // TODO(ayvi): onRefreshAction for history cards should refresh historic data,
-              // not dailies in current day view http://ayvi:3000/ayvi/dailies/issues/36
-              onRefreshAction={() => {}}
-            />
-          </div>
-        </div>
-      </div>
-    </CardBorder>
+        historic
+        daily={daily}
+        isOpen={isOpen}
+        title={`${daily.name} (${daily.date})`}
+        onOpenChange={onOpenChange}
+      />
+    </>
   );
-};
+}

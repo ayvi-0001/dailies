@@ -60,20 +60,38 @@ pub fn run() {
                     .await
                     .expect("failed to initialize database");
 
-                app.manage(Mutex::new(state::AppState::new(
-                    database,
-                    JWT_SECRET.to_string(),
-                )));
+                let state = state::AppState::new(database, JWT_SECRET.to_string());
+                app.manage(Mutex::new(state));
+
+                #[allow(unused_must_use)]
+                dailies::insert_dailies(app.app_handle().to_owned(), chrono::Local::now()).await;
             });
 
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            dailies::delete_daily,
+            dailies::get_quest_types,
             dailies::get_total_points,
             dailies::handle_point_change,
             dailies::insert_dailies,
+            dailies::insert_quest,
             dailies::query_dailies,
-            dailies::update_daily,
+            dailies::query_quest_chains,
+            dailies::update_archived,
+            dailies::update_chain,
+            dailies::update_days,
+            dailies::update_default_points,
+            dailies::update_description,
+            dailies::update_name,
+            dailies::update_note,
+            dailies::update_requirements,
+            dailies::update_sequence,
+            dailies::update_time_end,
+            dailies::update_time_start,
+            dailies::update_total,
+            dailies::update_type,
+            dailies::update_weight,
             db::create_user,
             db::delete_session,
             db::get_session,

@@ -52,7 +52,7 @@ impl Database {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, sqlx::Decode, sqlx::Encode, sqlx::FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Decode, sqlx::Encode, sqlx::FromRow)]
 pub struct User {
     pub id: i64,
     pub name: String,

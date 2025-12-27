@@ -3,7 +3,7 @@ import * as React from "react";
 import { invoke } from "@tauri-apps/api/core";
 
 import type { Daily } from "@/components/daily/types";
-import { toISO8601 } from "@/lib/dates";
+import { formatDateTimeISO8601 } from "@/lib/dates";
 
 export async function queryDailyHistory(
   userName: string,
@@ -19,8 +19,8 @@ export async function queryDailyHistory(
   return await invoke<Daily[]>("query_dailies", {
     user: userName,
     quest_id: questId,
-    start_date: toISO8601(startDate),
-    end_date: toISO8601(endDate),
+    start_date: formatDateTimeISO8601(startDate).substring(0, 10),
+    end_date: formatDateTimeISO8601(endDate).substring(0, 10),
   });
 }
 

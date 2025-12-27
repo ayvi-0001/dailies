@@ -1,23 +1,28 @@
 import * as React from "react";
 
-import UserProvider from "@/app/providers/user";
-import { DailyList } from "@/components/daily";
+import type { Metadata, ResolvingMetadata } from "next";
 
-export default async function Page(_props: {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}): Promise<React.ReactElement> {
+import { QuestList } from "@/components/daily";
+import DailiesProvider from "@/components/daily/context";
+import type { PageProps } from "@/types/props";
+
+export default async function Page(_: PageProps): Promise<React.ReactElement> {
   return (
-    <>
-      <UserProvider>
-        <DailyList title="Dailies" />
-      </UserProvider>
-    </>
+    <DailiesProvider>
+      <React.Suspense>
+        <div className="fixed flex h-screen w-screen justify-between select-none">
+          <div
+            className="fixed w-full items-center justify-center self-start pt-15 pr-4 pl-4"
+            id="main-content"
+          >
+            <QuestList title="Quests" />
+          </div>
+        </div>
+      </React.Suspense>
+    </DailiesProvider>
   );
 }
 
-export async function generateMetadata(_: {
-  params: Promise<{ slug: string }>;
-}): Promise<{ title: string }> {
-  return { title: `Dailies` };
+export async function generateMetadata(_1: PageProps, _2: ResolvingMetadata): Promise<Metadata> {
+  return {} as Metadata;
 }
