@@ -23,7 +23,7 @@ impl Database {
     pub async fn new(app_dir: PathBuf) -> Result<Self> {
         let db_path: PathBuf = app_dir.join(format!("{}.db", Database::NAME));
 
-        println!("Initializing database at: {:?}", db_path);
+        log::info!("Initializing database at: {:?}", db_path);
 
         let connection_options = SqliteConnectOptions::new()
             .filename(&db_path)
@@ -38,7 +38,10 @@ impl Database {
             .connect_with(connection_options)
             .await?;
 
-        sqlx::migrate!("./migrations").run(&pool).await?;
+        if let Err(migrate_result) = sqlx::migrate!().run(&pool).await {
+            // TODO(ayvi): handle if migration fails
+            log::error!("Sqlx migration error: {:?}", migrate_result.to_string());
+        };
 
         Ok(Self { pool })
     }
