@@ -845,7 +845,6 @@ dependencies = [
  "lazy_static",
  "libsqlite3-sys",
  "log",
- "rust_decimal",
  "serde",
  "serde_json",
  "serde_with",
