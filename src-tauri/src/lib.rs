@@ -15,7 +15,8 @@ lazy_static::lazy_static! {
 pub fn run() {
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
-        .plugin(tauri_plugin_os::init());
+        .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_fs::init());
 
     #[cfg(test)]
     {
