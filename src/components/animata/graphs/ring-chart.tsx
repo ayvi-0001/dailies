@@ -107,9 +107,9 @@ export default function RingChart({
             key={`ring_${index}`}
             size={ringSize}
             {...ring}
-            progressWidth={width}
             circleWidth={width}
             className={cn("absolute", ring.className)}
+            progressWidth={width}
           />
         );
       })}

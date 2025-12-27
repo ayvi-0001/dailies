@@ -43,35 +43,35 @@ export default function DonutChart({
   return (
     <div className={className}>
       <svg
-        width={size}
         height={size}
-        viewBox={`0 0 ${size} ${size}`}
-        version="1.1"
-        xmlns="http://www.w3.org/2000/svg"
         style={{ transform: "rotate(-90deg)" }}
+        version="1.1"
+        viewBox={`0 0 ${size} ${size}`}
+        width={size}
+        xmlns="http://www.w3.org/2000/svg"
       >
         <circle
-          r={radius}
+          className={cn("duration-500", trackClassName)}
           cx={size / 2}
           cy={size / 2}
           fill="transparent"
+          r={radius}
           stroke="currentColor"
-          strokeWidth={`${circleWidth}px`}
           strokeDasharray={"10px 0"}
           strokeDashoffset="0px"
-          className={cn("duration-500", trackClassName)}
+          strokeWidth={`${circleWidth}px`}
         />
         <circle
-          r={radius}
+          className={cn("duration-500", progressClassName)}
           cx={size / 2}
           cy={size / 2}
-          stroke="currentColor"
-          className={cn("duration-500", progressClassName)}
-          strokeWidth={`${progressWidth}px`}
-          strokeLinecap={rounded ? "round" : "butt"}
           fill="transparent"
+          r={radius}
+          stroke="currentColor"
           strokeDasharray={`${circumference}px`}
           strokeDashoffset={`${percentage}px`}
+          strokeLinecap={rounded ? "round" : "butt"}
+          strokeWidth={`${progressWidth}px`}
         />
       </svg>
       {children}

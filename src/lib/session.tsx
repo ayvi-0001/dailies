@@ -16,14 +16,13 @@ export async function encrypt(payload: { userName: string }): Promise<string> {
     .sign(encodedKey);
 }
 
-export async function decrypt<T = jose.JWTPayload>(
+export async function decrypt<T extends jose.JWTPayload>(
   session: string | null | undefined = "",
 ): Promise<T> {
   const encodedKey = await getEncodedKey();
   const { payload } = await jose.jwtVerify(session ?? "", encodedKey, { algorithms: ["HS256"] });
   if (!payload) throw new Error("Failed to verify session");
-  // @ts-expect-error: 2322 Type 'JWTPayload' is not assignable to type 'T'.
-  return payload;
+  return payload as T;
 }
 
 export async function createSession(userName: string): Promise<void> {
