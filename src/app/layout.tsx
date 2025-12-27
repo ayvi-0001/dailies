@@ -17,6 +17,7 @@ const spaceMono = Space_Mono({
   weight: ["400", "700"],
   style: ["normal", "italic"],
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = { title: "Dailies" };
