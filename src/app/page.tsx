@@ -7,11 +7,14 @@ import DailiesProvider from "@/components/daily/context";
 import ExpBar from "@/components/exp/exp-bar";
 import type { PageProps } from "@/types/props";
 
+import Speeddial from "./speed-dial";
+
 export default async function Page(_: PageProps): Promise<React.ReactElement> {
   return (
     <DailiesProvider>
       <React.Suspense>
         <div className="fixed flex h-screen w-screen justify-between select-none">
+          <Speeddial />
           <div
             className="fixed w-full items-center justify-center self-start pt-15 pr-4 pl-4"
             id="main-content"
