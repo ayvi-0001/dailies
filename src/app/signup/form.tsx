@@ -25,9 +25,12 @@ export default function SignupForm(): React.ReactElement {
         <div className="flex flex-col">
           <UserNameField />
           <UserNameErrors state={state} />
-          <PasswordField />
-          <PasswordErrors />
-          <ConfirmPasswordField />
+          <PasswordField isVisible={isVisible} setIsVisibleAction={setIsVisible} />
+          <PasswordErrors state={state} />
+          <ConfirmPasswordField
+            isConfirmVisible={isConfirmVisible}
+            setIsConfirmVisibleAction={setIsConfirmVisible}
+          />
           <ConfirmPasswordErrors state={state} />
         </div>
         <div className="flex w-full items-center justify-between px-1 py-2">
@@ -50,80 +53,94 @@ export default function SignupForm(): React.ReactElement {
       </p>
     </div>
   );
+}
 
-  function PasswordField(): React.ReactElement {
-    return (
-      <Input
-        fullWidth
-        isRequired
-        className="text-white"
-        classNames={{
-          base: "-mb-[2px]",
-          inputWrapper: "rounded-none data-[hover=true]:z-10 group-data-[focus-visible=true]:z-10",
-        }}
-        endContent={
-          <button type="button" onClick={() => setIsVisible(!isVisible)}>
-            {isVisible ? (
-              <Eye className="text-default-400 pointer-events-none text-2xl" />
-            ) : (
-              <EyeClosed className="text-default-400 pointer-events-none text-2xl" />
-            )}
-          </button>
-        }
-        label="Password"
-        name="password"
-        placeholder="Enter your password"
-        type={isVisible ? "text" : "password"}
-        variant="bordered"
-      />
-    );
-  }
+type PasswordFieldProps = {
+  isVisible: boolean;
+  setIsVisibleAction: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
-  function PasswordErrors(): React.ReactNode {
-    return (
-      <>
-        {state?.errors?.password && (
-          <div>
-            <p className="text-xs text-red-600">Password must:</p>
-            <ul>
-              {state?.errors?.password.map((error: string) => (
-                <li key={error} className="text-xs text-red-600">
-                  - {error}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </>
-    );
-  }
+function PasswordField(props: PasswordFieldProps): React.ReactElement {
+  const { isVisible, setIsVisibleAction } = props;
 
-  function ConfirmPasswordField(): React.ReactElement {
-    return (
-      <Input
-        fullWidth
-        isRequired
-        className="text-white"
-        classNames={{
-          inputWrapper: "rounded-t-none",
-        }}
-        endContent={
-          <button type="button" onClick={() => setIsConfirmVisible(!isConfirmVisible)}>
-            {isConfirmVisible ? (
-              <Eye className="text-default-400 pointer-events-none text-2xl" />
-            ) : (
-              <EyeClosed className="text-default-400 pointer-events-none text-2xl" />
-            )}
-          </button>
-        }
-        label="Confirm Password"
-        name="confirmPassword"
-        placeholder="Confirm your password"
-        type={isConfirmVisible ? "text" : "password"}
-        variant="bordered"
-      />
-    );
-  }
+  return (
+    <Input
+      fullWidth
+      isRequired
+      className="text-white"
+      classNames={{
+        base: "-mb-[2px]",
+        inputWrapper: "rounded-none data-[hover=true]:z-10 group-data-[focus-visible=true]:z-10",
+      }}
+      endContent={
+        <button type="button" onClick={() => setIsVisibleAction(!isVisible)}>
+          {isVisible ? (
+            <Eye className="text-default-400 pointer-events-none" />
+          ) : (
+            <EyeClosed className="text-default-400 pointer-events-none" />
+          )}
+        </button>
+      }
+      label="Password"
+      name="password"
+      placeholder="Enter your password"
+      type={isVisible ? "text" : "password"}
+      variant="bordered"
+    />
+  );
+}
+
+function PasswordErrors({ state }: { state: SignupErrors | undefined }): React.ReactNode {
+  return (
+    <>
+      {state?.errors?.password && (
+        <div>
+          <p className="text-xs text-red-600">Password must:</p>
+          <ul>
+            {state?.errors?.password.map((error: string) => (
+              <li key={error} className="text-xs text-red-600">
+                - {error}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
+  );
+}
+
+type ConfirmPasswordFieldProps = {
+  isConfirmVisible: boolean;
+  setIsConfirmVisibleAction: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+function ConfirmPasswordField(props: ConfirmPasswordFieldProps): React.ReactElement {
+  const { isConfirmVisible, setIsConfirmVisibleAction } = props;
+
+  return (
+    <Input
+      fullWidth
+      isRequired
+      className="text-white"
+      classNames={{
+        inputWrapper: "rounded-t-none",
+      }}
+      endContent={
+        <button type="button" onClick={() => setIsConfirmVisibleAction(!isConfirmVisible)}>
+          {isConfirmVisible ? (
+            <Eye className="text-default-400 pointer-events-none" />
+          ) : (
+            <EyeClosed className="text-default-400 pointer-events-none" />
+          )}
+        </button>
+      }
+      label="Confirm Password"
+      name="confirmPassword"
+      placeholder="Confirm your password"
+      type={isConfirmVisible ? "text" : "password"}
+      variant="bordered"
+    />
+  );
 }
 
 function UserNameField(): React.ReactElement {

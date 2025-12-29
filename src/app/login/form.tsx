@@ -92,9 +92,9 @@ function PasswordField(props: PasswordFieldProps): React.ReactElement {
       endContent={
         <button type="button" onClick={() => setIsVisibleAction(!isVisible)}>
           {isVisible ? (
-            <Eye className="text-default-400 pointer-events-none text-2xl" />
+            <Eye className="text-default-400 pointer-events-none" />
           ) : (
-            <EyeClosed className="text-default-400 pointer-events-none text-2xl" />
+            <EyeClosed className="text-default-400 pointer-events-none" />
           )}
         </button>
       }
