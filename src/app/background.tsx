@@ -7,6 +7,8 @@ import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 
+import { AppMetaState, useAppMetaState } from "./providers/app-meta";
+
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
 type BackgroundProps = {
@@ -21,18 +23,21 @@ type BackgroundProps = {
 export default function BackgroundImage(background_props: BackgroundProps): React.ReactElement {
   const { src, alt, props, imageProps, children } = background_props;
 
-  const handleWindowDrag = async (event: MouseEvent): Promise<void> => {
-    const appWindow: Window = getCurrentWindow();
-    if (event.buttons === 1) {
-      event.detail === 2 ? appWindow.toggleMaximize() : appWindow.startDragging();
-    }
-  };
+  const appMeta: AppMetaState = useAppMetaState();
 
   React.useEffect(() => {
-    const backgroundElement: HTMLElement | null = document.getElementById("app-build-info");
-    backgroundElement?.addEventListener("mousedown", handleWindowDrag);
-    return () => backgroundElement?.removeEventListener("mousedown", handleWindowDrag);
-  }, []);
+    if (appMeta.platform == "windows") {
+      const handleWindowDrag = async (event: MouseEvent): Promise<void> => {
+        const appWindow: Window = getCurrentWindow();
+        if (event.buttons === 1) {
+          event.detail === 2 ? appWindow.toggleMaximize() : appWindow.startDragging();
+        }
+      };
+      const backgroundElement: HTMLElement | null = document.getElementById("app-build-info");
+      backgroundElement?.addEventListener("mousedown", handleWindowDrag);
+      return () => backgroundElement?.removeEventListener("mousedown", handleWindowDrag);
+    }
+  }, [appMeta]);
 
   return (
     <div

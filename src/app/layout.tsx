@@ -39,19 +39,19 @@ export default function RootLayout(pages: Pages): React.ReactNode {
         )}
       </head>
       <body>
-        <Toaster />
-        <React.Suspense>
-          <Speeddial />
-        </React.Suspense>
-        <div className="relative z-1 select-none">
-          <Providers>
+        <Providers>
+          <Toaster />
+          <React.Suspense>
+            <Speeddial />
+          </React.Suspense>
+          <div className="relative z-1 select-none">
             {process.env.NODE_ENV === "development" && <CommandDialog />}
             {modals}
             {children}
-          </Providers>
-        </div>
-        <AppBuildInfo as="header" />
-        <BackgroundImage src="/images/background.png" />
+          </div>
+          <AppBuildInfo as="header" />
+          <BackgroundImage src="/images/background.png" />
+        </Providers>
       </body>
     </html>
   );
