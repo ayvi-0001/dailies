@@ -32,11 +32,11 @@ export default function RootLayout(pages: Pages): React.ReactNode {
   return (
     <html suppressHydrationWarning className={`${spaceMono.className} antialiased`} lang="en">
       <head>
-        {process.env.NODE_ENV === "development" && (
+        {/* process.env.NODE_ENV === "development" && (
           // Connect to react-devtools server.
           // eslint-disable-next-line @next/next/no-sync-scripts
           <script src="http://localhost:8097"></script>
-        )}
+        ) */}
       </head>
       <body>
         <Providers>
