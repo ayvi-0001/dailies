@@ -26,7 +26,7 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
   }, []);
 
   const Info = (): React.ReactElement => (
-    <div className="text-right select-none">
+    <div className="cursor-move text-right select-none">
       <p className="text-[10px]/4 text-white/50">
         {process.env.NEXT_VERSION && (
           <span className="text-[10px]/4 text-white/50">
