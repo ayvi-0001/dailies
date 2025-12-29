@@ -10,8 +10,7 @@ crate::mod_flat!(dailies, state, db, errors);
 mod android;
 
 lazy_static::lazy_static! {
-    pub static ref JWT_SECRET: String = std::env::var("JWT_SECRET")
-        .expect("Env var `JWT_SECRET` should be set.");
+    pub static ref JWT_SECRET: &'static str = env!("JWT_SECRET");
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
