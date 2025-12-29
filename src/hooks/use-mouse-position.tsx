@@ -1,8 +1,12 @@
 import * as React from "react";
 
+import { Option } from "@/types/option";
+
+export type Coordinates = { x: number; y: number };
+
 export default function useMousePosition(
-  ref?: React.RefObject<HTMLElement | null>,
-  callback?: ({ x, y }: { x: number; y: number }) => void,
+  ref: React.RefObject<Option<HTMLElement>>,
+  callback: ({ x, y }: { x: number; y: number }) => void,
 ) {
   React.useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
@@ -11,24 +15,26 @@ export default function useMousePosition(
         top: 0,
         left: 0,
       };
-
       callback?.({ x: clientX - left, y: clientY - top });
     };
 
     const handleTouchMove = (event: TouchEvent) => {
-      const { clientX, clientY } = event.touches[0];
+      const touch: Touch = event?.touches?.[0];
+      const { clientX, clientY } = touch;
       const { top, left } = ref?.current?.getBoundingClientRect() || {
         top: 0,
         left: 0,
       };
-
       callback?.({ x: clientX - left, y: clientY - top });
     };
 
-    ref?.current?.addEventListener("mousemove", handleMouseMove, { passive: true });
-    ref?.current?.addEventListener("touchmove", handleTouchMove, { passive: true });
+    // The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs.
+    // Copying 'ref.current' to a variable inside the effect and using that variable in the cleanup function.
+    const nodeRef: Option<HTMLElement> | undefined = ref?.current;
 
-    const nodeRef = ref?.current;
+    nodeRef?.addEventListener("mousemove", handleMouseMove, { passive: true });
+    nodeRef?.addEventListener("touchmove", handleTouchMove, { passive: true });
+
     return () => {
       nodeRef?.removeEventListener("mousemove", handleMouseMove);
       nodeRef?.removeEventListener("touchmove", handleTouchMove);

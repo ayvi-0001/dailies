@@ -21,7 +21,7 @@ export default async function Page(_: PageProps): Promise<React.ReactElement> {
           >
             <QuestList title="Quests" />
           </div>
-          <div className="mr-7 mb-4 ml-20 w-full touch-none self-end">
+          <div className="mr-7 mb-4 ml-20 w-full self-end">
             <ExpBar />
           </div>
         </div>

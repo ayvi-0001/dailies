@@ -8,6 +8,7 @@ import { type ClassValue, clsx } from "clsx";
 import { TextCursorInput } from "lucide-react";
 import { toast } from "sonner";
 
+import { AppMetaState, useAppMetaState } from "@/app/providers/app-meta";
 import CursorTracker from "@/components/animata/container/cursor-tracker";
 import { cn } from "@/lib/utils";
 import type { Option } from "@/types/option";
@@ -23,6 +24,8 @@ type PointsInputProps = {
 
 export default function PointsInput(props: PointsInputProps): React.ReactNode {
   const { daily, points, setPointsAction, onRefreshAction } = props;
+
+  const appMeta: AppMetaState = useAppMetaState();
 
   const inputRef = React.useRef<Option<HTMLInputElement>>(null);
 
@@ -114,9 +117,8 @@ export default function PointsInput(props: PointsInputProps): React.ReactNode {
     ),
   );
 
-  return (
-    <CursorTracker>
-      <TextCursorInput />
+  const InputCell = (): React.ReactElement => {
+    return (
       <div
         className={cn(
           borderClassValue,
@@ -162,8 +164,20 @@ export default function PointsInput(props: PointsInputProps): React.ReactNode {
           <p className={textClassValue}>{daily.total}</p>
         </div>
       </div>
-    </CursorTracker>
-  );
+    );
+  };
+
+  switch (appMeta.platform) {
+    case "android":
+      return <InputCell />;
+    default:
+      return (
+        <CursorTracker platform={appMeta.platform}>
+          <TextCursorInput />
+          <InputCell />
+        </CursorTracker>
+      );
+  }
 }
 
 export function Input({ className, ...props }: React.ComponentProps<"input">) {

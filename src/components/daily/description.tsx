@@ -7,11 +7,13 @@ import { HTMLMotionProps } from "framer-motion";
 
 import type { Option } from "@/types/option";
 
-export default function Description({
-  description,
-}: {
+type DescriptionProps = {
   description: Option<string>;
-}): React.ReactElement {
+};
+
+export default function Description(props: DescriptionProps): React.ReactElement {
+  const { description } = props;
+
   const motionProps: Omit<HTMLMotionProps<"div">, "ref"> = {
     variants: {
       exit: { opacity: 0, transition: { duration: 0.1, ease: "easeIn" } },
