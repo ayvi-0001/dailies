@@ -80,7 +80,10 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
       fullWidth
       isCompact
       keepContentMounted
-      defaultExpandedKeys={dailies.length > 0 ? [chain] : undefined}
+      // TODO(ayvi): make accordian for empty quest chains closed by default
+      // http://ayvi:3000/ayvi/dailies/issues/129
+      // defaultExpandedKeys={dailies.length > 0 ? [chain] : undefined}
+      defaultExpandedKeys={[chain]}
       variant="splitted"
     >
       <AccordionItem
