@@ -57,7 +57,7 @@ export function TypeField(props: TypeFieldProps): React.ReactElement {
       classNames={{ base: "text-sm" }}
       defaultInputValue={
         daily &&
-        questTypes.find((type: QuestType) => type.id === daily.type.replace("_", "-"))!.name
+        questTypes.find((type: QuestType) => type.id === daily.type.replace("_", "-"))?.name
       }
       defaultItems={questTypes.filter(questType => questType.available)}
       label="Type"
@@ -178,7 +178,7 @@ export function DefaultPointsField(props: DefaultPointsFieldProps): React.ReactE
       name="default_points"
       radius="none"
       type="number"
-      value={defaultPoints ?? 1}
+      value={defaultPoints ?? 0}
       variant="bordered"
       onValueChange={setDefaultPointsAction}
     />

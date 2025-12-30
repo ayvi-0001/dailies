@@ -7,11 +7,11 @@ import { ValueOf } from "next/dist/shared/lib/constants";
 import { toast } from "sonner";
 
 import editQuest, { EditQuestState } from "@/actions/edit-quest";
-import { DailiesState, Daily, useDailies } from "@/components/daily";
 import { camelCaseToSnakeCase } from "@/lib/string";
 import { invoke } from "@/lib/tauri";
 import type { Option } from "@/types/option";
 
+import { DailiesState, Daily, useDailies } from "../../daily";
 import EditDailyForm from "../forms/edit";
 import { QuestType, useQuestTypes } from "../providers/quest-types";
 
@@ -30,16 +30,15 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
   const questTypes: QuestType[] = useQuestTypes();
 
   const formRef: React.RefObject<Option<HTMLFormElement>> = React.useRef(null);
-  const handleSubmitButtonRef = () => formRef?.current?.requestSubmit();
 
-  const draggableRef = React.useRef<HTMLElement>(null as unknown as HTMLElement);
+  const draggableRef = React.useRef<Option<HTMLElement>>(null);
   const { moveProps } = heroui.useDraggable({
-    targetRef: draggableRef,
+    targetRef: draggableRef as React.RefObject<HTMLElement>,
     canOverflow: true,
     isDisabled: false,
   });
 
-  const actionState = React.useActionState(
+  const [_, dispatch, isPending] = React.useActionState(
     async (state: EditQuestState, payload: FormData): Promise<EditQuestState> => {
       const diff = (await editQuest(state, payload, daily)) as Partial<Daily>;
       if (Object.hasOwn(diff, "errors")) return;
@@ -86,14 +85,9 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
         dailiesState.setDailies(dailies);
         dailiesState.triggerRefreshDailies();
       }
-      return undefined;
     },
     undefined,
   );
-  const [_, dispatch, isPending] = actionState;
-
-  const [isLoading, setIsLoading] = React.useState<boolean>(isPending);
-  React.useEffect(() => setIsLoading(isPending), [isPending]);
 
   return (
     <>
@@ -139,6 +133,7 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
                     dispatch={dispatch}
                     formRef={formRef}
                     historic={historic}
+                    onSubmit={onClose}
                   />
                 </heroui.ScrollShadow>
               </heroui.ModalBody>
@@ -149,14 +144,10 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
                 <heroui.Button
                   color="primary"
                   disabled={isPending}
-                  isLoading={isLoading}
+                  isLoading={isPending}
                   size="sm"
                   type="submit"
-                  onPress={() => {
-                    handleSubmitButtonRef();
-                    setIsLoading(false);
-                    onClose();
-                  }}
+                  onPress={() => formRef?.current?.requestSubmit()}
                 >
                   save
                 </heroui.Button>

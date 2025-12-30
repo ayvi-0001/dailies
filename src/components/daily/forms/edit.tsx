@@ -16,10 +16,11 @@ type EditDailyFormProps = {
   formRef: React.RefObject<Option<HTMLFormElement>>;
   dispatch: (payload: FormData) => void;
   historic?: boolean;
+  onSubmit: () => void;
 };
 
 export default function EditDailyForm(props: EditDailyFormProps): React.ReactElement {
-  const { daily, formRef, dispatch, historic } = props;
+  const { daily, formRef, dispatch, historic, onSubmit } = props;
 
   const dailiesState: DailiesState = useDailies();
   const questTypes: QuestType[] = useQuestTypes();
@@ -45,7 +46,7 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
   }
 
   const [total, setTotal] = React.useState<number>(1);
-  const [defaultPoints, setDefaultPoints] = React.useState<number>(1);
+  const [defaultPoints, setDefaultPoints] = React.useState<number>(0);
   const defaultPointsErrors: React.ReactNode[] = [];
   if (total && defaultPoints && defaultPoints > total)
     defaultPointsErrors.push("Default points cannot be greater than total points.");
@@ -72,6 +73,7 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
       autoCapitalize="off"
       autoComplete="off"
       validationBehavior="native"
+      onSubmit={onSubmit}
     >
       {!historic && (
         <DailyForm.NameField name={name} nameErrors={nameErrors} setNameAction={setName} />
@@ -100,14 +102,14 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
         <DailyForm.StreakTargetField daily={daily} />
       </div>
       <div className="flex w-full flex-row gap-3">
-        {questType == Quest.Type.QR && (
+        {!historic && questType == Quest.Type.QR && (
           <DailyForm.TimeStartField
             setTimeStartAction={setTimeStart}
             timeStart={timeStart}
             timeStartErrors={timeStartErrors}
           />
         )}
-        {questType == Quest.Type.QR && (
+        {!historic && questType == Quest.Type.QR && (
           <DailyForm.TimeEndField
             setTimeEndAction={setTimeEnd}
             timeEnd={timeEnd}
