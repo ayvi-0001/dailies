@@ -33,8 +33,7 @@ export default function PointsInput(props: PointsInputProps): React.ReactNode {
   const [restorePoints, setRestorePoints] = React.useState<Option<string>>(points);
 
   const handleOnChange = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
-    event.currentTarget.value = event.currentTarget.value.slice(0, 6);
-    setPointsAction(event.target.value);
+    setPointsAction(event.currentTarget.value?.slice(0, 6));
   };
 
   const handleOuterDivClick = async (
@@ -65,8 +64,6 @@ export default function PointsInput(props: PointsInputProps): React.ReactNode {
         toast.error("Invalid value", { description: `${points} not a valid numeric value.` });
       }
     }
-
-    inputRef?.current?.blur();
   };
 
   const handleOnKeyDownCapture = async (event: React.KeyboardEvent): Promise<void> => {
@@ -85,14 +82,12 @@ export default function PointsInput(props: PointsInputProps): React.ReactNode {
     } else if (["Escape"].includes(event.key)) {
       inputRef?.current?.blur();
     } else if (["Enter"].includes(event.key)) {
-      event.preventDefault();
       inputRef?.current?.blur();
     }
   };
 
-  const handleFocus = async (event: React.FocusEvent<HTMLInputElement>): Promise<void> => {
+  const handleFocus = async (_: React.FocusEvent<HTMLInputElement>): Promise<void> => {
     inputRef?.current?.select();
-    event.target.select();
   };
 
   const borderClassValue: ClassValue = cn(
@@ -117,64 +112,42 @@ export default function PointsInput(props: PointsInputProps): React.ReactNode {
     ),
   );
 
-  const InputCell = (): React.ReactElement => {
-    return (
-      <div
-        className={cn(
-          borderClassValue,
-          "max-w-[6rem] min-w-[6rem] hover:outline-2 hover:outline-offset-2 hover:outline-dashed",
-        )}
-        onClick={handleOuterDivClick}
-      >
-        <div className="flex place-content-center items-center justify-self-center-safe">
-          <Input
-            ref={inputRef}
-            multiple
-            autoComplete="off"
-            className={cn(
-              textClassValue,
-              "field-sizing-content",
-              "border-y border-r border-none",
-              `dark:bg-input/30 has-disabled:opacity-50 dark:transition-all`,
-              "data-[active=true]:border-ring",
-              "data-[active=true]:ring-ring/50",
-              "data-[active=true]:aria-invalid:ring-destructive/20",
-              "data-[active=true]:aria-invalid:border-destructive",
-              "data-[active=true]:aria-invalid:ring-destructive/40",
-              "data-[active=true]:z-10",
-              "data-[active=true]:ring-[3px]",
-              "aria-invalid:border-destructive",
-            )}
-            height={1}
-            id={daily.pointId}
-            inputMode="numeric"
-            pattern="\d*\.?\d*"
-            type="number"
-            value={`${points ?? ""}`}
-            onBlur={handleOnBlur}
-            onBlurCapture={handleOnBlurCapture}
-            onChange={handleOnChange}
-            onFocus={handleFocus}
-            onKeyDown={handleOnKeyDown}
-            onKeyDownCapture={handleOnKeyDownCapture}
-          />
-          <div className="mr-2 ml-1">
-            <p className={textClassValue}>/</p>
-          </div>
-          <p className={textClassValue}>{daily.total}</p>
-        </div>
-      </div>
-    );
-  };
-
   switch (appMeta.platform) {
     case "android":
-      return <InputCell />;
+      return (
+        <InputCell
+          borderClassValue={borderClassValue}
+          daily={daily}
+          handleFocus={handleFocus}
+          handleOnBlur={handleOnBlur}
+          handleOnBlurCapture={handleOnBlurCapture}
+          handleOnChange={handleOnChange}
+          handleOnKeyDown={handleOnKeyDown}
+          handleOnKeyDownCapture={handleOnKeyDownCapture}
+          handleOuterDivClick={handleOuterDivClick}
+          inputRef={inputRef}
+          points={points}
+          textClassValue={textClassValue}
+        />
+      );
     default:
       return (
         <CursorTracker platform={appMeta.platform}>
           <TextCursorInput />
-          <InputCell />
+          <InputCell
+            borderClassValue={borderClassValue}
+            daily={daily}
+            handleFocus={handleFocus}
+            handleOnBlur={handleOnBlur}
+            handleOnBlurCapture={handleOnBlurCapture}
+            handleOnChange={handleOnChange}
+            handleOnKeyDown={handleOnKeyDown}
+            handleOnKeyDownCapture={handleOnKeyDownCapture}
+            handleOuterDivClick={handleOuterDivClick}
+            inputRef={inputRef}
+            points={points}
+            textClassValue={textClassValue}
+          />
         </CursorTracker>
       );
   }
@@ -188,7 +161,7 @@ export function Input({ className, ...props }: React.ComponentProps<"input">) {
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
         "min-w-2 border bg-transparent text-base shadow-xs transition-[color,box-shadow] outline-none",
         "file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-[3px]",
-        "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+        "pointer-events-none cursor-not-allowed disabled:opacity-50",
         className,
       )}
       data-slot="input"
@@ -196,3 +169,81 @@ export function Input({ className, ...props }: React.ComponentProps<"input">) {
     />
   );
 }
+
+type InputCellProps = {
+  borderClassValue: ClassValue;
+  daily: Daily;
+  handleFocus: (event: React.FocusEvent<HTMLInputElement>) => Promise<void>;
+  handleOnBlur: (event: React.FocusEvent<HTMLInputElement>) => Promise<void>;
+  handleOnBlurCapture: (event: React.FocusEvent<HTMLInputElement>) => Promise<void>;
+  handleOnChange: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  handleOnKeyDown: (event: React.KeyboardEvent) => Promise<void>;
+  handleOnKeyDownCapture: (event: React.KeyboardEvent) => Promise<void>;
+  handleOuterDivClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => Promise<void>;
+  inputRef: React.RefObject<Option<HTMLInputElement>>;
+  points: Option<string>;
+  textClassValue: ClassValue;
+};
+
+const InputCell = (props: InputCellProps): React.ReactElement => {
+  const {
+    daily,
+    points,
+    borderClassValue,
+    textClassValue,
+    inputRef,
+    handleOnChange,
+    handleOuterDivClick,
+    handleFocus,
+    handleOnKeyDownCapture,
+    handleOnKeyDown,
+    handleOnBlurCapture,
+    handleOnBlur,
+  } = props;
+
+  return (
+    <div
+      className={cn(
+        borderClassValue,
+        "max-w-[6rem] min-w-[6rem] hover:outline-2 hover:outline-offset-2 hover:outline-dashed",
+      )}
+      onClick={handleOuterDivClick}
+    >
+      <div className="flex place-content-center items-center justify-self-center-safe">
+        <Input
+          ref={inputRef}
+          multiple
+          autoComplete="off"
+          className={cn(
+            textClassValue,
+            "mr-1 field-sizing-content",
+            "border-y border-r border-none",
+            `dark:bg-input/30 has-disabled:opacity-50 dark:transition-all`,
+            "data-[active=true]:border-ring",
+            "data-[active=true]:ring-ring/50",
+            "data-[active=true]:aria-invalid:ring-destructive/20",
+            "data-[active=true]:aria-invalid:border-destructive",
+            "data-[active=true]:aria-invalid:ring-destructive/40",
+            "data-[active=true]:z-10",
+            "data-[active=true]:ring-[3px]",
+            "aria-invalid:border-destructive",
+          )}
+          height={1}
+          id={daily.pointId}
+          inputMode="numeric"
+          pattern="\d*\.?\d*"
+          type="number"
+          value={`${points ?? ""}`}
+          onBlur={handleOnBlur}
+          onBlurCapture={handleOnBlurCapture}
+          onChange={handleOnChange}
+          onFocus={handleFocus}
+          onKeyDown={handleOnKeyDown}
+          onKeyDownCapture={handleOnKeyDownCapture}
+        />
+        <span className={cn("mr-2 ml-1", textClassValue)}>/</span>
+        <p className={`${textClassValue}`}>{daily.total}</p>
+      </div>
+    </div>
+  );
+};
