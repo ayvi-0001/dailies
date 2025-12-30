@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 
 import { ModalParam } from "@/app/@modals/params";
-import DailiesProvider from "@/components/daily/context";
+import DailiesProvider from "@/components/daily/providers/dailies";
 import { Option } from "@/types/option";
 
 export default function App(): React.ReactElement {

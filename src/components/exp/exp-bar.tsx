@@ -8,7 +8,7 @@ import { AppMetaState, useAppMetaState } from "@/app/providers/app-meta";
 import CursorTracker from "@/components/animata/container/cursor-tracker";
 import Progress from "@/components/animata/graphs/progress";
 import Counter from "@/components/animata/text/counter";
-import { DailiesState, useDailies } from "@/components/daily/context";
+import { DailiesState, useDailies } from "@/components/daily/providers/dailies";
 import { roundTo } from "@/lib/number";
 
 export default function ExpBar(): React.ReactNode {

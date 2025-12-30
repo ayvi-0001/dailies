@@ -10,8 +10,8 @@ import * as User from "@/app/providers/user";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
-import QuestTypesProvider from "./providers/quest-types";
-import { Daily } from "./types";
+import QuestTypesProvider from "./quest-types";
+import { Daily } from "../types";
 
 export const dynamic = "force-dynamic";
 
@@ -86,7 +86,7 @@ export default function DailiesProvider({
   const triggerRefreshDailies: () => void = React.useCallback(() => {
     console.debug(`countRefreshDailies=${countRefreshDailies}`);
     setCountRefreshDailies(countRefreshDailies + 1);
-  }, [countRefreshDailies, setCountRefreshDailies]);
+  }, [countRefreshDailies]);
 
   const value: DailiesState = {
     dailies: dailies,

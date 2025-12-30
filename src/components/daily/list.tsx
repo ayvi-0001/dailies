@@ -7,7 +7,7 @@ import { ScrollShadow } from "@heroui/react";
 import * as User from "@/app/providers/user";
 import { Option } from "@/types/option";
 
-import { DailiesState, useDailies } from "./context";
+import { DailiesState, useDailies } from "./providers/dailies";
 import { QuestChain, QuestsHeader } from "./quest-chain";
 import { Daily } from "./types";
 
@@ -30,7 +30,7 @@ export default function QuestList({ title }: { title: string }): React.ReactNode
   return (
     <div className="flex h-full w-full flex-col gap-2 overflow-hidden" id="dailies-list">
       <div className="mx-2">
-        <QuestsHeader title={`${title}`} />
+        <QuestsHeader title={title} />
       </div>
       <ScrollShadow
         hideScrollBar

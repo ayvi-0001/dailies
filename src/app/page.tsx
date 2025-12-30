@@ -3,7 +3,7 @@ import * as React from "react";
 import type { Metadata, ResolvingMetadata } from "next";
 
 import { QuestList } from "@/components/daily";
-import DailiesProvider from "@/components/daily/context";
+import DailiesProvider from "@/components/daily/providers/dailies";
 import ExpBar from "@/components/exp/exp-bar";
 import type { PageProps } from "@/types/props";
 
