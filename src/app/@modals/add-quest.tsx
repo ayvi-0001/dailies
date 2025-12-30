@@ -28,7 +28,9 @@ export default function Modal(): React.ReactElement {
         questTypes.find((questType: QuestType) => questType.name == typeId)!.id.replace("_", "-"),
       );
 
-      return addQuest(state, payload) as AddQuestErrors;
+      const result = addQuest(state, payload) as AddQuestErrors;
+      router.back();
+      return result;
     },
     undefined,
   );
@@ -99,11 +101,7 @@ export default function Modal(): React.ReactElement {
                 isLoading={isLoading}
                 size="sm"
                 type="submit"
-                onPress={() => {
-                  onClose();
-                  router.back();
-                  formRef?.current?.requestSubmit();
-                }}
+                onPress={() => formRef?.current?.requestSubmit()}
               >
                 Submit
               </heroui.Button>
