@@ -32,8 +32,12 @@ export default function PointsDisplay(props: PointsDisplayProps): React.ReactNod
   );
 
   const WeightedPoints = () => {
-    const displayPoints: string =
-      (pointsWeighted && `(${dailyPointsContribution}%) ${pointsWeighted}`) || `∅`;
+    const displayPoints: React.ReactNode =
+      daily.points === null
+        ? ""
+        : pointsWeighted
+          ? `(${dailyPointsContribution}%) ${pointsWeighted}`
+          : 0;
 
     return (
       <div className="flex flex-row items-center">
