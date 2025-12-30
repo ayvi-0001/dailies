@@ -10,12 +10,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { Option } from "@/types/option";
 
 import CardBorder from "./border";
-import {
-  DeleteMenuOption,
-  EditMenuOption,
-  HistoryMenuOption,
-  SetNullMenuOption,
-} from "./context-menu/items";
+import { AbandonDailyMenuOption, EditMenuOption, HistoryMenuOption } from "./context-menu/items";
 import Description from "./description";
 import Details from "./details";
 import HistoryDrawer from "./history";
@@ -172,14 +167,13 @@ export function ContextMenuContent(props: ContextMenuContentProps): React.ReactE
         initial={{ opacity: 0, scale: 0.9 }}
         transition={{ duration: 0.2 }}
       >
-        <SetNullMenuOption
+        <AbandonDailyMenuOption
           daily={daily}
           setPointsAction={setPointsAction}
           onRefreshAction={onRefreshAction}
         />
         <EditMenuOption onOpen={editOnOpenAction} />
         {toggleHistoryAction && <HistoryMenuOption toggleHistory={toggleHistoryAction} />}
-        <DeleteMenuOption pointId={daily.pointId} />
       </motion.div>
     </RadixContextMenu.Content>
   );

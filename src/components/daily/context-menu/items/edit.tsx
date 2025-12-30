@@ -1,6 +1,6 @@
 import * as RadixContextMenu from "@radix-ui/react-context-menu";
+import { BookTextIcon } from "lucide-react";
 
-import { EditSquare } from "@/components/svgs";
 import { cn } from "@/lib/utils";
 
 type MenuOptionProps = {
@@ -22,7 +22,7 @@ export default function EditMenuOption(props: MenuOptionProps) {
       onSelect={onOpen}
     >
       <div className="flex flex-row gap-2">
-        <EditSquare height="16px" width="16px" />
+        <BookTextIcon size={2} stroke="#e3e3e3" />
         <p className="text-xs text-white">{menuTitle ?? "Edit"}</p>
       </div>
     </RadixContextMenu.Item>

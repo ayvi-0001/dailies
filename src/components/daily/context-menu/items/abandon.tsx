@@ -1,5 +1,5 @@
 import * as RadixContextMenu from "@radix-ui/react-context-menu";
-import { CircleOff } from "lucide-react";
+import { BookXIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { Option } from "@/types/option";
@@ -13,7 +13,7 @@ type MenuOptionProps = {
   onRefreshAction: () => void;
 };
 
-export default function SetNullMenuOption(props: MenuOptionProps) {
+export default function AbandonDailyMenuOption(props: MenuOptionProps) {
   const { menuTitle, daily, setPointsAction, onRefreshAction } = props;
 
   return (
@@ -27,8 +27,8 @@ export default function SetNullMenuOption(props: MenuOptionProps) {
       onSelect={async () => await setDailyPointsNull(daily, setPointsAction, onRefreshAction)}
     >
       <div className="flex flex-row gap-2">
-        <CircleOff size={2} stroke="#e3e3e3" />
-        <p className="text-xs text-white">{menuTitle ?? "Set Null"}</p>
+        <BookXIcon size={2} stroke="#e3e3e3" />
+        <p className="text-xs text-white">{menuTitle ?? "Abandon Daily"}</p>
       </div>
     </RadixContextMenu.Item>
   );

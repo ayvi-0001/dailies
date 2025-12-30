@@ -1,6 +1,6 @@
 import * as RadixContextMenu from "@radix-ui/react-context-menu";
+import { BookSearchIcon } from "lucide-react";
 
-import { ManageHistory } from "@/components/svgs";
 import { cn } from "@/lib/utils";
 
 type MenuOptionProps = {
@@ -22,7 +22,7 @@ export default function HistoryMenuOption(props: MenuOptionProps) {
       onSelect={toggleHistory}
     >
       <div className="flex flex-row gap-2">
-        <ManageHistory height="16px" width="16px" />
+        <BookSearchIcon size={2} stroke="#e3e3e3" />
         <p className="text-xs text-white">{menuTitle ?? "History"}</p>
       </div>
     </RadixContextMenu.Item>
