@@ -615,6 +615,29 @@ pub async fn update_default_points(
 
 #[allow(unused_variables)]
 #[tauri::command(async, rename_all = "snake_case")]
+pub async fn update_streak_target(
+    state: tauri::State<'_, Mutex<state::AppState>>,
+    quest_id: String,
+    point_id: String,
+    value: f64,
+) -> Result<(), crate::errors::Error> {
+    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+    let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
+
+    sqlx::query!(
+        r#"UPDATE "dailies" SET streak_target = $1 WHERE quest_id = $2 AND point_id = $3;"#,
+        value,
+        quest_id,
+        point_id,
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
+#[allow(unused_variables)]
+#[tauri::command(async, rename_all = "snake_case")]
 pub async fn update_archived(
     state: tauri::State<'_, Mutex<state::AppState>>,
     quest_id: String,

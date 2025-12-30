@@ -108,6 +108,7 @@ pub fn run() {
             dailies::update_note,
             dailies::update_requirements,
             dailies::update_sequence,
+            dailies::update_streak_target,
             dailies::update_time_end,
             dailies::update_time_start,
             dailies::update_total,
