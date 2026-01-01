@@ -46,7 +46,7 @@ export function QuestsHeader({ title }: { title: string }): React.ReactNode {
 }
 
 export type QuestChainProps = {
-  userId?: number;
+  userId: number;
   chain: string;
   dailies: Daily[];
   setDailiesAction: React.Dispatch<React.SetStateAction<Daily[]>>;
@@ -124,6 +124,7 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
                   <DailyCard
                     daily={daily}
                     totalWeight={totalWeight}
+                    userId={userId}
                     onRefreshAction={onUpdateAction}
                   />
                 </SortableItem>

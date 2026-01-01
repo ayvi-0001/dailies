@@ -12,7 +12,6 @@ import {
   DrawerHeader,
 } from "@heroui/react";
 import { ScrollShadow } from "@heroui/react";
-import { ok } from "assert";
 import { AnimatePresence } from "framer-motion";
 
 import * as User from "@/app/providers/user";
@@ -46,9 +45,7 @@ type HistoryDrawerProps = {
 export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactElement {
   const { isOpen, setHistoryIsOpenAction, daily, totalWeight } = props;
 
-  const userState: User.UserState = User.useState();
-  const userName: Option<string> = userState?.user?.name || null;
-  ok(userName, Error("Cannot query history for unknown user."));
+  const user: User.User = User.useState().user!;
 
   return (
     <Drawer
@@ -70,6 +67,7 @@ export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactEle
                 <HistoryCards
                   query={cachedQueryDailyHistory(userName, daily.questId, 6)}
                   totalWeight={totalWeight}
+                  userId={user.id}
                 />
               </div>
             </DrawerBody>
@@ -94,13 +92,14 @@ export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactEle
 }
 
 type HistoryCardsProps = {
+  userId: number;
   query: Promise<Daily[]>;
   totalWeight: number;
 };
 
 // TODO(ayvi): infinite scroll history http://ayvi:3000/ayvi/dailies/issues/33
 export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
-  const { query, totalWeight } = props;
+  const { userId, query, totalWeight } = props;
 
   const [dailies, setDailies] = React.useState<Daily[]>([]);
 
@@ -119,7 +118,12 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
       <React.Suspense fallback={<div>Loading...</div>}>
         {dailies?.map((daily: Daily, index: number) => (
           <div key={`${daily.pointId}-${index}`} className="mr-2 mb-4 ml-2">
-            <HistoryDailyCard daily={daily} index={index} totalWeight={totalWeight} />
+            <HistoryDailyCard
+              daily={daily}
+              index={index}
+              totalWeight={totalWeight}
+              userId={userId}
+            />
           </div>
         ))}
       </React.Suspense>
@@ -128,13 +132,14 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
 }
 
 type HistoryDailyCardProps = {
+  userId: number;
   daily: Daily;
   index: number;
   totalWeight: number;
 };
 
 export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactElement {
-  const { daily, index, totalWeight } = props;
+  const { userId, daily, index, totalWeight } = props;
 
   const questTypes: QuestType[] = useQuestTypes();
   const questType: Option<QuestType> =
@@ -186,6 +191,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
         daily={daily}
         isOpen={isOpen}
         title={`${daily.name} (${daily.date})`}
+        userId={userId}
         onOpenChange={onOpenChange}
       />
     </>

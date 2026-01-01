@@ -27,13 +27,14 @@ import {
 import type { Daily } from "./types";
 
 type DailyCardProps = {
+  userId: number;
   daily: Daily;
   totalWeight: number;
   onRefreshAction: () => void;
 };
 
 export default function DailyCard(props: DailyCardProps): React.ReactNode {
-  const { daily, totalWeight, onRefreshAction } = props;
+  const { userId, daily, totalWeight, onRefreshAction } = props;
 
   const [points, setPoints] = React.useState<Option<string>>(`${daily.points}`);
 
@@ -87,6 +88,7 @@ export default function DailyCard(props: DailyCardProps): React.ReactNode {
         daily={daily}
         isOpen={editDisclosure.isOpen}
         title={daily.name}
+        userId={userId}
         onOpenChange={editDisclosure.onOpenChange}
       />
       <HistoryDrawer

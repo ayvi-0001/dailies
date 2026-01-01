@@ -284,6 +284,7 @@ pub async fn insert_quest(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn update_chain(
     state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
     quest_id: String,
     point_id: String,
     value: String,
@@ -306,6 +307,7 @@ pub async fn update_chain(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn update_days(
     state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
     quest_id: String,
     point_id: String,
     value: Json<Vec<i64>>,
@@ -328,6 +330,7 @@ pub async fn update_days(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn update_name(
     state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
     quest_id: String,
     point_id: String,
     value: String,
@@ -350,6 +353,7 @@ pub async fn update_name(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn update_type(
     state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
     quest_id: String,
     point_id: String,
     value: QuestType,
@@ -372,6 +376,7 @@ pub async fn update_type(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn update_weight(
     state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
     quest_id: String,
     point_id: String,
     value: f64,
@@ -395,6 +400,7 @@ pub async fn update_weight(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn update_description(
     state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
     quest_id: String,
     point_id: String,
     value: Option<String>,
@@ -429,6 +435,7 @@ pub async fn update_description(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn update_note(
     state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
     quest_id: String,
     point_id: String,
     value: Option<NaiveTime>,
@@ -463,6 +470,7 @@ pub async fn update_note(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn update_time_start(
     state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
     quest_id: String,
     point_id: String,
     value: Option<NaiveTime>,
@@ -499,6 +507,7 @@ pub async fn update_time_start(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn update_time_end(
     state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
     quest_id: String,
     point_id: String,
     value: Option<NaiveTime>,
@@ -535,6 +544,7 @@ pub async fn update_time_end(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn update_requirements(
     state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
     quest_id: String,
     point_id: String,
     value: Option<Json<Value>>,
@@ -571,6 +581,7 @@ pub async fn update_requirements(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn update_total(
     state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
     quest_id: String,
     point_id: String,
     value: f64,
@@ -594,6 +605,7 @@ pub async fn update_total(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn update_default_points(
     state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
     quest_id: String,
     point_id: String,
     value: f64,
@@ -617,6 +629,7 @@ pub async fn update_default_points(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn update_streak_target(
     state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
     quest_id: String,
     point_id: String,
     value: f64,
@@ -640,6 +653,7 @@ pub async fn update_streak_target(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn update_archived(
     state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
     quest_id: String,
     point_id: String,
     value: Option<NaiveDateTime>,

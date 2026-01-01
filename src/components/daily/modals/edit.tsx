@@ -16,6 +16,7 @@ import EditDailyForm from "../forms/edit";
 import { QuestType, useQuestTypes } from "../providers/quest-types";
 
 type EditModalProps = {
+  userId: number;
   daily: Daily;
   isOpen: boolean;
   onOpenChange: () => void;
@@ -24,7 +25,7 @@ type EditModalProps = {
 };
 
 export default function EditModal(props: EditModalProps): React.ReactNode {
-  const { daily, isOpen, onOpenChange, title, historic } = props;
+  const { userId, daily, isOpen, onOpenChange, title, historic } = props;
 
   const dailiesState: DailiesState = useDailies();
   const questTypes: QuestType[] = useQuestTypes();
@@ -63,6 +64,7 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
         }
 
         await invoke(`update_${camelCaseToSnakeCase(key)}`, {
+          user_id: userId,
           quest_id: daily.questId,
           point_id: daily.pointId,
           value: sendValue,
