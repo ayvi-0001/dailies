@@ -15,7 +15,7 @@ import { ScrollShadow } from "@heroui/react";
 import { AnimatePresence } from "framer-motion";
 
 import * as User from "@/app/providers/user";
-import { cachedQueryDailyHistory } from "@/actions/query";
+import { cachedQueryQuestHistory } from "@/actions/query";
 import { formatDateISO8601 } from "@/lib/dates";
 import { call } from "@/lib/utils";
 import type { Option } from "@/types/option";
@@ -65,7 +65,7 @@ export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactEle
             <DrawerBody>
               <div>
                 <HistoryCards
-                  query={cachedQueryDailyHistory(userName, daily.questId, 6)}
+                  query={cachedQueryQuestHistory(user.name, daily.questId, 6)}
                   totalWeight={totalWeight}
                   userId={user.id}
                 />

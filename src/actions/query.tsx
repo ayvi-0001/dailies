@@ -1,19 +1,18 @@
 import * as React from "react";
 
-import { CalendarDate, DateDuration, today as today_ } from "@internationalized/date";
+import { CalendarDate, today } from "@internationalized/date";
 import { invoke } from "@tauri-apps/api/core";
 
 import type { Daily } from "@/components/daily/types";
 import { LOCAL_TZ, formatDateTimeISO8601 } from "@/lib/dates";
 
-export async function queryDailyHistory(
+export async function queryQuestHistory(
   userName: string,
   questId: string,
   days: number,
 ): Promise<Daily[]> {
-  const startDate: CalendarDate = today_(LOCAL_TZ);
-  const duration: DateDuration = { days: days };
-  const endDate = startDate.subtract(duration);
+  const startDate: CalendarDate = today(LOCAL_TZ).subtract({ days: 1 });
+  const endDate = startDate.subtract({ days: days });
 
   return await invoke<Daily[]>("query_dailies", {
     user: userName,
@@ -24,8 +23,8 @@ export async function queryDailyHistory(
   });
 }
 
-export const cachedQueryDailyHistory: (
+export const cachedQueryQuestHistory: (
   userName: string,
   questId: string,
   days: number,
-) => Promise<Daily[]> = React.cache(queryDailyHistory);
+) => Promise<Daily[]> = React.cache(queryQuestHistory);
