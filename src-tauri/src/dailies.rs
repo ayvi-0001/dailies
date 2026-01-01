@@ -639,19 +639,32 @@ pub async fn update_streak_target(
     user_id: i64,
     quest_id: String,
     point_id: String,
-    value: f64,
+    value: Option<f64>,
 ) -> Result<(), crate::errors::Error> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
-    sqlx::query!(
-        r#"UPDATE "dailies" SET streak_target = $1 WHERE quest_id = $2 AND point_id = $3;"#,
-        value,
-        quest_id,
-        point_id,
-    )
-    .execute(pool)
-    .await?;
+    match value {
+        Some(streak_target) => {
+            sqlx::query!(
+                r#"UPDATE "dailies" SET streak_target = $1 WHERE quest_id = $2 AND point_id = $3;"#,
+                streak_target,
+                quest_id,
+                point_id,
+            )
+            .execute(pool)
+            .await?;
+        }
+        None => {
+            sqlx::query!(
+                r#"UPDATE "dailies" SET streak_target = NULL WHERE quest_id = $1 AND point_id = $2;"#,
+                quest_id,
+                point_id,
+            )
+            .execute(pool)
+            .await?;
+        }
+    }
 
     Ok(())
 }
