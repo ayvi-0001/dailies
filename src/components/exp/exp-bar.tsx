@@ -19,7 +19,7 @@ export default function ExpBar(): React.ReactNode {
   const totalWeight = dailiesState.totalWeight;
   const countRefreshDailies = dailiesState.countRefreshDailies;
 
-  let value: number = roundTo(totalPoints / totalWeight, 2);
+  let value: number = roundTo((totalPoints / totalWeight) * 100, 2);
   value = !Number.isNaN(value) ? value : +``;
 
   const bar: React.ReactElement = (
@@ -28,12 +28,12 @@ export default function ExpBar(): React.ReactNode {
         <Counter
           className="text-sm text-white"
           direction="up"
-          format={(value: number): string => `${roundTo(value, 2).toFixed(2)}%`}
+          format={(value: number): string => `${value.toFixed(2)}%`}
           targetValue={value ?? 0}
         />
       </div>
       <div className="grow">
-        <Progress<number> deps={[countRefreshDailies]} progress={value * 100} />
+        <Progress<number> deps={[countRefreshDailies]} progress={value} />
       </div>
       <div>
         <p className="text-sm font-bold text-white">{totalWeight}</p>
