@@ -293,9 +293,16 @@ pub async fn update_chain(
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
     sqlx::query!(
-        r#"UPDATE "quests" SET chain = $1 WHERE id = $2;"#,
-        value,
+        r#"
+            UPDATE "quests"
+            SET
+                chain = $3,
+                sequence = (SELECT COALESCE((SELECT MAX(sequence) + 1 FROM "quests" WHERE user_id = $1 AND chain = $3 GROUP BY chain), 1))
+            WHERE id = $2;
+        "#,
+        user_id,
         quest_id,
+        value,
     )
     .execute(pool)
     .await?;
