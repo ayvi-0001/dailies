@@ -24,6 +24,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Accordion, AccordionItem } from "@heroui/react";
 import { ArrowBigLeftDash, ArrowBigUpDash, SwordsIcon } from "lucide-react";
 
+import { User } from "@/app/providers/user";
 import { invoke } from "@/lib/tauri";
 
 import DailyCard from "./card";
@@ -46,7 +47,7 @@ export function QuestsHeader({ title }: { title: string }): React.ReactNode {
 }
 
 export type QuestChainProps = {
-  userId: number;
+  user: User;
   chain: string;
   dailies: Daily[];
   setDailiesAction: React.Dispatch<React.SetStateAction<Daily[]>>;
@@ -55,7 +56,7 @@ export type QuestChainProps = {
 };
 
 export function QuestChain(props: QuestChainProps): React.ReactElement {
-  const { userId, chain, dailies, setDailiesAction, totalWeight, onUpdateAction } = props;
+  const { user, chain, dailies, setDailiesAction, totalWeight, onUpdateAction } = props;
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -107,7 +108,7 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
             collisionDetection={closestCenter}
             sensors={sensors}
             onDragEnd={(event: DragEndEvent) =>
-              handleDragEnd(event, userId!, chain, dailies, setDailiesAction)
+              handleDragEnd(event, user.id, chain, dailies, setDailiesAction)
             }
           >
             <SortableContext
@@ -124,7 +125,7 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
                   <DailyCard
                     daily={daily}
                     totalWeight={totalWeight}
-                    userId={userId}
+                    user={user}
                     onRefreshAction={onUpdateAction}
                   />
                 </SortableItem>

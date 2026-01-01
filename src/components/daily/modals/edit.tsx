@@ -6,6 +6,7 @@ import clsx from "clsx";
 import { ValueOf } from "next/dist/shared/lib/constants";
 
 import editQuest, { EditQuestState } from "@/actions/edit-quest";
+import { User } from "@/app/providers/user";
 import { camelCaseToSnakeCase } from "@/lib/string";
 import { invoke } from "@/lib/tauri";
 import type { Option } from "@/types/option";
@@ -15,7 +16,7 @@ import EditDailyForm from "../forms/edit";
 import { QuestType, useQuestTypes } from "../providers/quest-types";
 
 type EditModalProps = {
-  userId: number;
+  user: User;
   daily: Daily;
   isOpen: boolean;
   onOpenChange: () => void;
@@ -24,7 +25,7 @@ type EditModalProps = {
 };
 
 export default function EditModal(props: EditModalProps): React.ReactNode {
-  const { userId, daily, isOpen, onOpenChange, title, historic } = props;
+  const { user, daily, isOpen, onOpenChange, title, historic } = props;
 
   const dailiesState: DailiesState = useDailies();
   const questTypes: QuestType[] = useQuestTypes();
@@ -56,7 +57,7 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
         if (key == "typeId") key = "type";
 
         await invoke(`update_${camelCaseToSnakeCase(key)}`, {
-          user_id: userId,
+          user_id: user.id,
           quest_id: daily.questId,
           point_id: daily.pointId,
           value: sendValue,

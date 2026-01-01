@@ -14,10 +14,9 @@ import {
 import { ScrollShadow } from "@heroui/react";
 import { AnimatePresence } from "framer-motion";
 
-import * as User from "@/app/providers/user";
-import { cachedQueryQuestHistory } from "@/actions/query";
+import { queryQuestHistory } from "@/actions/query";
+import { User } from "@/app/providers/user";
 import { formatDateISO8601 } from "@/lib/dates";
-import { call } from "@/lib/utils";
 import type { Option } from "@/types/option";
 
 import CardBorder from "./border";
@@ -34,25 +33,22 @@ import type { Daily } from "./types";
 // TODO(ayvi): history days options/streaming http://ayvi:3000/ayvi/dailies/issues/32
 
 type HistoryDrawerProps = {
+  user: User;
   isOpen: boolean;
   setHistoryIsOpenAction: React.Dispatch<React.SetStateAction<boolean>>;
   daily: Daily;
-  // TODO(ayvi): totalWeight for history should eval for the respective day
-  // http://ayvi:3000/ayvi/dailies/issues/35
   totalWeight: number;
 };
 
 export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactElement {
-  const { isOpen, setHistoryIsOpenAction, daily, totalWeight } = props;
-
-  const user: User.User = User.useState().user!;
+  const { user, isOpen, setHistoryIsOpenAction, daily, totalWeight } = props;
 
   return (
     <Drawer
       hideCloseButton
       isDismissable
       isKeyboardDismissDisabled
-      className="border-1 border-white bg-black/85"
+      className="border-1 border-white bg-black/85 select-none"
       isOpen={isOpen}
       placement="bottom"
       radius="none"
@@ -64,11 +60,7 @@ export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactEle
             <DrawerHeader className="flex flex-col gap-1 text-white">{daily.name}</DrawerHeader>
             <DrawerBody>
               <div>
-                <HistoryCards
-                  query={cachedQueryQuestHistory(user.name, daily.questId, 6)}
-                  totalWeight={totalWeight}
-                  userId={user.id}
-                />
+                <HistoryCards daily={daily} totalWeight={totalWeight} user={user} />
               </div>
             </DrawerBody>
             <DrawerFooter className="mt-4 mb-3 flex justify-center gap-2 leading-none">
@@ -92,20 +84,31 @@ export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactEle
 }
 
 type HistoryCardsProps = {
-  userId: number;
-  query: Promise<Daily[]>;
+  daily: Daily;
+  user: User;
   totalWeight: number;
 };
 
 // TODO(ayvi): infinite scroll history http://ayvi:3000/ayvi/dailies/issues/33
 export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
-  const { userId, query, totalWeight } = props;
+  const { daily, user, totalWeight } = props;
+
+  const questTypes: QuestType[] = useQuestTypes();
 
   const [dailies, setDailies] = React.useState<Daily[]>([]);
+  const [countRefreshDailies, setCountRefreshDailies] = React.useState<number>(0);
 
   React.useEffect(() => {
-    call(async () => setDailies(await query));
-  }, [query]);
+    const query_dailies = async (): Promise<void> => {
+      setDailies(await queryQuestHistory(user.name, daily.questId, 6));
+    };
+    query_dailies();
+  }, [daily, user, countRefreshDailies]);
+
+  const triggerRefreshDailies: () => void = React.useCallback(() => {
+    console.debug(`countRefreshDailies=${countRefreshDailies}`);
+    setCountRefreshDailies(countRefreshDailies + 1);
+  }, [countRefreshDailies]);
 
   return (
     <ScrollShadow
@@ -116,13 +119,15 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
       style={{ scrollbarWidth: "none" }}
     >
       <React.Suspense fallback={<div>Loading...</div>}>
-        {dailies?.map((daily: Daily, index: number) => (
+        {dailies.map((daily: Daily, index: number) => (
           <div key={`${daily.pointId}-${index}`} className="mr-2 mb-4 ml-2">
             <HistoryDailyCard
               daily={daily}
               index={index}
+              questTypes={questTypes}
               totalWeight={totalWeight}
-              userId={userId}
+              user={user}
+              onRefreshAction={triggerRefreshDailies}
             />
           </div>
         ))}
@@ -132,16 +137,17 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
 }
 
 type HistoryDailyCardProps = {
-  userId: number;
+  user: User;
   daily: Daily;
   index: number;
+  questTypes: QuestType[];
   totalWeight: number;
+  onRefreshAction: () => void;
 };
 
 export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactElement {
-  const { userId, daily, index, totalWeight } = props;
+  const { user, daily, index, questTypes, totalWeight, onRefreshAction } = props;
 
-  const questTypes: QuestType[] = useQuestTypes();
   const questType: Option<QuestType> =
     questTypes.find(type => `${type.id}` == `${daily.type}`) || null;
   const questTypeStyles: QuestTypeStyles = questType?.styles || DEFAULT_QUEST_TYPE_STYLES;
@@ -167,7 +173,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
                 points={points}
                 setPointsAction={setPoints}
                 totalWeight={totalWeight}
-                onRefreshAction={() => {}}
+                onRefreshAction={onRefreshAction}
               />
             </div>
           </CardBorder>
@@ -179,7 +185,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
                 daily={daily}
                 editOnOpenAction={onOpen}
                 setPointsAction={setPoints}
-                onRefreshAction={() => {}}
+                onRefreshAction={onRefreshAction}
               />
             )}
           </AnimatePresence>
@@ -191,7 +197,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
         daily={daily}
         isOpen={isOpen}
         title={`${daily.name} (${daily.date})`}
-        userId={userId}
+        user={user}
         onOpenChange={onOpenChange}
       />
     </>

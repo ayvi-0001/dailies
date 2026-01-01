@@ -47,7 +47,7 @@ export default function QuestList({ title }: { title: string }): React.ReactNode
             dailies={groupedDailies[chain] || []}
             setDailiesAction={dailiesState.setDailies}
             totalWeight={dailiesState.totalWeight}
-            userId={userState.user!.id}
+            user={userState.user!}
             onUpdateAction={dailiesState.triggerRefreshDailies}
           />
         ))}

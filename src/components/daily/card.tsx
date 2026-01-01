@@ -7,6 +7,7 @@ import * as RadixContextMenu from "@radix-ui/react-context-menu";
 import * as ReactUse from "@reactuses/core";
 import { AnimatePresence, motion } from "framer-motion";
 
+import { User } from "@/app/providers/user";
 import type { Option } from "@/types/option";
 
 import CardBorder from "./border";
@@ -27,14 +28,14 @@ import {
 import type { Daily } from "./types";
 
 type DailyCardProps = {
-  userId: number;
+  user: User;
   daily: Daily;
   totalWeight: number;
   onRefreshAction: () => void;
 };
 
 export default function DailyCard(props: DailyCardProps): React.ReactNode {
-  const { userId, daily, totalWeight, onRefreshAction } = props;
+  const { user, daily, totalWeight, onRefreshAction } = props;
 
   const [points, setPoints] = React.useState<Option<string>>(`${daily.points}`);
 
@@ -88,7 +89,7 @@ export default function DailyCard(props: DailyCardProps): React.ReactNode {
         daily={daily}
         isOpen={editDisclosure.isOpen}
         title={daily.name}
-        userId={userId}
+        user={user}
         onOpenChange={editDisclosure.onOpenChange}
       />
       <HistoryDrawer
@@ -96,6 +97,7 @@ export default function DailyCard(props: DailyCardProps): React.ReactNode {
         isOpen={historyIsOpen}
         setHistoryIsOpenAction={toggleHistory}
         totalWeight={totalWeight}
+        user={user}
       />
     </>
   );
