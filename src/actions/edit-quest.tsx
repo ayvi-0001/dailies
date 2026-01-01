@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import * as utils from "@/lib/utils";
 import { Daily, Quest } from "@/components/daily";
+import { QuestType } from "@/components/daily/providers/quest-types";
 import { formatDateTimeISO8601 } from "@/lib/dates";
 
 export type EditQuestErrors = {
@@ -31,6 +32,7 @@ export default async function editQuest(
   _: EditQuestState,
   formData: FormData,
   originalValues: Daily,
+  questTypes: QuestType[],
 ): Promise<EditQuestErrors | Partial<Daily>> {
   const validatedFields = Quest.EditQuestFormSchema.safeParse({
     archived: formData.get("archived"),
@@ -53,7 +55,9 @@ export default async function editQuest(
   }
 
   if (validatedFields.data?.typeId) {
-    validatedFields.data.typeId = validatedFields.data.typeId.replace("_", "-");
+    validatedFields.data.typeId = questTypes
+      .find((questType: QuestType) => questType.name == validatedFields.data.typeId)!
+      .id.replace("_", "-");
   }
 
   if (!validatedFields.success) {

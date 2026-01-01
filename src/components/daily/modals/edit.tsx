@@ -4,7 +4,6 @@ import * as heroui from "@heroui/react";
 import * as log from "@tauri-apps/plugin-log";
 import clsx from "clsx";
 import { ValueOf } from "next/dist/shared/lib/constants";
-import { toast } from "sonner";
 
 import editQuest, { EditQuestState } from "@/actions/edit-quest";
 import { camelCaseToSnakeCase } from "@/lib/string";
@@ -41,7 +40,7 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
 
   const [_, dispatch, isPending] = React.useActionState(
     async (state: EditQuestState, payload: FormData): Promise<EditQuestState> => {
-      const diff = (await editQuest(state, payload, daily)) as Partial<Daily>;
+      const diff = (await editQuest(state, payload, daily, questTypes)) as Partial<Daily>;
       if (Object.hasOwn(diff, "errors")) return;
 
       const dailies: Daily[] = dailiesState.dailies;
@@ -52,35 +51,24 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
         let key = entry[0];
 
         const value = entry[1];
-        let sendValue = null;
+        const sendValue = typeof value === "boolean" ? !!value : value;
 
-        if (key == "typeId") {
-          key = "type";
-          sendValue = questTypes
-            .find((questType: QuestType) => questType.name == value)!
-            .id.replace("_", "-");
-        } else {
-          sendValue = typeof value === "boolean" ? !!value : value || null;
-        }
+        if (key == "typeId") key = "type";
 
         await invoke(`update_${camelCaseToSnakeCase(key)}`, {
           user_id: userId,
           quest_id: daily.questId,
           point_id: daily.pointId,
           value: sendValue,
-        })
-          .catch(err => {
-            toast.error(JSON.stringify(err));
-          })
-          .then(_ => {
-            dailies.map(d => {
-              if (d.pointId == daily.pointId) {
-                // @ts-expect-error: TODO(ayvi): fix types on daily index
-                d[key as keyof Daily] = value as ValueOf<Daily>;
-              }
-              return d;
-            });
+        }).then(_ => {
+          dailies.map(d => {
+            if (d.pointId == daily.pointId) {
+              // @ts-expect-error: TODO(ayvi): fix types on daily index
+              d[key as keyof Daily] = value as ValueOf<Daily>;
+            }
+            return d;
           });
+        });
       }
 
       if (Object.entries(diff).length > 0) {
