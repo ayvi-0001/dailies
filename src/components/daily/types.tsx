@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { getLocalTimeZone, parseDateTime } from "@internationalized/date";
+import { parseDateTime } from "@internationalized/date";
 import { z } from "zod";
 import { SomeType, _$ZodTypeInternals } from "zod/v4/core";
 
-import { formatDateTimeISO8601 } from "@/lib/dates";
+import { LOCAL_TZ, formatDateTimeISO8601 } from "@/lib/dates";
 import type { Option } from "@/types/option";
 
 export type Daily = {
@@ -95,7 +95,7 @@ export namespace Quest {
 
   // prettier-ignore
   export const EditQuestFormSchema = z.object({
-    archived: z.preprocess<Option<Date>, SomeType, string | null>(val => val ? parseDateTime(val).toDate(getLocalTimeZone()) : null, z.coerce.date().nullable()),
+    archived: z.preprocess<Option<Date>, SomeType, string | null>(val => val ? parseDateTime(val).toDate(LOCAL_TZ) : null, z.coerce.date().nullable()),
     chain: z.string().nonempty(),
     days: z.preprocess<number[], SomeType, string[]>( val => (val.length === 0 ? [] : val.map(v => parseInt(v))), z.array(z.number())),
     name: z.string().nonempty(),

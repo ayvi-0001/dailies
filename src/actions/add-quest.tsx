@@ -1,10 +1,11 @@
-import { getLocalTimeZone, today } from "@internationalized/date";
+import { today } from "@internationalized/date";
 import { invoke } from "@tauri-apps/api/core";
 import { RedirectType, redirect } from "next/navigation";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { Quest } from "@/components/daily";
+import { LOCAL_TZ } from "@/lib/dates";
 import type { AppError } from "@/types/errors";
 
 export type AddQuestErrors = {
@@ -34,8 +35,7 @@ export default async function addQuest(
   _: AddQuestState,
   formData: FormData,
 ): Promise<AddQuestErrors> {
-  const tz: string = getLocalTimeZone();
-  const now: Date = today(tz).toDate(tz);
+  const now: Date = today(LOCAL_TZ).toDate(LOCAL_TZ);
 
   const validatedFields = Quest.NewQuestFormSchema.safeParse({
     userId: formData.get("userId"),

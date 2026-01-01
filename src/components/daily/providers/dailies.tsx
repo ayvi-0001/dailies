@@ -2,16 +2,17 @@
 
 import * as React from "react";
 
-import { getLocalTimeZone, today } from "@internationalized/date";
+import { today } from "@internationalized/date";
 import { useOnceEffect } from "@reactuses/core";
 import ok from "assert";
 
 import * as User from "@/app/providers/user";
+import { LOCAL_TZ } from "@/lib/dates";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
-import QuestTypesProvider from "./quest-types";
 import { Daily } from "../types";
+import QuestTypesProvider from "./quest-types";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +44,7 @@ export default function DailiesProvider({
   const user: Option<User.User> = userState.user;
 
   useOnceEffect(() => {
-    const now: string = today(getLocalTimeZone()).toString();
+    const now: string = today(LOCAL_TZ).toString();
 
     const query_dailies = async (): Promise<void> => {
       await invoke<Daily[]>("query_dailies", {

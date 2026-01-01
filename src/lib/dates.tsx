@@ -1,4 +1,6 @@
-import { CalendarDate, parseDate } from "@internationalized/date";
+import { CalendarDate, getLocalTimeZone, parseDate } from "@internationalized/date";
+
+export const LOCAL_TZ = getLocalTimeZone();
 
 export enum Weekdays {
   Mon,

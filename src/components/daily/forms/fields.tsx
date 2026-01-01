@@ -2,12 +2,12 @@ import * as React from "react";
 
 import * as heroui from "@heroui/react";
 import { Time } from "@internationalized/date";
-import { DateValue, getLocalTimeZone, today } from "@internationalized/date";
+import { DateValue, today } from "@internationalized/date";
 import type { ValidationResult } from "@react-types/shared/src/inputs";
 import { X } from "lucide-react";
 
 import { Daily } from "@/components/daily";
-import { Weekdays } from "@/lib/dates";
+import { LOCAL_TZ, Weekdays } from "@/lib/dates";
 import type { Option } from "@/types/option";
 
 import { QuestType } from "../providers/quest-types";
@@ -300,7 +300,7 @@ type ArchivedFieldProps = {
 
 export function ArchivedField(props: ArchivedFieldProps): React.ReactElement {
   const { archivedDate, setArchivedDateAction } = props;
-  const now: heroui.CalendarDate = today(getLocalTimeZone());
+  const now: heroui.CalendarDate = today(LOCAL_TZ);
 
   return (
     <heroui.DatePicker
