@@ -43,7 +43,7 @@ export default function AddQuestForm(props: AddQuestFormProps): React.ReactEleme
   }
 
   const [total, setTotal] = React.useState<number>(1);
-  const [defaultPoints, setDefaultPoints] = React.useState<number>(1);
+  const [defaultPoints, setDefaultPoints] = React.useState<number>(0);
   const defaultPointsErrors: React.ReactNode[] = [];
   if (total && defaultPoints && defaultPoints > total)
     defaultPointsErrors.push("Default points cannot be greater than total points.");

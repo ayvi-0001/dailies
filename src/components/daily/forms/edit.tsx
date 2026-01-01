@@ -45,8 +45,8 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
     timeEndErrors.push("End time cannot be the same as start time.");
   }
 
-  const [total, setTotal] = React.useState<number>(1);
-  const [defaultPoints, setDefaultPoints] = React.useState<number>(0);
+  const [total, setTotal] = React.useState<number>(daily.total);
+  const [defaultPoints, setDefaultPoints] = React.useState<number>(daily.defaultPoints);
   const defaultPointsErrors: React.ReactNode[] = [];
   if (total && defaultPoints && defaultPoints > total)
     defaultPointsErrors.push("Default points cannot be greater than total points.");
