@@ -175,10 +175,10 @@ export function DefaultPointsField(props: DefaultPointsFieldProps): React.ReactE
       isInvalid={defaultPointsErrors?.length > 0}
       label="Default Points"
       minValue={0}
-      name="default_points"
+      name="defaultPoints"
       radius="none"
       type="number"
-      value={defaultPoints ?? 0}
+      value={defaultPoints}
       variant="bordered"
       onValueChange={setDefaultPointsAction}
     />
