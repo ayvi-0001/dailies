@@ -116,7 +116,7 @@ export function CardContent(props: CardContentProps): React.ReactElement {
   const { name, daily, questType, questTypeStyles } = props;
 
   return (
-    <div className="flex min-w-0 grow flex-col items-start gap-1">
+    <div className="flex min-w-0 grow flex-col items-start gap-[2]">
       <QuestName name={name} />
       <Details daily={daily} questType={questType} questTypeStyles={questTypeStyles} />
       <heroui.Divider />
