@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import * as heroui from "@heroui/react";
 import {
   DndContext,
   DragEndEvent,
@@ -22,15 +23,36 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Accordion, AccordionItem } from "@heroui/react";
-import { ArrowBigLeftDash, ArrowBigUpDash, SwordsIcon } from "lucide-react";
+import { ArrowBigLeftDash, ArrowBigUpDash, ListFilterIcon, SwordsIcon } from "lucide-react";
 
 import { User } from "@/app/providers/user";
 import { invoke } from "@/lib/tauri";
+import { Option } from "@/types/option";
 
 import DailyCard from "./card";
 import { Daily } from "./types";
 
-export function QuestsHeader({ title }: { title: string }): React.ReactNode {
+type QuestsHeaderProps = {
+  title: string;
+  isArchivedQuestsFiltered: boolean;
+  setArchivedQuestsFilteredAction: (value: boolean) => Promise<void>;
+  isCompletedQuestsFiltered: boolean;
+  setCompletedQuestsFilteredAction: (value: boolean) => Promise<void>;
+  isOptionalQuestsFiltered: boolean;
+  setOptionalQuestsFilteredAction: (value: boolean) => Promise<void>;
+};
+
+export function QuestsHeader(props: QuestsHeaderProps): React.ReactNode {
+  const {
+    title,
+    isArchivedQuestsFiltered,
+    setArchivedQuestsFilteredAction,
+    isCompletedQuestsFiltered,
+    setCompletedQuestsFilteredAction,
+    isOptionalQuestsFiltered,
+    setOptionalQuestsFilteredAction,
+  } = props;
+
   return (
     <div
       className="bg-opacity-90 relative h-8 bg-[#6B6C76] bg-blend-overlay select-none"
@@ -40,7 +62,19 @@ export function QuestsHeader({ title }: { title: string }): React.ReactNode {
         <div className="box-content aspect-square size-8 place-items-center place-self-center bg-yellow-400 shadow-md">
           <SwordsIcon className="size-8 opacity-20" />
         </div>
-        <p className="text-xl leading-none font-bold text-black text-shadow-sm">{title}</p>
+        <div className="flex grow">
+          <p className="text-xl leading-none font-bold text-black text-shadow-sm">{title}</p>
+        </div>
+        <div className="mr-2">
+          <QuestsFilter
+            isArchivedQuestsFiltered={isArchivedQuestsFiltered}
+            isCompletedQuestsFiltered={isCompletedQuestsFiltered}
+            isOptionalQuestsFiltered={isOptionalQuestsFiltered}
+            setArchivedQuestsFilteredAction={setArchivedQuestsFilteredAction}
+            setCompletedQuestsFilteredAction={setCompletedQuestsFilteredAction}
+            setOptionalQuestsFilteredAction={setOptionalQuestsFilteredAction}
+          />
+        </div>
       </div>
     </div>
   );
@@ -52,11 +86,20 @@ export type QuestChainProps = {
   dailies: Daily[];
   setDailiesAction: React.Dispatch<React.SetStateAction<Daily[]>>;
   totalWeight: number;
+  isDailyFilteredAction: (daily: Daily) => Option<Daily>;
   onUpdateAction: () => void;
 };
 
 export function QuestChain(props: QuestChainProps): React.ReactElement {
-  const { user, chain, dailies, setDailiesAction, totalWeight, onUpdateAction } = props;
+  const {
+    user,
+    chain,
+    dailies,
+    setDailiesAction,
+    totalWeight,
+    isDailyFilteredAction,
+    onUpdateAction,
+  } = props;
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -101,7 +144,7 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
           isOpen ? <ArrowBigLeftDash size={20} /> : <ArrowBigUpDash size={20} />
         }
         startContent={<div className={"text-md ml-10 p-1 leading-5 text-white"}>{chain}</div>}
-        textValue={chain}
+        textValue={chain ?? ""}
       >
         <div className="flex flex-col items-center justify-center gap-4">
           <DndContext
@@ -115,21 +158,23 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
               items={dailies.map(d => d.sequence) || []}
               strategy={verticalListSortingStrategy}
             >
-              {dailies?.map(daily => (
-                <SortableItem
-                  key={`${daily.pointId}-${daily.sequence}`}
-                  className="w-[100%] flex-shrink-0"
-                  // @ts-expect-error: overwrite assigning number to id
-                  id={daily.sequence}
-                >
-                  <DailyCard
-                    daily={daily}
-                    totalWeight={totalWeight}
-                    user={user}
-                    onRefreshAction={onUpdateAction}
-                  />
-                </SortableItem>
-              ))}
+              {dailies
+                ?.filter(daily => isDailyFilteredAction(daily))
+                .map(daily => (
+                  <SortableItem
+                    key={`${daily.pointId}-${daily.sequence}`}
+                    className="w-[100%] flex-shrink-0"
+                    // @ts-expect-error: overwrite assigning number to id
+                    id={daily.sequence}
+                  >
+                    <DailyCard
+                      daily={daily}
+                      totalWeight={totalWeight}
+                      user={user}
+                      onRefreshAction={onUpdateAction}
+                    />
+                  </SortableItem>
+                ))}
             </SortableContext>
           </DndContext>
         </div>
@@ -219,5 +264,82 @@ export function SortableItem(props: React.ComponentProps<"div">): React.ReactEle
     <div ref={setNodeRef} className={props.className} style={style} {...attributes} {...listeners}>
       {props.children}
     </div>
+  );
+}
+
+type QuestsFilterProps = {
+  isArchivedQuestsFiltered: boolean;
+  setArchivedQuestsFilteredAction: (value: boolean) => Promise<void>;
+  isCompletedQuestsFiltered: boolean;
+  setCompletedQuestsFilteredAction: (value: boolean) => Promise<void>;
+  isOptionalQuestsFiltered: boolean;
+  setOptionalQuestsFilteredAction: (value: boolean) => Promise<void>;
+};
+
+function QuestsFilter(props: QuestsFilterProps): React.ReactElement {
+  const {
+    isArchivedQuestsFiltered,
+    setArchivedQuestsFilteredAction,
+    isCompletedQuestsFiltered,
+    setCompletedQuestsFilteredAction,
+    isOptionalQuestsFiltered,
+    setOptionalQuestsFilteredAction,
+  } = props;
+
+  return (
+    <heroui.Dropdown
+      className="dark relative z-100 mr-3 max-w-fit min-w-fit rounded-none bg-gray-900/90 p-2"
+      closeOnSelect={false}
+    >
+      <heroui.DropdownTrigger>
+        <heroui.Button
+          isIconOnly
+          className="box-content flex aspect-square"
+          radius="sm"
+          size="sm"
+          variant="light"
+        >
+          <ListFilterIcon size="18" />
+        </heroui.Button>
+      </heroui.DropdownTrigger>
+      <heroui.DropdownMenu aria-label="Static Actions" className="w-fit">
+        <heroui.DropdownItem key="archived" classNames={{ title: "text-xs text-white" }}>
+          <heroui.Switch
+            classNames={{ label: "text-xs text-white" }}
+            isSelected={!isArchivedQuestsFiltered}
+            size="sm"
+            onValueChange={async (isSelected: boolean) =>
+              await setArchivedQuestsFilteredAction(!isSelected)
+            }
+          >
+            Archived
+          </heroui.Switch>
+        </heroui.DropdownItem>
+        <heroui.DropdownItem key="completed" classNames={{ title: "text-xs text-white" }}>
+          <heroui.Switch
+            classNames={{ label: "text-xs text-white" }}
+            isSelected={!isCompletedQuestsFiltered}
+            size="sm"
+            onValueChange={async (isSelected: boolean) =>
+              await setCompletedQuestsFilteredAction(!isSelected)
+            }
+          >
+            Completed
+          </heroui.Switch>
+        </heroui.DropdownItem>
+        <heroui.DropdownItem key="optional" classNames={{ title: "text-xs text-white" }}>
+          <heroui.Switch
+            classNames={{ label: "text-xs text-white" }}
+            isSelected={!isOptionalQuestsFiltered}
+            size="sm"
+            onValueChange={async (isSelected: boolean) =>
+              await setOptionalQuestsFilteredAction(!isSelected)
+            }
+          >
+            Optional
+          </heroui.Switch>
+        </heroui.DropdownItem>
+      </heroui.DropdownMenu>
+    </heroui.Dropdown>
   );
 }
