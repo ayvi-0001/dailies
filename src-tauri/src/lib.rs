@@ -4,7 +4,7 @@ use tauri::Manager;
 use tokio::sync::Mutex;
 
 pub(crate) mod macros;
-crate::mod_flat!(dailies, state, db, errors);
+crate::mod_flat!(config, dailies, state, db, errors);
 
 #[cfg(target_os = "android")]
 mod android;
@@ -15,7 +15,7 @@ lazy_static::lazy_static! {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // Must be mutable in either of the following 2 cfg's apply.
+    // Must be mutable if either of the following 2 cfg's apply.
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
@@ -91,6 +91,16 @@ pub fn run() {
             android::export_db,
             #[cfg(target_os = "android")]
             android::import_db,
+            config::get_key_as_bool,
+            config::get_key_as_float,
+            config::get_key_as_int,
+            config::get_key_as_json,
+            config::get_key_as_string,
+            config::set_key_as_bool,
+            config::set_key_as_float,
+            config::set_key_as_int,
+            config::set_key_as_json,
+            config::set_key_as_string,
             dailies::delete_daily,
             dailies::get_quest_types,
             dailies::get_total_points,
