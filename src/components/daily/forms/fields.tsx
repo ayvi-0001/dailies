@@ -33,7 +33,7 @@ export function NameField(props: NameFieldProps): React.ReactElement {
       name="name"
       radius="none"
       type="text"
-      value={name || ""}
+      value={name ?? ""}
       variant="bordered"
       onValueChange={setNameAction}
     />
@@ -64,7 +64,7 @@ export function TypeField(props: TypeFieldProps): React.ReactElement {
       name="typeId"
       radius="none"
       type="text"
-      value={questType || ""}
+      value={questType ?? ""}
       variant="bordered"
       onInputChange={(value: string) => {
         setQuestTypesAction(questTypes.find(type => type.name == value)?.id || null);
@@ -96,7 +96,7 @@ export function ChainField(props: ChainFieldProps): React.ReactElement {
       isRequired
       className="text-sm text-white"
       classNames={{ base: "text-sm" }}
-      defaultInputValue={daily?.chain}
+      defaultInputValue={daily?.chain ?? ""}
       defaultItems={questChains.map(questChain => {
         return { key: questChain, name: questChain };
       })}
@@ -190,7 +190,7 @@ export function StreakTargetField({ daily }: { daily?: Daily }): React.ReactElem
     <heroui.NumberInput
       className="text-sm text-white"
       classNames={{ innerWrapper: "text-xs", label: "text-xs" }}
-      defaultValue={+`${daily?.streakTarget}`}
+      defaultValue={daily?.streakTarget ?? undefined}
       label="Streak Target"
       minValue={1}
       name="streakTarget"
@@ -264,7 +264,7 @@ export function DescriptionField({ daily }: { daily?: Daily }): React.ReactEleme
         input: "resize-y min-h-[40px] text-sm",
         innerWrapper: "text-xs",
       }}
-      defaultValue={daily?.description || ""}
+      defaultValue={daily?.description ?? ""}
       label="Description"
       name="description"
       radius="none"
@@ -351,7 +351,7 @@ export function DaysField(props: DaysFieldProps): React.ReactElement {
       orientation="horizontal"
       radius="none"
       size="md"
-      value={days || []}
+      value={days ?? []}
       onValueChange={setDaysAction}
     >
       {Object.values(Weekdays)

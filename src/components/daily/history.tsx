@@ -152,7 +152,9 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
     questTypes.find(type => `${type.id}` == `${daily.type}`) || null;
   const questTypeStyles: QuestTypeStyles = questType?.styles || DEFAULT_QUEST_TYPE_STYLES;
 
-  const [points, setPoints] = React.useState<Option<string>>(`${daily.points}`);
+  const [points, setPoints] = React.useState<Option<string>>(
+    daily.points !== null ? `${daily.points}` : null,
+  );
   const { isOpen, onOpen, onOpenChange } = heroui.useDisclosure();
   const { value: contextMenuOpen, toggle: toggleContextMenu } = ReactUse.useBoolean();
 

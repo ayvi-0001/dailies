@@ -37,7 +37,9 @@ type DailyCardProps = {
 export default function DailyCard(props: DailyCardProps): React.ReactNode {
   const { user, daily, totalWeight, onRefreshAction } = props;
 
-  const [points, setPoints] = React.useState<Option<string>>(`${daily.points}`);
+  const [points, setPoints] = React.useState<Option<string>>(
+    daily.points !== null ? `${daily.points}` : null,
+  );
 
   const { value: historyIsOpen, toggle: toggleHistory } = ReactUse.useBoolean();
   const { value: contextMenuOpen, toggle: toggleContextMenu } = ReactUse.useBoolean();

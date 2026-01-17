@@ -233,7 +233,7 @@ const InputCell = (props: InputCellProps): React.ReactElement => {
           inputMode="numeric"
           pattern="\d*\.?\d*"
           type="number"
-          value={`${points ?? ""}`}
+          value={points ?? ""}
           onBlur={handleOnBlur}
           onBlurCapture={handleOnBlurCapture}
           onChange={handleOnChange}
