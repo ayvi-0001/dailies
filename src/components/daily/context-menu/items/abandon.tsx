@@ -28,7 +28,7 @@ export default function AbandonDailyMenuOption(props: MenuOptionProps) {
     >
       <div className="flex flex-row gap-2">
         <BookXIcon size={2} stroke="#e3e3e3" />
-        <p className="text-xs text-white">{menuTitle ?? "Abandon Daily"}</p>
+        <p className="text-xs text-white">{menuTitle ?? "Abandon"}</p>
       </div>
     </RadixContextMenu.Item>
   );
