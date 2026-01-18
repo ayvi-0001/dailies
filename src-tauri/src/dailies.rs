@@ -123,7 +123,9 @@ pub async fn get_total_points(
                "dailies_weighted"
              WHERE
                user = $1
-               AND date = $2;
+               AND date = $2
+               AND archived IS NULL
+               AND points IS NOT NULL;
         "#,
         user,
         date,

@@ -36,7 +36,7 @@ export default function ExpBar(): React.ReactNode {
         <Progress<number> deps={[countRefreshDailies]} progress={value} />
       </div>
       <div>
-        <p className="text-sm font-bold text-white">{totalWeight}</p>
+        <p className="text-sm font-bold text-white">{totalWeight !== 0 && (totalWeight ?? "")}</p>
       </div>
     </div>
   );
@@ -44,7 +44,7 @@ export default function ExpBar(): React.ReactNode {
   const focusContent: React.ReactElement = (
     <div className="top-2 rounded-full bg-black/60 px-4 py-1">
       <span className="text-xs font-bold text-white">
-        <span className="pr-1">{totalPoints.toPrecision(2)}</span>
+        <span className="pr-1">{totalPoints.toFixed(2)}</span>
         <span>{` / `}</span>
         <span>{totalWeight}</span>
       </span>
