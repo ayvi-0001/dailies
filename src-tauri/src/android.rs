@@ -1,11 +1,8 @@
 #![cfg(target_os = "android")]
 
-use std::path::Path;
-
 use futures::TryFutureExt;
-use tauri::{Emitter, EventLoopMessage, Manager, Wry};
-use tauri_plugin_android_fs::{AndroidFsExt, Entry, Error, FileUri, ImageFormat, PrivateDir, PublicDir, PublicGeneralPurposeDir, PublicImageDir, Result, Size, api::api_async::{AndroidFs, PublicStorage}};
-use tauri_plugin_fs::FilePath;
+use tauri::{Emitter, Wry};
+use tauri_plugin_android_fs::{AndroidFsExt, PublicGeneralPurposeDir, Result, api::api_async::AndroidFs};
 use tokio::sync::{Mutex, MutexGuard};
 
 use crate::{errors::ErrorMessage, state};
@@ -32,10 +29,10 @@ pub async fn export_db(
 
     sqlx::query(&format!(
         r#"
-            ATTACH DATABASE '{}' AS export_db;
-            CREATE TABLE export_db.quests AS SELECT * FROM quests;
-            CREATE TABLE export_db.points AS SELECT * FROM points;
-            DETACH DATABASE 'export_db';
+            ATTACH DATABASE '{}' AS "export_db";
+            CREATE TABLE "export_db.quests" AS SELECT * FROM quests;
+            CREATE TABLE "export_db.points" AS SELECT * FROM points;
+            DETACH DATABASE "export_db";
         "#,
         &format!("/storage/emulated/0/Download/{relative_path}/dailies.db")
     ))
