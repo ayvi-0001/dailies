@@ -6,10 +6,9 @@ import { today } from "@internationalized/date";
 import { useOnceEffect } from "@reactuses/core";
 import ok from "assert";
 
-import * as User from "@/app/providers/user";
+import { User, useState as useUserState } from "@/app/providers/user";
 import { LOCAL_TZ } from "@/lib/dates";
 import { invoke } from "@/lib/tauri";
-import { Option } from "@/types/option";
 
 import { Daily } from "../types";
 import QuestTypesProvider from "./quest-types";
@@ -40,8 +39,7 @@ export default function DailiesProvider({
   const [totalWeight, setTotalWeight] = React.useState<number>(0);
   const [countRefreshDailies, setCountRefreshDailies] = React.useState<number>(0);
 
-  const userState: User.UserState = User.useState();
-  const user: Option<User.User> = userState.user;
+  const user: User = useUserState().user!;
 
   useOnceEffect(() => {
     const now: string = today(LOCAL_TZ).toString();

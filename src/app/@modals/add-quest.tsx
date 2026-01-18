@@ -3,11 +3,12 @@
 import * as React from "react";
 
 import * as heroui from "@heroui/react";
+import { HTMLMotionProps } from "framer-motion";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { RedirectType, redirect, useRouter } from "next/navigation";
 
-import * as User from "@/app/providers/user";
 import addQuest, { AddQuestErrors, AddQuestState } from "@/actions/add-quest";
+import { UserState, useState as useUserState } from "@/app/providers/user";
 import AddQuestForm from "@/components/daily/forms/add";
 import { QuestType, useQuestTypes } from "@/components/daily/providers/quest-types";
 import { Option } from "@/types/option";
@@ -15,7 +16,7 @@ import { Option } from "@/types/option";
 export default function Modal(): React.ReactElement {
   const router: AppRouterInstance = useRouter();
 
-  const userState: User.UserState = User.useState();
+  const userState: UserState = useUserState();
   const questTypes: QuestType[] = useQuestTypes();
 
   const [_, action, pending] = React.useActionState(
@@ -47,6 +48,13 @@ export default function Modal(): React.ReactElement {
     isDisabled: false,
   });
 
+  const motionProps: Omit<HTMLMotionProps<"div">, "ref"> = {
+    variants: {
+      enter: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" } },
+      exit: { y: -20, opacity: 0, transition: { duration: 0.2, ease: "easeIn" } },
+    },
+  };
+
   return (
     <heroui.Modal
       ref={draggableRef}
@@ -58,12 +66,7 @@ export default function Modal(): React.ReactElement {
       className="dark z-1000 w-9/10 text-white select-none"
       defaultOpen={true}
       isDismissable={false}
-      motionProps={{
-        variants: {
-          enter: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" } },
-          exit: { y: -20, opacity: 0, transition: { duration: 0.2, ease: "easeIn" } },
-        },
-      }}
+      motionProps={motionProps}
       placement="center"
       radius="none"
       shadow="lg"

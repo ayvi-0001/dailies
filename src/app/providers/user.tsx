@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import logout from "@/actions/logout";
 import { decrypt } from "@/lib/session";
+import { Option } from "@/types/option";
 
 export type User = {
   id: number;
@@ -26,21 +27,21 @@ export type Session = {
 };
 
 export type UserState = {
-  user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  user: Option<User>;
+  setUser: React.Dispatch<React.SetStateAction<Option<User>>>;
 };
 
-const UserContext = React.createContext<UserState | null>(null);
+const UserContext = React.createContext<Option<UserState>>(null);
 
 export default function UserProvider({
   children,
 }: Readonly<{ children?: React.ReactNode }>): React.ReactNode {
-  const [user, setUser] = React.useState<User | null>(null);
+  const [user, setUser] = React.useState<Option<User>>(null);
 
   React.useEffect(() => {
     const get_session = async () => {
       try {
-        const session = await invoke<string | null>("get_session");
+        const session = await invoke<Option<string>>("get_session");
         const token = await decrypt<DecodedToken>(session);
         const payload = { username: token?.userName };
         await invoke<User>("get_user", payload).then(result => setUser(result));
@@ -57,9 +58,9 @@ export default function UserProvider({
 }
 
 export function useState<
-  State = { user: User | null; setUser: React.Dispatch<React.SetStateAction<User>> },
+  State = { user: Option<User>; setUser: React.Dispatch<React.SetStateAction<User>> },
 >(): State {
-  const context = React.useContext<UserState | null>(UserContext);
+  const context = React.useContext<Option<UserState>>(UserContext);
   ok(context, new Error("User state was used outside of its Provider"));
   return context as State;
 }

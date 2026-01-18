@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { ScrollShadow } from "@heroui/react";
 
-import * as User from "@/app/providers/user";
+import { User, UserState, useState as useUserState } from "@/app/providers/user";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
@@ -13,7 +13,7 @@ import { QuestChain, QuestsHeader } from "./quest-chain";
 import { Daily, Quest } from "./types";
 
 export default function QuestList({ title }: { title: string }): React.ReactNode {
-  const userState: User.UserState = User.useState();
+  const userState: UserState = useUserState();
   const dailiesState: DailiesState = useDailies();
 
   const {
@@ -76,7 +76,7 @@ export default function QuestList({ title }: { title: string }): React.ReactNode
   );
 }
 
-function useQuestListConfig(user: User.User): {
+function useQuestListConfig(user: User): {
   isArchivedQuestsFiltered: boolean;
   isCompletedQuestsFiltered: boolean;
   isOptionalQuestsFiltered: boolean;
