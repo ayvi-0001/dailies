@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { getLocalTimeZone, today } from "@internationalized/date";
-import { BookPlusIcon, ListRestartIcon, LogOutIcon } from "lucide-react";
+import { BookPlusIcon, ChartAreaIcon, ListRestartIcon, LogOutIcon } from "lucide-react";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -43,6 +43,12 @@ export default function App(): React.ReactElement {
         await truncate_sessions();
         router.push("/login");
       },
+    },
+    {
+      icon: <ChartAreaIcon size={16} />,
+      label: <p className="text-xs">Stats</p>,
+      key: "add",
+      buttonAction: () => updateParam([{ key: "modal", value: ModalParam.Stats }]),
     },
     {
       icon: <BookPlusIcon size={14} />,

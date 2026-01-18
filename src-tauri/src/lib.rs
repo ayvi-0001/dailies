@@ -102,6 +102,7 @@ pub fn run() {
             config::set_key_as_json,
             config::set_key_as_string,
             dailies::delete_daily,
+            dailies::get_dailies_graph_data,
             dailies::get_quest_types,
             dailies::get_total_points,
             dailies::handle_point_change,

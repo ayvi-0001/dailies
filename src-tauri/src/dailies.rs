@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use anyhow::Result;
 use chrono::{DateTime, Duration, Local, NaiveDate, NaiveDateTime, NaiveTime};
+use serde::Deserialize;
 use serde_json::Value;
 use sqlx::{Acquire, Sqlite, SqliteConnection, Transaction, pool::PoolConnection, types::Json};
 use tauri::Manager;
@@ -1028,4 +1029,115 @@ pub async fn backfill_dailies(app_handle: tauri::AppHandle) -> Result<(), crate:
     }
 
     Ok(())
+}
+
+#[allow(clippy::upper_case_acronyms)]
+#[derive(Debug, Deserialize)]
+pub(crate) enum GraphType {
+    YTD,
+    Last365,
+}
+
+#[tauri::command(async, rename_all = "snake_case")]
+pub async fn get_dailies_graph_data(
+    state: tauri::State<'_, Mutex<state::AppState>>,
+    user: &str,
+    graph_type: GraphType,
+) -> Result<Vec<Vec<Option<f64>>>, crate::errors::Error> {
+    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+    let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
+    let conn: &mut SqliteConnection = pool.acquire().await?;
+
+    const WEEKS: usize = 53;
+    const DAYS_PER_WEEK: usize = 7;
+
+    let mut matrix: Vec<Vec<Option<f64>>> = vec![vec![None; DAYS_PER_WEEK]; WEEKS];
+
+    let values: Vec<Option<f64>> = match graph_type {
+        GraphType::YTD => {
+            sqlx::query_scalar!(
+                r#"
+                    WITH RECURSIVE date_range("date") AS (
+                      VALUES(DATE(DATE(CURRENT_TIMESTAMP, 'localtime'), 'start of year'))
+                      UNION ALL
+                      SELECT DATE("date", '+1 day')
+                      FROM
+                        date_range
+                      WHERE
+                        "date" < DATE(DATE(CURRENT_TIMESTAMP, 'localtime'), 'start of year', '+12 months', '-1 day')
+                    )
+                    SELECT SUM(dw.points_weighted) / SUM(dw.weight) AS "value: f64"
+                    FROM
+                      date_range dr
+                    LEFT JOIN
+                        dailies_weighted dw
+                    ON
+                        dw.date = dr.date
+                    WHERE
+                        user = $1
+                        AND archived IS NULL
+                        AND points IS NOT NULL
+                    GROUP BY
+                        dr.date
+                    ORDER BY
+                        dr.date DESC;
+                "#,
+                user,
+            )
+            .fetch_all(&mut *conn)
+            .await?
+        }
+        GraphType::Last365 => {
+            sqlx::query_scalar!(
+                r#"
+                    WITH RECURSIVE date_range("date") AS (
+                      VALUES(DATE(DATE(CURRENT_TIMESTAMP, 'localtime') - '365 day'))
+                      UNION ALL
+                      SELECT DATE("date", '+1 day')
+                      FROM
+                        date_range
+                      WHERE
+                        "date" <= DATE(CURRENT_TIMESTAMP, 'localtime')
+                    )
+                    SELECT SUM(dw.points_weighted) / SUM(dw.weight) AS "value: f64"
+                    FROM
+                      date_range dr
+                    LEFT JOIN
+                        dailies_weighted dw
+                    ON
+                        dw.date = dr.date
+                    WHERE
+                        user = $1
+                        AND archived IS NULL
+                        AND points IS NOT NULL
+                    GROUP BY
+                        dr.date
+                    ORDER BY
+                        dr.date DESC
+                    LIMIT 365;
+                "#,
+                user,
+            )
+            .fetch_all(&mut *conn)
+            .await?
+        }
+    };
+
+    // let chunks: Vec<Vec<f64>> = values
+    //     .chunks_exact(7)
+    //     .map(|s| s.to_vec())
+    //     .collect();
+    let chunks: Vec<&[Option<f64>]> = values.chunks(7).collect();
+
+    for (column_idx, chunk) in chunks.iter().enumerate() {
+        for (row_idx, value) in chunk.iter().enumerate() {
+            if let Some(v) = value {
+                let mut owned_value = v.to_owned();
+                owned_value *= 100.0;
+                matrix[column_idx][row_idx] = Some(owned_value);
+            }
+        }
+    }
+
+    Ok(matrix)
 }
