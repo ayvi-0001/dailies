@@ -40,13 +40,12 @@ export default function DailiesProvider({
   const [countRefreshDailies, setCountRefreshDailies] = React.useState<number>(0);
 
   const user: User = useUserState().user!;
+  const now: string = today(LOCAL_TZ).toString();
 
   useOnceEffect(() => {
-    const now: string = today(LOCAL_TZ).toString();
-
     const query_dailies = async (): Promise<void> => {
       await invoke<Daily[]>("query_dailies", {
-        user: user?.name,
+        user: user.name,
         quest_id: null, // pull all dailies
         start_date: now,
         end_date: now,
@@ -54,23 +53,25 @@ export default function DailiesProvider({
         .then(result => setDailies(result))
         .catch(console.error);
     };
-
     query_dailies();
+  }, [user, countRefreshDailies]);
 
+  useOnceEffect(() => {
     const query_quest_chains = async (): Promise<void> => {
-      if (user)
-        await invoke<string[]>("query_quest_chains", { user_id: user!.id })
-          .then(result => setQuestChains(result))
-          .catch(console.error);
+      await invoke<string[]>("query_quest_chains", { user_id: user.id })
+        .then(result => setQuestChains(result))
+        .catch(console.error);
     };
     query_quest_chains();
+  }, [user, countRefreshDailies]);
 
+  useOnceEffect(() => {
     const get_total_points = async (): Promise<void> => {
       await invoke<{
         total_points: number;
         total_weight: number;
       }>("get_total_points", {
-        user: user?.name,
+        user: user.name,
         date: now,
       })
         .then(result => {
