@@ -125,7 +125,6 @@ pub async fn get_total_points(
              WHERE
                user = $1
                AND date = $2
-               AND archived IS NULL
                AND points IS NOT NULL;
         "#,
         user,
@@ -1075,7 +1074,6 @@ pub async fn get_dailies_graph_data(
                         dw.date = dr.date
                     WHERE
                         user = $1
-                        AND archived IS NULL
                         AND points IS NOT NULL
                     GROUP BY
                         dr.date
@@ -1108,7 +1106,6 @@ pub async fn get_dailies_graph_data(
                         dw.date = dr.date
                     WHERE
                         user = $1
-                        AND archived IS NULL
                         AND points IS NOT NULL
                     GROUP BY
                         dr.date
