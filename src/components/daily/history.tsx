@@ -118,19 +118,25 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
       size={10}
       style={{ scrollbarWidth: "none" }}
     >
-      <React.Suspense fallback={<div>Loading...</div>}>
-        {dailies.map((daily: Daily, index: number) => (
-          <div key={`${daily.pointId}-${index}`} className="mr-2 mb-4 ml-2">
-            <HistoryDailyCard
-              daily={daily}
-              index={index}
-              questTypes={questTypes}
-              totalWeight={totalWeight}
-              user={user}
-              onRefreshAction={triggerRefreshDailies}
-            />
+      <React.Suspense fallback={<heroui.Spinner color="secondary" variant="wave" />}>
+        {dailies?.length == 0 ? (
+          <div className="flex min-h-full min-w-full justify-center">
+            <heroui.Spinner color="secondary" variant="wave" />
           </div>
-        ))}
+        ) : (
+          dailies?.map((daily: Daily, index: number) => (
+            <div key={`${daily.pointId}-${index}`} className="mr-2 mb-4 ml-2">
+              <HistoryDailyCard
+                daily={daily}
+                index={index}
+                questTypes={questTypes}
+                totalWeight={totalWeight}
+                user={user}
+                onRefreshAction={triggerRefreshDailies}
+              />
+            </div>
+          ))
+        )}
       </React.Suspense>
     </ScrollShadow>
   );
