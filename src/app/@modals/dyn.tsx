@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 
 import { ModalParam } from "@/app/@modals/params";
+import UserProvider from "@/app/providers/user";
 import DailiesProvider from "@/components/daily/providers/dailies";
 
 export default function App(): React.ReactElement {
@@ -18,9 +19,11 @@ export default function App(): React.ReactElement {
         { ssr: false },
       );
       return (
-        <DailiesProvider>
-          <Modal />
-        </DailiesProvider>
+        <UserProvider>
+          <DailiesProvider>
+            <Modal />
+          </DailiesProvider>
+        </UserProvider>
       );
     }
     case ModalParam.Stats: {
@@ -29,9 +32,11 @@ export default function App(): React.ReactElement {
         { ssr: false },
       );
       return (
-        <DailiesProvider>
-          <Modal />
-        </DailiesProvider>
+        <UserProvider>
+          <DailiesProvider>
+            <Modal />
+          </DailiesProvider>
+        </UserProvider>
       );
     }
     default: {

@@ -5,7 +5,6 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 import { useRouter } from "next/navigation";
 
 import AppMetaProvider from "./app-meta";
-import UserProvider from "./user";
 
 declare module "@react-types/shared" {
   interface RouterConfig {
@@ -20,9 +19,7 @@ export default function Providers({
 
   return (
     <HeroUIProvider navigate={router.push}>
-      <AppMetaProvider>
-        <UserProvider>{children}</UserProvider>
-      </AppMetaProvider>
+      <AppMetaProvider>{children}</AppMetaProvider>
     </HeroUIProvider>
   );
 }

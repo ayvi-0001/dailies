@@ -27,7 +27,7 @@ export type Session = {
 };
 
 export type UserState = {
-  user: Option<User>;
+  user: User;
   setUser: React.Dispatch<React.SetStateAction<Option<User>>>;
 };
 
@@ -54,11 +54,12 @@ export default function UserProvider({
     get_session();
   }, []);
 
+  if (!user) return <></>;
   return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
 }
 
 export function useState<
-  State = { user: Option<User>; setUser: React.Dispatch<React.SetStateAction<User>> },
+  State = { user: User; setUser: React.Dispatch<React.SetStateAction<User>> },
 >(): State {
   const context = React.useContext<Option<UserState>>(UserContext);
   ok(context, new Error("User state was used outside of its Provider"));

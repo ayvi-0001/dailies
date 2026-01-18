@@ -39,7 +39,7 @@ export default function DailiesProvider({
   const [totalWeight, setTotalWeight] = React.useState<number>(0);
   const [countRefreshDailies, setCountRefreshDailies] = React.useState<number>(0);
 
-  const user: User = useUserState().user!;
+  const user: User = useUserState().user;
   const now: string = today(LOCAL_TZ).toString();
 
   useOnceEffect(() => {
