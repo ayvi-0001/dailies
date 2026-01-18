@@ -16,6 +16,10 @@ withGlobalTauri = true
 [app.security]
 csp = "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'"
 
+[app.security.headers]
+Access-Control-Allow-Headers = "*"
+Cross-Origin-Resource-Policy = "cross-origin"
+
 [app.security.assetProtocol]
 enable = true
 
