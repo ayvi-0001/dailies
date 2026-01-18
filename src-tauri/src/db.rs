@@ -95,6 +95,12 @@ pub async fn create_user<'a>(
     .fetch_one(&state.db.pool)
     .await?;
 
+    let result: SqliteQueryResult = sqlx::query_file!("queries/new-user-config.sql", user.id,)
+        .execute(&state.db.pool)
+        .await?;
+
+    log::info!("{result:?}");
+
     Ok(user)
 }
 
