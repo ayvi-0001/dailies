@@ -4,6 +4,7 @@ import { Chip } from "@heroui/react";
 import { Divider } from "@heroui/react";
 
 import { Weekdays } from "@/lib/dates";
+import { cn } from "@/lib/utils";
 import type { Option } from "@/types/option";
 
 import { QuestType, QuestTypeStyles } from "./providers/quest-types";
@@ -59,10 +60,12 @@ export default function Details(props: DetailsProps): React.ReactElement {
     elements.push(
       <Chip
         as={"p"}
-        className="h-fit px-0 text-[0.55rem] leading-none tracking-tighter"
         classNames={{
-          base: questTypeStyles.typeBadgeClass as string,
-          content: "font-semibold drop-shadow-xs shadow-black",
+          base: cn(questTypeStyles.typeBadgeClass as string, "h-3"),
+          content: cn(
+            "font-semibold drop-shadow-xs shadow-black px-0 ",
+            "text-[0.55rem] leading-none tracking-tighter",
+          ),
         }}
         size="sm"
       >
@@ -111,7 +114,7 @@ export default function Details(props: DetailsProps): React.ReactElement {
       }
     }
 
-    if (days) {
+    if (days.length > 0) {
       elements.push(
         <div key={elements.length + 1} className="empty:h-6">
           <p className="text-[0.55rem] leading-none font-bold tracking-tighter text-nowrap text-ellipsis">
