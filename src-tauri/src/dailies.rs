@@ -10,7 +10,7 @@ use tokio::sync::{Mutex, MutexGuard};
 
 crate::mod_flat!(daily, enums, quest, points);
 
-use crate::{dailies::{daily::Daily, enums::SortDirection, points::TotalPointEval, quest::{Quest, QuestSequence, QuestType, QuestTypeRecord, QuestTypeStyles}}, db::User, state, state::app_handle};
+use crate::{dailies::{daily::Daily, enums::SortDirection, points::TotalPointEval, quest::{Quest, QuestChain, QuestSequence, QuestType, QuestTypeRecord, QuestTypeStyles}}, db::User, state, state::app_handle};
 
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn query_dailies(
@@ -81,12 +81,18 @@ pub async fn query_dailies(
 pub async fn query_quest_chains(
     state: tauri::State<'_, Mutex<state::AppState>>,
     user_id: i64,
-) -> Result<Vec<String>, crate::errors::Error> {
+) -> Result<Vec<QuestChain>, crate::errors::Error> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
 
-    let rows = sqlx::query_scalar!(
+    let rows = sqlx::query_as!(
+        QuestChain,
         r#"
-            SELECT chain AS "chain!: String"
+            SELECT
+              id AS "id!: i64",
+              user_id AS "user_id!: i64",
+              chain AS "chain!: String",
+              sequence AS "sequence!: i64",
+              collapsed AS "collapsed!: bool"
             FROM
               "quest_chains"
             WHERE
@@ -1137,4 +1143,48 @@ pub async fn get_dailies_graph_data(
     }
 
     Ok(matrix)
+}
+
+#[tauri::command(async, rename_all = "snake_case")]
+pub async fn get_quest_chain_collapsed(
+    state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
+    chain: &str,
+) -> Result<bool, crate::errors::Error> {
+    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+    let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
+    let conn: &mut SqliteConnection = pool.acquire().await?;
+
+    let value: bool = sqlx::query_scalar!(
+        r#"SELECT collapsed AS "collapsed!: bool" FROM "quest_chains" WHERE user_id = $1 AND chain = $2;"#,
+        user_id,
+        chain,
+    )
+    .fetch_one(&mut *conn)
+    .await?;
+
+    Ok(value)
+}
+
+#[tauri::command(async, rename_all = "snake_case")]
+pub async fn set_quest_chain_collapsed(
+    state: tauri::State<'_, Mutex<state::AppState>>,
+    user_id: i64,
+    chain: &str,
+    value: bool,
+) -> Result<(), crate::errors::Error> {
+    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+    let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
+    let conn: &mut SqliteConnection = pool.acquire().await?;
+
+    sqlx::query!(
+        r#"UPDATE "quest_chains" SET collapsed = $1 WHERE user_id = $2 AND chain = $3;"#,
+        value,
+        user_id,
+        chain,
+    )
+    .execute(&mut *conn)
+    .await?;
+
+    Ok(())
 }

@@ -10,7 +10,7 @@ import { User, useState as useUserState } from "@/app/providers/user";
 import { LOCAL_TZ } from "@/lib/dates";
 import { invoke } from "@/lib/tauri";
 
-import { Daily } from "../types";
+import { Daily, QuestChain } from "../types";
 import QuestTypesProvider from "./quest-types";
 
 export const dynamic = "force-dynamic";
@@ -58,8 +58,8 @@ export default function DailiesProvider({
 
   useOnceEffect(() => {
     const query_quest_chains = async (): Promise<void> => {
-      await invoke<string[]>("query_quest_chains", { user_id: user.id })
-        .then(result => setQuestChains(result))
+      await invoke<QuestChain[]>("query_quest_chains", { user_id: user.id })
+        .then(quest_chains => setQuestChains(quest_chains.map(value => value.chain)))
         .catch(console.error);
     };
     query_quest_chains();

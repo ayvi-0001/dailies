@@ -111,3 +111,13 @@ pub struct QuestSequence {
     pub id: String,
     pub sequence: i64,
 }
+
+#[derive(Default, Serialize, Deserialize, sqlx::Decode, sqlx::Encode, sqlx::FromRow)]
+#[serde_as]
+pub struct QuestChain {
+    pub id: i64,
+    pub user_id: i64,
+    pub chain: String,
+    pub sequence: i64,
+    pub collapsed: bool,
+}

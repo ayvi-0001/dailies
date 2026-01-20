@@ -17,16 +17,18 @@ export default function QuestList({ title }: { title: string }): React.ReactNode
   const dailiesState: DailiesState = useDailies();
 
   const {
+    isAllQuestChainsCollapsed,
     isArchivedQuestsFiltered,
     isCompletedQuestsFiltered,
+    isDailyFilteredAction,
     isOptionalQuestsFiltered,
     setArchivedQuestsFilteredAction,
     setCompletedQuestsFilteredAction,
+    setIsAllQuestChainCollapsedAction,
     setOptionalQuestsFilteredAction,
-    isDailyFilteredAction,
   } = useQuestListConfig(userState.user);
 
-  const groupedDailies = dailiesState.dailies.reduce(
+  const groupedDailies: Record<string, Option<Daily[]>> = dailiesState.dailies.reduce(
     (accumulator, currentItem) => {
       const category = currentItem.chain;
       if (!accumulator[category]) {
@@ -42,11 +44,13 @@ export default function QuestList({ title }: { title: string }): React.ReactNode
     <div className="flex h-full w-full flex-col gap-2 overflow-hidden" id="dailies-list">
       <div className="mx-2">
         <QuestsHeader
+          isAllQuestChainsCollapsed={isAllQuestChainsCollapsed}
           isArchivedQuestsFiltered={isArchivedQuestsFiltered}
           isCompletedQuestsFiltered={isCompletedQuestsFiltered}
           isOptionalQuestsFiltered={isOptionalQuestsFiltered}
           setArchivedQuestsFilteredAction={setArchivedQuestsFilteredAction}
           setCompletedQuestsFilteredAction={setCompletedQuestsFilteredAction}
+          setIsAllQuestChainCollapsedAction={setIsAllQuestChainCollapsedAction}
           setOptionalQuestsFilteredAction={setOptionalQuestsFilteredAction}
           title={title}
         />
@@ -64,6 +68,7 @@ export default function QuestList({ title }: { title: string }): React.ReactNode
             key={idx}
             chain={chain}
             dailies={groupedDailies[chain] ?? []}
+            isAllQuestChainsCollapsed={isAllQuestChainsCollapsed}
             isDailyFilteredAction={isDailyFilteredAction}
             setDailiesAction={dailiesState.setDailies}
             totalWeight={dailiesState.totalWeight}
@@ -77,17 +82,20 @@ export default function QuestList({ title }: { title: string }): React.ReactNode
 }
 
 function useQuestListConfig(user: User): {
+  isAllQuestChainsCollapsed: boolean;
   isArchivedQuestsFiltered: boolean;
   isCompletedQuestsFiltered: boolean;
+  isDailyFilteredAction: (daily: Daily) => Option<Daily>;
   isOptionalQuestsFiltered: boolean;
   setArchivedQuestsFilteredAction: (value: boolean) => Promise<void>;
   setCompletedQuestsFilteredAction: (value: boolean) => Promise<void>;
+  setIsAllQuestChainCollapsedAction: (value: boolean) => Promise<void>;
   setOptionalQuestsFilteredAction: (value: boolean) => Promise<void>;
-  isDailyFilteredAction: (daily: Daily) => Option<Daily>;
 } {
   const [isArchivedQuestsFiltered, setArchivedQuestsFiltered] = React.useState(false);
   const [isCompletedQuestsFiltered, setCompletedQuestsFiltered] = React.useState(false);
   const [isOptionalQuestsFiltered, setOptionalQuestsFiltered] = React.useState(false);
+  const [isAllQuestChainsCollapsed, setIsAllQuestChainCollapsed] = React.useState(false);
 
   React.useEffect(() => {
     const get_config_is_archived_quests_filtered = async () => {
@@ -119,6 +127,16 @@ function useQuestListConfig(user: User): {
     get_config_is_optional_quests_filtered();
   }, [user.id]);
 
+  React.useEffect(() => {
+    const get_config_is_quest_chains_collapsed = async () => {
+      await invoke<boolean>("get_key_as_bool", {
+        user_id: user.id,
+        key: "quest-list--is-quest-chains-collapsed",
+      }).then(result => setIsAllQuestChainCollapsed(result || false));
+    };
+    get_config_is_quest_chains_collapsed();
+  }, [user.id]);
+
   const setArchivedQuestsFilteredAction = async (value: boolean): Promise<void> => {
     setArchivedQuestsFiltered(value);
     await invoke<boolean>("set_key_as_bool", {
@@ -146,6 +164,15 @@ function useQuestListConfig(user: User): {
     });
   };
 
+  const setIsAllQuestChainCollapsedAction = async (value: boolean): Promise<void> => {
+    setIsAllQuestChainCollapsed(value);
+    await invoke<boolean>("set_key_as_bool", {
+      user_id: user.id,
+      key: "quest-list--is-quest-chains-collapsed",
+      value: value,
+    });
+  };
+
   const isDailyFilteredAction = (daily: Daily): Option<Daily> => {
     if (isArchivedQuestsFiltered && !!daily.archived) {
       return null;
@@ -159,12 +186,14 @@ function useQuestListConfig(user: User): {
   };
 
   return {
+    isAllQuestChainsCollapsed,
     isArchivedQuestsFiltered,
     isCompletedQuestsFiltered,
+    isDailyFilteredAction,
     isOptionalQuestsFiltered,
     setArchivedQuestsFilteredAction,
     setCompletedQuestsFilteredAction,
+    setIsAllQuestChainCollapsedAction,
     setOptionalQuestsFilteredAction,
-    isDailyFilteredAction,
   };
 }

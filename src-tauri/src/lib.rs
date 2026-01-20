@@ -125,6 +125,8 @@ pub fn run() {
             dailies::update_total,
             dailies::update_type,
             dailies::update_weight,
+            dailies::get_quest_chain_collapsed,
+            dailies::set_quest_chain_collapsed,
             db::create_user,
             db::delete_session,
             db::get_session,

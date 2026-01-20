@@ -51,6 +51,14 @@ export type Quest = {
   streak: Readonly<Option<number>>;
 };
 
+export type QuestChain = {
+  id: Readonly<number>;
+  user_id: Readonly<number>;
+  chain: string;
+  sequence: number;
+  collapsed: boolean;
+};
+
 export namespace Quest {
   export enum Type {
     /** Daily */

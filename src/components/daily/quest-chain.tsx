@@ -23,7 +23,16 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Accordion, AccordionItem } from "@heroui/react";
-import { ArrowBigLeftDash, ArrowBigUpDash, ListFilterIcon, SwordsIcon } from "lucide-react";
+import clsx from "clsx";
+import { HTMLMotionProps } from "framer-motion";
+import {
+  ArrowBigLeftDash,
+  ArrowBigUpDash,
+  ListChevronsDownUpIcon,
+  ListChevronsUpDownIcon,
+  ListFilterIcon,
+  SwordsIcon,
+} from "lucide-react";
 
 import { User } from "@/app/providers/user";
 import { invoke } from "@/lib/tauri";
@@ -34,22 +43,26 @@ import { Daily } from "./types";
 
 type QuestsHeaderProps = {
   title: string;
+  isAllQuestChainsCollapsed: boolean;
   isArchivedQuestsFiltered: boolean;
-  setArchivedQuestsFilteredAction: (value: boolean) => Promise<void>;
   isCompletedQuestsFiltered: boolean;
-  setCompletedQuestsFilteredAction: (value: boolean) => Promise<void>;
   isOptionalQuestsFiltered: boolean;
+  setArchivedQuestsFilteredAction: (value: boolean) => Promise<void>;
+  setCompletedQuestsFilteredAction: (value: boolean) => Promise<void>;
+  setIsAllQuestChainCollapsedAction: (value: boolean) => Promise<void>;
   setOptionalQuestsFilteredAction: (value: boolean) => Promise<void>;
 };
 
 export function QuestsHeader(props: QuestsHeaderProps): React.ReactNode {
   const {
     title,
+    isAllQuestChainsCollapsed,
     isArchivedQuestsFiltered,
-    setArchivedQuestsFilteredAction,
     isCompletedQuestsFiltered,
-    setCompletedQuestsFilteredAction,
     isOptionalQuestsFiltered,
+    setArchivedQuestsFilteredAction,
+    setCompletedQuestsFilteredAction,
+    setIsAllQuestChainCollapsedAction,
     setOptionalQuestsFilteredAction,
   } = props;
 
@@ -65,8 +78,12 @@ export function QuestsHeader(props: QuestsHeaderProps): React.ReactNode {
         <div className="flex grow">
           <p className="text-xl leading-none font-bold text-black text-shadow-sm">{title}</p>
         </div>
-        <div className="mr-2">
-          <QuestsFilter
+        <div className="mr-2 flex flex-row">
+          <QuestCollapseButton
+            isAllQuestChainsCollapsed={isAllQuestChainsCollapsed}
+            setIsAllQuestChainCollapsedAction={setIsAllQuestChainCollapsedAction}
+          />
+          <QuestsFilterMenu
             isArchivedQuestsFiltered={isArchivedQuestsFiltered}
             isCompletedQuestsFiltered={isCompletedQuestsFiltered}
             isOptionalQuestsFiltered={isOptionalQuestsFiltered}
@@ -81,24 +98,26 @@ export function QuestsHeader(props: QuestsHeaderProps): React.ReactNode {
 }
 
 export type QuestChainProps = {
-  user: User;
   chain: string;
   dailies: Daily[];
-  setDailiesAction: React.Dispatch<React.SetStateAction<Daily[]>>;
-  totalWeight: number;
+  isAllQuestChainsCollapsed: boolean;
   isDailyFilteredAction: (daily: Daily) => Option<Daily>;
   onUpdateAction: () => void;
+  setDailiesAction: React.Dispatch<React.SetStateAction<Daily[]>>;
+  totalWeight: number;
+  user: User;
 };
 
 export function QuestChain(props: QuestChainProps): React.ReactElement {
   const {
-    user,
     chain,
     dailies,
-    setDailiesAction,
-    totalWeight,
+    isAllQuestChainsCollapsed,
     isDailyFilteredAction,
     onUpdateAction,
+    setDailiesAction,
+    totalWeight,
+    user,
   } = props;
 
   const sensors = useSensors(
@@ -118,17 +137,59 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
     }),
   );
 
+  const [isQuestChainCollapsed, setIsQuestChainCollapsed] = React.useState<boolean>(false);
+  const [selectedKeys, setSelectedKeys] = React.useState<heroui.Selection>(new Set([]));
+
+  const setSelectedKeysAction = async (keys: heroui.Selection): Promise<void> => {
+    if (keys != "all" && keys?.size === 0) {
+      await invoke<boolean>("set_quest_chain_collapsed", {
+        user_id: user.id,
+        chain: chain,
+        value: true,
+      });
+      setIsQuestChainCollapsed(true);
+    } else {
+      await invoke<boolean>("set_quest_chain_collapsed", {
+        user_id: user.id,
+        chain: chain,
+        value: false,
+      });
+      setIsQuestChainCollapsed(false);
+    }
+    setSelectedKeys(keys);
+  };
+
+  React.useEffect(() => {
+    const get_collapsed = async () => {
+      await invoke<boolean>("get_quest_chain_collapsed", {
+        user_id: user.id,
+        chain: chain,
+      }).then(result => {
+        setIsQuestChainCollapsed(result);
+        if (result) {
+          setSelectedKeys(new Set([]));
+        } else {
+          setSelectedKeys(new Set([chain]));
+        }
+      });
+    };
+
+    if (isAllQuestChainsCollapsed) {
+      setSelectedKeys(new Set([]));
+    } else {
+      get_collapsed();
+    }
+  }, [isAllQuestChainsCollapsed, user.id, chain]);
+
   return (
     <Accordion
       key={chain}
       fullWidth
       isCompact
       keepContentMounted
-      // TODO(ayvi): make accordian for empty quest chains closed by default
-      // http://ayvi:3000/ayvi/dailies/issues/129
-      // defaultExpandedKeys={dailies.length > 0 ? [chain] : undefined}
-      defaultExpandedKeys={[chain]}
+      selectedKeys={selectedKeys}
       variant="splitted"
+      onSelectionChange={(keys: heroui.Selection) => setSelectedKeysAction(keys)}
     >
       <AccordionItem
         key={chain}
@@ -141,7 +202,20 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
         }}
         id={`chain-${chain}`}
         indicator={({ isOpen }) =>
-          isOpen ? <ArrowBigLeftDash size={20} /> : <ArrowBigUpDash size={20} />
+          isOpen ? (
+            <ArrowBigLeftDash
+              fill={clsx(!isQuestChainCollapsed && isAllQuestChainsCollapsed && "#005f5a")}
+              size={20}
+            />
+          ) : (
+            <ArrowBigUpDash
+              fill={clsx(
+                isQuestChainCollapsed && isAllQuestChainsCollapsed && "#372aac",
+                isQuestChainCollapsed && !isAllQuestChainsCollapsed && "#372aac",
+              )}
+              size={20}
+            />
+          )
         }
         startContent={<div className={"text-md ml-10 p-1 leading-5 text-white"}>{chain}</div>}
         textValue={chain ?? ""}
@@ -267,22 +341,77 @@ export function SortableItem(props: React.ComponentProps<"div">): React.ReactEle
   );
 }
 
+const motionProps: Omit<HTMLMotionProps<"div">, "ref"> = {
+  variants: {
+    exit: { opacity: 0, transition: { duration: 0.1, ease: "easeIn" } },
+    enter: { opacity: 1, transition: { duration: 0.15, ease: "easeOut" } },
+  },
+};
+
+type QuestCollapseButtonProps = {
+  isAllQuestChainsCollapsed: boolean;
+  setIsAllQuestChainCollapsedAction: (value: boolean) => Promise<void>;
+};
+
+function QuestCollapseButton(props: QuestCollapseButtonProps): React.ReactElement {
+  const { isAllQuestChainsCollapsed, setIsAllQuestChainCollapsedAction } = props;
+
+  return (
+    <heroui.Button
+      isIconOnly
+      className="box-content flex aspect-square"
+      radius="sm"
+      size="sm"
+      variant="light"
+      onPress={(_event: heroui.PressEvent) =>
+        setIsAllQuestChainCollapsedAction(!isAllQuestChainsCollapsed)
+      }
+    >
+      {isAllQuestChainsCollapsed ? (
+        <heroui.Tooltip
+          classNames={{ base: "dark", content: "text-xs text-white" }}
+          closeDelay={0}
+          content="Expand"
+          delay={0}
+          motionProps={motionProps}
+          offset={3}
+          showArrow={true}
+        >
+          <ListChevronsUpDownIcon size="18" />
+        </heroui.Tooltip>
+      ) : (
+        <heroui.Tooltip
+          classNames={{ base: "dark", content: "text-xs text-white" }}
+          closeDelay={0}
+          content="Collapse"
+          delay={0}
+          motionProps={motionProps}
+          offset={3}
+          showArrow={true}
+        >
+          <ListChevronsDownUpIcon size="18" />
+        </heroui.Tooltip>
+      )}
+    </heroui.Button>
+  );
+}
+
 type QuestsFilterProps = {
   isArchivedQuestsFiltered: boolean;
-  setArchivedQuestsFilteredAction: (value: boolean) => Promise<void>;
   isCompletedQuestsFiltered: boolean;
-  setCompletedQuestsFilteredAction: (value: boolean) => Promise<void>;
   isOptionalQuestsFiltered: boolean;
+  setArchivedQuestsFilteredAction: (value: boolean) => Promise<void>;
+  setCompletedQuestsFilteredAction: (value: boolean) => Promise<void>;
   setOptionalQuestsFilteredAction: (value: boolean) => Promise<void>;
 };
 
-function QuestsFilter(props: QuestsFilterProps): React.ReactElement {
+function QuestsFilterMenu(props: QuestsFilterProps): React.ReactElement {
   const {
     isArchivedQuestsFiltered,
-    setArchivedQuestsFilteredAction,
     isCompletedQuestsFiltered,
-    setCompletedQuestsFilteredAction,
     isOptionalQuestsFiltered,
+    setArchivedQuestsFilteredAction,
+    setCompletedQuestsFilteredAction,
     setOptionalQuestsFilteredAction,
   } = props;
 
@@ -299,7 +428,17 @@ function QuestsFilter(props: QuestsFilterProps): React.ReactElement {
           size="sm"
           variant="light"
         >
-          <ListFilterIcon size="18" />
+          <heroui.Tooltip
+            classNames={{ base: "dark", content: "text-xs text-white" }}
+            closeDelay={0}
+            content="Filter"
+            delay={0}
+            motionProps={motionProps}
+            offset={3}
+            showArrow={true}
+          >
+            <ListFilterIcon size="18" />
+          </heroui.Tooltip>
         </heroui.Button>
       </heroui.DropdownTrigger>
       <heroui.DropdownMenu aria-label="Static Actions" className="w-fit">
