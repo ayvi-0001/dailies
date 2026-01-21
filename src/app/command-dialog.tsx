@@ -6,7 +6,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { OnBackButtonPressPayload, onBackButtonPress } from "@tauri-apps/api/app";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { useRouter } from "next/navigation";
+import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
 
 import * as Command from "@/components/ui/command";
 import { truncate_sessions } from "@/actions/logout";
@@ -17,7 +17,9 @@ import { AppMetaState, useAppMetaState } from "./providers/app-meta";
 // It's only mounted when process.env.NODE_ENV === "development".
 export default function CommandDialog(): React.ReactElement {
   const [open, setOpen] = React.useState<boolean>(false);
+
   const router: AppRouterInstance = useRouter();
+  const searchParams: ReadonlyURLSearchParams = useSearchParams();
 
   const appMeta: AppMetaState = useAppMetaState();
 
@@ -36,7 +38,7 @@ export default function CommandDialog(): React.ReactElement {
     },
     {
       name: "goto root",
-      callback: async () => router.push("/"),
+      callback: async () => router.push(`/?date=${searchParams.get("date")}`),
     },
     {
       name: "goto login",

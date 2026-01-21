@@ -23,7 +23,8 @@ export type Daily = {
   requirements: Option<unknown>;
   timeStart: Option<string>;
   timeEnd: Option<string>;
-  accepted: Readonly<Date>;
+  // TODO(ayvi): set type to Date
+  accepted: Readonly<string>;
   archived: Option<Date>;
   days: Option<number[]>;
   description: Option<string>;
@@ -44,7 +45,8 @@ export type Quest = {
   requirements: Option<unknown>;
   timeStart: Option<string>;
   timeEnd: Option<string>;
-  accepted: Readonly<Date>;
+  // TODO(ayvi): set type to Date
+  accepted: Readonly<string>;
   archived: Option<Date>;
   days: number[];
   description: Option<string>;

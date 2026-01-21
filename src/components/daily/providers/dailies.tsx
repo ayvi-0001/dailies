@@ -2,13 +2,15 @@
 
 import * as React from "react";
 
+import * as ReactUse from "@reactuses/core";
 import { today } from "@internationalized/date";
-import { useOnceEffect } from "@reactuses/core";
 import ok from "assert";
+import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 
 import { User, useState as useUserState } from "@/app/providers/user";
 import { LOCAL_TZ } from "@/lib/dates";
 import { invoke } from "@/lib/tauri";
+import { Option } from "@/types/option";
 
 import { Daily, QuestChain } from "../types";
 import QuestTypesProvider from "./quest-types";
@@ -26,53 +28,70 @@ export type DailiesState = {
   countRefreshDailies: number;
   setCountRefreshDailies: React.Dispatch<React.SetStateAction<number>>;
   triggerRefreshDailies: () => void;
+  isLoading: boolean;
 };
 
 export const DailiesContext = React.createContext<DailiesState | null>(null);
 
-export default function DailiesProvider({
-  children,
-}: Readonly<{ children?: React.ReactNode }>): React.ReactElement {
+type DailiesProviderProps = {
+  children?: Readonly<React.ReactNode>;
+};
+
+export default function DailiesProvider(props: DailiesProviderProps): React.ReactElement {
   const [dailies, setDailies] = React.useState<Daily[]>([]);
   const [questChains, setQuestChains] = React.useState<string[]>([]);
   const [totalPoints, setTotalPoints] = React.useState<number>(0);
   const [totalWeight, setTotalWeight] = React.useState<number>(0);
   const [countRefreshDailies, setCountRefreshDailies] = React.useState<number>(0);
 
-  const user: User = useUserState().user;
-  const now: string = today(LOCAL_TZ).toString();
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
-  useOnceEffect(() => {
+  const searchParams: ReadonlyURLSearchParams = useSearchParams();
+
+  const user: User = useUserState().user;
+
+  const date: string = searchParams.get("date") ?? today(LOCAL_TZ).toString();
+
+  ReactUse.useOnceEffect(() => {
+    setIsLoading(true);
+    setTotalWeight(0);
+    setTotalPoints(0);
+  }, [date]);
+
+  ReactUse.useOnceEffect(() => {
     const query_dailies = async (): Promise<void> => {
       await invoke<Daily[]>("query_dailies", {
         user: user.name,
         quest_id: null, // pull all dailies
-        start_date: now,
-        end_date: now,
+        start_date: date,
+        end_date: date,
       })
-        .then(result => setDailies(result))
+        .then(result => {
+          setDailies(result);
+          setIsLoading(false);
+        })
         .catch(console.error);
     };
     query_dailies();
-  }, [user, countRefreshDailies]);
+  }, [user, countRefreshDailies, date]);
 
-  useOnceEffect(() => {
+  ReactUse.useOnceEffect(() => {
     const query_quest_chains = async (): Promise<void> => {
       await invoke<QuestChain[]>("query_quest_chains", { user_id: user.id })
         .then(quest_chains => setQuestChains(quest_chains.map(value => value.chain)))
         .catch(console.error);
     };
     query_quest_chains();
-  }, [user, countRefreshDailies]);
+  }, [user, countRefreshDailies, date]);
 
-  useOnceEffect(() => {
+  ReactUse.useOnceEffect(() => {
     const get_total_points = async (): Promise<void> => {
       await invoke<{
         total_points: number;
         total_weight: number;
       }>("get_total_points", {
         user: user.name,
-        date: now,
+        date: date,
       })
         .then(result => {
           setTotalWeight(result.total_weight);
@@ -81,37 +100,38 @@ export default function DailiesProvider({
         .catch(console.error);
     };
     get_total_points();
-  }, [user, countRefreshDailies]);
+  }, [user, countRefreshDailies, date]);
 
   const triggerRefreshDailies: () => void = React.useCallback(() => {
-    console.debug(`countRefreshDailies=${countRefreshDailies}`);
     setCountRefreshDailies(countRefreshDailies + 1);
+    console.debug(`countRefreshDailies=${countRefreshDailies}`);
   }, [countRefreshDailies]);
 
   const value: DailiesState = {
-    dailies: dailies,
-    setDailies: setDailies,
-    questChains: questChains,
-    totalPoints: totalPoints,
-    setTotalPoints: setTotalPoints,
-    totalWeight: totalWeight,
-    setTotalWeight: setTotalWeight,
-    countRefreshDailies: countRefreshDailies,
-    setCountRefreshDailies: setCountRefreshDailies,
-    triggerRefreshDailies: triggerRefreshDailies,
+    dailies,
+    setDailies,
+    questChains,
+    totalPoints,
+    setTotalPoints,
+    totalWeight,
+    setTotalWeight,
+    countRefreshDailies,
+    setCountRefreshDailies,
+    triggerRefreshDailies,
+    isLoading,
   };
 
   return (
     <>
       <QuestTypesProvider>
-        <DailiesContext.Provider value={value}>{children}</DailiesContext.Provider>
+        <DailiesContext.Provider value={value}>{props.children}</DailiesContext.Provider>
       </QuestTypesProvider>
     </>
   );
 }
 
 export function useDailies(): DailiesState {
-  const context: DailiesState | null = React.useContext(DailiesContext);
+  const context: Option<DailiesState> = React.useContext(DailiesContext);
   ok(context, new Error("useDailies was used outside of its Provider"));
   return context;
 }

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { getLocalTimeZone, today } from "@internationalized/date";
+import { today } from "@internationalized/date";
 import { BookPlusIcon, ChartAreaIcon, ListRestartIcon, LogOutIcon } from "lucide-react";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 
 import { truncate_sessions } from "@/actions/logout";
 import Speeddial from "@/components/animata/container/speed-dial";
+import { LOCAL_TZ } from "@/lib/dates";
 import { formatDateTimeISO8601 } from "@/lib/dates";
 import { invoke } from "@/lib/tauri";
 
@@ -64,10 +65,7 @@ export default function App(): React.ReactElement {
         toast.promise(
           async () => {
             await invoke("insert_dailies", {
-              datetime: formatDateTimeISO8601(
-                today(getLocalTimeZone()).toDate(getLocalTimeZone()),
-                true,
-              ),
+              datetime: formatDateTimeISO8601(today(LOCAL_TZ).toDate(LOCAL_TZ), true),
             });
             window.location.reload();
           },

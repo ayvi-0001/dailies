@@ -22,12 +22,14 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Accordion, AccordionItem } from "@heroui/react";
+import { today } from "@internationalized/date";
+import { CalendarDate, CalendarDateTime, DateValue, ZonedDateTime } from "@internationalized/date";
 import clsx from "clsx";
 import { HTMLMotionProps } from "framer-motion";
 import {
   ArrowBigLeftDash,
   ArrowBigUpDash,
+  CalendarCogIcon,
   ListChevronsDownUpIcon,
   ListChevronsUpDownIcon,
   ListFilterIcon,
@@ -35,6 +37,7 @@ import {
 } from "lucide-react";
 
 import { User } from "@/app/providers/user";
+import { LOCAL_TZ } from "@/lib/dates";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
@@ -42,28 +45,32 @@ import DailyCard from "./card";
 import { Daily } from "./types";
 
 type QuestsHeaderProps = {
-  title: string;
   isAllQuestChainsCollapsed: boolean;
   isArchivedQuestsFiltered: boolean;
   isCompletedQuestsFiltered: boolean;
   isOptionalQuestsFiltered: boolean;
+  listDate: DateValue;
   setArchivedQuestsFilteredAction: (value: boolean) => Promise<void>;
   setCompletedQuestsFilteredAction: (value: boolean) => Promise<void>;
   setIsAllQuestChainCollapsedAction: (value: boolean) => Promise<void>;
+  setListDateAction: React.Dispatch<React.SetStateAction<DateValue>>;
   setOptionalQuestsFilteredAction: (value: boolean) => Promise<void>;
+  title: string;
 };
 
 export function QuestsHeader(props: QuestsHeaderProps): React.ReactNode {
   const {
-    title,
     isAllQuestChainsCollapsed,
     isArchivedQuestsFiltered,
     isCompletedQuestsFiltered,
     isOptionalQuestsFiltered,
+    listDate,
     setArchivedQuestsFilteredAction,
     setCompletedQuestsFilteredAction,
     setIsAllQuestChainCollapsedAction,
+    setListDateAction,
     setOptionalQuestsFilteredAction,
+    title,
   } = props;
 
   return (
@@ -79,6 +86,7 @@ export function QuestsHeader(props: QuestsHeaderProps): React.ReactNode {
           <p className="text-xl leading-none font-bold text-black text-shadow-sm">{title}</p>
         </div>
         <div className="mr-2 flex flex-row">
+          <QuestListDatePicker listDate={listDate} setListDateAction={setListDateAction} />
           <QuestCollapseButton
             isAllQuestChainsCollapsed={isAllQuestChainsCollapsed}
             setIsAllQuestChainCollapsedAction={setIsAllQuestChainCollapsedAction}
@@ -179,10 +187,10 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
     } else {
       get_collapsed();
     }
-  }, [isAllQuestChainsCollapsed, user.id, chain]);
+  }, [isAllQuestChainsCollapsed, user.id, chain, isQuestChainCollapsed]);
 
   return (
-    <Accordion
+    <heroui.Accordion
       key={chain}
       fullWidth
       isCompact
@@ -191,7 +199,7 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
       variant="splitted"
       onSelectionChange={(keys: heroui.Selection) => setSelectedKeysAction(keys)}
     >
-      <AccordionItem
+      <heroui.AccordionItem
         key={chain}
         classNames={{
           base: "px-0 shadow-medium rounded-medium relative bg-transparent",
@@ -252,8 +260,8 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
             </SortableContext>
           </DndContext>
         </div>
-      </AccordionItem>
-    </Accordion>
+      </heroui.AccordionItem>
+    </heroui.Accordion>
   );
 }
 
@@ -347,6 +355,51 @@ const motionProps: Omit<HTMLMotionProps<"div">, "ref"> = {
     enter: { opacity: 1, transition: { duration: 0.15, ease: "easeOut" } },
   },
 };
+
+type QuestListDatePickerProps = {
+  listDate: DateValue;
+  setListDateAction: React.Dispatch<React.SetStateAction<DateValue>>;
+};
+
+function QuestListDatePicker(props: QuestListDatePickerProps): React.ReactElement {
+  const { listDate, setListDateAction } = props;
+  const currentDate = today(LOCAL_TZ);
+
+  return (
+    <heroui.DatePicker
+      aria-label="quest list date picker"
+      className="dark"
+      classNames={{
+        inputWrapper: "w-fit bg-[#6B6C76] hover:bg-[#6B6C76] focus-within:hover:bg-[#6B6C76]",
+        segment:
+          "text-xs font-bold text-black transition-colors focus:bg-slate-900/40 data-[editable=true]:text-black data-[editable=true]:focus:text-black data-[editable=true]:data-[placeholder=true]:text-black",
+        calendarContent: "dark",
+        popoverContent: "dark",
+      }}
+      granularity="day"
+      maxValue={currentDate}
+      minValue={undefined /* TODO(ayvi): set to earliest day for user */}
+      popoverProps={{ size: "sm" }}
+      radius="none"
+      selectorButtonProps={{ size: "sm", isIconOnly: true, variant: "light" }}
+      selectorIcon={
+        <CalendarCogIcon
+          size={18}
+          stroke={clsx(
+            listDate.compare(currentDate) !== 0 && "#000000",
+            listDate.compare(currentDate) === 0 && "#fcc800",
+          )}
+        />
+      }
+      size="sm"
+      value={listDate}
+      variant="flat"
+      onChange={(value: CalendarDate | CalendarDateTime | ZonedDateTime | null) =>
+        value && setListDateAction(value as DateValue)
+      }
+    />
+  );
+}
 
 type QuestCollapseButtonProps = {
   isAllQuestChainsCollapsed: boolean;

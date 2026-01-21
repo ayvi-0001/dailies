@@ -3,20 +3,15 @@ import * as React from "react";
 import * as heroui from "@heroui/react";
 import * as RadixContextMenu from "@radix-ui/react-context-menu";
 import * as ReactUse from "@reactuses/core";
-import {
-  Button,
-  Drawer,
-  DrawerBody,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-} from "@heroui/react";
-import { ScrollShadow } from "@heroui/react";
+import { CalendarDate, parseDate } from "@internationalized/date";
 import { AnimatePresence } from "framer-motion";
+import { CalendarCogIcon } from "lucide-react";
+import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 
-import { queryQuestHistory } from "@/actions/query";
+import { cachedQueryQuestHistory } from "@/actions/query";
 import { User } from "@/app/providers/user";
 import { formatDateISO8601 } from "@/lib/dates";
+import { cn } from "@/lib/utils";
 import type { Option } from "@/types/option";
 
 import CardBorder from "./border";
@@ -30,8 +25,6 @@ import {
 } from "./providers/quest-types";
 import type { Daily } from "./types";
 
-// TODO(ayvi): history days options/streaming http://ayvi:3000/ayvi/dailies/issues/32
-
 type HistoryDrawerProps = {
   user: User;
   isOpen: boolean;
@@ -43,67 +36,135 @@ type HistoryDrawerProps = {
 export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactElement {
   const { user, isOpen, setHistoryIsOpenAction, daily, totalWeight } = props;
 
+  const searchParams: ReadonlyURLSearchParams = useSearchParams();
+
+  const questAcceptedDate: CalendarDate = parseDate(daily.accepted.substring(0, 10));
+  const dateParam: CalendarDate = parseDate(searchParams.get("date") as string);
+  const dateRangeEnd: CalendarDate = dateParam.subtract({ days: 1 });
+
+  let dateRangeStart: CalendarDate = dateRangeEnd.subtract({ days: 6 });
+  if (Math.sign(dateRangeStart.compare(questAcceptedDate)) === -1) {
+    dateRangeStart = questAcceptedDate;
+  }
+
+  const [dateRange, setDateRange] = React.useState<Option<heroui.RangeValue<CalendarDate>>>({
+    start: dateRangeStart,
+    end: dateRangeEnd,
+  });
+
   return (
-    <Drawer
+    <heroui.Drawer
       hideCloseButton
       isDismissable
       isKeyboardDismissDisabled
-      className="border-1 border-white bg-black/85 select-none"
+      className="border-1 border-[#f0f0ff]/80 bg-black/85 select-none"
       isOpen={isOpen}
       placement="bottom"
       radius="none"
       size="2xl"
     >
-      <DrawerContent>
+      <heroui.DrawerContent>
         {onClose => (
           <div>
-            <DrawerHeader className="flex flex-col gap-1 text-white">{daily.name}</DrawerHeader>
-            <DrawerBody>
-              <div>
-                <HistoryCards daily={daily} totalWeight={totalWeight} user={user} />
-              </div>
-            </DrawerBody>
-            <DrawerFooter className="mt-4 mb-3 flex justify-center gap-2 leading-none">
-              <Button
+            <heroui.DrawerHeader className="flex place-self-center">
+              <span className="text-[#f0f0ff] underline underline-offset-2">{daily.name}</span>
+            </heroui.DrawerHeader>
+            <heroui.DrawerBody>
+              {Math.sign(dateRangeEnd.compare(dateRangeStart)) === -1 ? (
+                <div className="place-self-center">
+                  <p className="text-sm text-[#f0f0ff] italic opacity-60">No History</p>
+                </div>
+              ) : (
+                <>
+                  <heroui.DateRangePicker
+                    aria-label="history date range picker"
+                    className="dark mb-1 w-fit place-self-center"
+                    classNames={{
+                      inputWrapper: "w-fit",
+                      segment:
+                        "text-xs font-bold text-[#f0f0ff] transition-colors data-[editable=true]:text-[#f0f0ff] data-[editable=true]:focus:text-[#f0f0ff] data-[editable=true]:data-[placeholder=true]:text-[#f0f0ff]",
+                      calendarContent: "dark",
+                      popoverContent: "dark",
+                      separator: "text-[#f0f0ff]",
+                    }}
+                    labelPlacement="outside"
+                    maxValue={dateRangeEnd}
+                    minValue={questAcceptedDate}
+                    selectorIcon={<CalendarCogIcon size={18} stroke="#f0f0ff" />}
+                    value={dateRange}
+                    onChange={setDateRange}
+                  />
+                  <div>
+                    <HistoryCards
+                      daily={daily}
+                      dateRange={dateRange}
+                      totalWeight={totalWeight}
+                      user={user}
+                    />
+                  </div>
+                  <p
+                    className={cn(
+                      "w-full text-[0.6rem] leading-none",
+                      "tracking-tighter text-[#f0f0ff]",
+                    )}
+                  >{`Quest accepted: ${questAcceptedDate}`}</p>
+                </>
+              )}
+            </heroui.DrawerBody>
+            <heroui.DrawerFooter className="mt-4 mb-3 flex justify-center gap-2 leading-none">
+              <heroui.Button
                 color="danger"
                 size="sm"
                 variant="flat"
-                onPress={() => {
+                onPress={(_: heroui.PressEvent) => {
                   setHistoryIsOpenAction(!history);
                   onClose();
                 }}
               >
                 Close
-              </Button>
-            </DrawerFooter>
+              </heroui.Button>
+            </heroui.DrawerFooter>
           </div>
         )}
-      </DrawerContent>
-    </Drawer>
+      </heroui.DrawerContent>
+    </heroui.Drawer>
   );
 }
 
 type HistoryCardsProps = {
   daily: Daily;
-  user: User;
+  dateRange: Option<heroui.RangeValue<CalendarDate>>;
   totalWeight: number;
+  user: User;
 };
 
 // TODO(ayvi): infinite scroll history http://ayvi:3000/ayvi/dailies/issues/33
 export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
-  const { daily, user, totalWeight } = props;
+  const { daily, dateRange, totalWeight, user } = props;
 
   const questTypes: QuestType[] = useQuestTypes();
 
   const [dailies, setDailies] = React.useState<Daily[]>([]);
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const [countRefreshDailies, setCountRefreshDailies] = React.useState<number>(0);
+
+  ReactUse.useOnceEffect(() => {
+    setIsLoading(true);
+  }, [dateRange]);
 
   React.useEffect(() => {
     const query_dailies = async (): Promise<void> => {
-      setDailies(await queryQuestHistory(user.name, daily.questId, 6));
+      const dailies = await cachedQueryQuestHistory(
+        user.name,
+        daily.questId,
+        dateRange!.start,
+        dateRange!.end,
+      );
+      setDailies(dailies);
+      setIsLoading(false);
     };
     query_dailies();
-  }, [daily, user, countRefreshDailies]);
+  }, [daily, user, countRefreshDailies, dateRange]);
 
   const triggerRefreshDailies: () => void = React.useCallback(() => {
     console.debug(`countRefreshDailies=${countRefreshDailies}`);
@@ -111,20 +172,20 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
   }, [countRefreshDailies]);
 
   return (
-    <ScrollShadow
+    <heroui.ScrollShadow
       hideScrollBar
       className="h-[calc(100vh-60vh)] rounded-md"
       offset={80}
       size={10}
       style={{ scrollbarWidth: "none" }}
     >
-      <React.Suspense fallback={<heroui.Spinner color="secondary" variant="wave" />}>
-        {dailies?.length == 0 ? (
+      <React.Suspense>
+        {isLoading ? (
           <div className="flex min-h-full min-w-full justify-center">
             <heroui.Spinner color="secondary" variant="wave" />
           </div>
         ) : (
-          dailies?.map((daily: Daily, index: number) => (
+          dailies.map((daily: Daily, index: number) => (
             <div key={`${daily.pointId}-${index}`} className="mr-2 mb-4 ml-2">
               <HistoryDailyCard
                 daily={daily}
@@ -138,7 +199,7 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
           ))
         )}
       </React.Suspense>
-    </ScrollShadow>
+    </heroui.ScrollShadow>
   );
 }
 

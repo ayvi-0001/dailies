@@ -2,9 +2,15 @@
 
 import * as React from "react";
 
+import * as heroui from "@heroui/react";
+import * as ReactUse from "@reactuses/core";
 import { ScrollShadow } from "@heroui/react";
+import { DateValue, today } from "@internationalized/date";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
 
 import { User, UserState, useState as useUserState } from "@/app/providers/user";
+import { LOCAL_TZ } from "@/lib/dates";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
@@ -12,9 +18,34 @@ import { DailiesState, useDailies } from "./providers/dailies";
 import { QuestChain, QuestsHeader } from "./quest-chain";
 import { Daily, Quest } from "./types";
 
-export default function QuestList({ title }: { title: string }): React.ReactNode {
+export default function QuestList({ title }: { title: string }): React.ReactElement {
   const userState: UserState = useUserState();
   const dailiesState: DailiesState = useDailies();
+
+  const [listDate, setListDate] = React.useState<DateValue>(today(LOCAL_TZ));
+
+  const router: AppRouterInstance = useRouter();
+
+  const searchParams: ReadonlyURLSearchParams = useSearchParams();
+  const createQueryString = React.useCallback(
+    (values: Array<{ key: string; value: string }>): string => {
+      const params = new URLSearchParams(searchParams);
+      for (const { key, value } of values) {
+        params.set(key, value);
+      }
+      return params.toString();
+    },
+    [searchParams],
+  );
+
+  const updateParam = React.useCallback((values: Array<{ key: string; value: string }>): void => {
+    router.push(`?${createQueryString(values)}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  ReactUse.useOnceEffect(() => {
+    updateParam([{ key: "date", value: listDate.toString() }]);
+  }, [listDate]);
 
   const {
     isAllQuestChainsCollapsed,
@@ -48,35 +79,47 @@ export default function QuestList({ title }: { title: string }): React.ReactNode
           isArchivedQuestsFiltered={isArchivedQuestsFiltered}
           isCompletedQuestsFiltered={isCompletedQuestsFiltered}
           isOptionalQuestsFiltered={isOptionalQuestsFiltered}
+          listDate={listDate}
           setArchivedQuestsFilteredAction={setArchivedQuestsFilteredAction}
           setCompletedQuestsFilteredAction={setCompletedQuestsFilteredAction}
           setIsAllQuestChainCollapsedAction={setIsAllQuestChainCollapsedAction}
+          setListDateAction={setListDate}
           setOptionalQuestsFilteredAction={setOptionalQuestsFilteredAction}
           title={title}
         />
       </div>
-      <ScrollShadow
-        hideScrollBar
-        className="h-[calc(100vh-20vh)]"
-        offset={40}
-        orientation="vertical"
-        size={40}
-        visibility="auto"
-      >
-        {dailiesState.questChains?.map((chain, idx) => (
-          <QuestChain
-            key={idx}
-            chain={chain}
-            dailies={groupedDailies[chain] ?? []}
-            isAllQuestChainsCollapsed={isAllQuestChainsCollapsed}
-            isDailyFilteredAction={isDailyFilteredAction}
-            setDailiesAction={dailiesState.setDailies}
-            totalWeight={dailiesState.totalWeight}
-            user={userState.user}
-            onUpdateAction={dailiesState.triggerRefreshDailies}
+      {dailiesState.isLoading ? (
+        <div className="flex h-full w-full flex-col">
+          <heroui.Spinner
+            className="dark z-1000"
+            classNames={{ label: "text-foreground mt-4" }}
+            variant="dots"
           />
-        ))}
-      </ScrollShadow>
+        </div>
+      ) : (
+        <ScrollShadow
+          hideScrollBar
+          className="h-[calc(100vh-20vh)]"
+          offset={40}
+          orientation="vertical"
+          size={40}
+          visibility="auto"
+        >
+          {dailiesState.questChains?.map((chain, idx) => (
+            <QuestChain
+              key={idx}
+              chain={chain}
+              dailies={groupedDailies[chain] ?? []}
+              isAllQuestChainsCollapsed={isAllQuestChainsCollapsed}
+              isDailyFilteredAction={isDailyFilteredAction}
+              setDailiesAction={dailiesState.setDailies}
+              totalWeight={dailiesState.totalWeight}
+              user={userState.user}
+              onUpdateAction={dailiesState.triggerRefreshDailies}
+            />
+          ))}
+        </ScrollShadow>
+      )}
     </div>
   );
 }

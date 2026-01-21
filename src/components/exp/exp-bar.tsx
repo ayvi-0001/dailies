@@ -24,20 +24,35 @@ export default function ExpBar(): React.ReactNode {
 
   const bar: React.ReactElement = (
     <div className="flex h-10 items-center gap-3 rounded" id="exp-bar">
-      <div className="grow empty:w-12">
-        <Counter
-          className="text-sm text-white"
-          direction="up"
-          format={(value: number): string => `${value.toFixed(2)}%`}
-          targetValue={value ?? 0}
-        />
-      </div>
-      <div className="grow">
-        <Progress<number> deps={[countRefreshDailies]} progress={value} />
-      </div>
-      <div>
-        <p className="text-sm font-bold text-white">{totalWeight !== 0 && (totalWeight ?? "")}</p>
-      </div>
+      {!!totalWeight ? (
+        <>
+          <div className="grow empty:w-12">
+            <Counter
+              className="text-sm text-white"
+              direction="up"
+              format={(value: number): string => `${value.toFixed(2)}%`}
+              targetValue={value ?? 0}
+            />
+          </div>
+          <div className="grow">
+            <Progress<number> deps={[countRefreshDailies]} progress={value} />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-white">
+              {totalWeight !== 0 && (totalWeight ?? "")}
+            </p>
+          </div>
+        </>
+      ) : (
+        <div className="flex h-full w-full flex-col">
+          <heroui.Spinner
+            as={"div"}
+            className="dark z-1000"
+            classNames={{ label: "text-foreground mt-4" }}
+            variant="dots"
+          />
+        </div>
+      )}
     </div>
   );
 

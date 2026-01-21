@@ -5,7 +5,7 @@ import * as React from "react";
 import * as heroui from "@heroui/react";
 import clsx from "clsx";
 import { HTMLMotionProps } from "framer-motion";
-import { RedirectType, redirect } from "next/navigation";
+import { ReadonlyURLSearchParams, RedirectType, redirect, useSearchParams } from "next/navigation";
 
 import { User, useState as useUserState } from "@/app/providers/user";
 import { roundTo } from "@/lib/number";
@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils";
 import { Option } from "@/types/option";
 
 export default function Modal(): React.ReactElement {
+  const searchParams: ReadonlyURLSearchParams = useSearchParams();
+
   const draggableRef = React.useRef<HTMLElement>(null as unknown as HTMLElement);
   const { moveProps } = heroui.useDraggable({
     targetRef: draggableRef,
@@ -82,7 +84,7 @@ export default function Modal(): React.ReactElement {
                 variant="light"
                 onPress={() => {
                   onClose();
-                  redirect("/", RedirectType.replace);
+                  redirect(`/?date=${searchParams.get("date")}`, RedirectType.replace);
                 }}
               >
                 Close

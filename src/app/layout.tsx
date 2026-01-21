@@ -41,7 +41,9 @@ export default function RootLayout(pages: Pages): React.ReactNode {
         <Providers>
           <Toaster />
           <div className="relative z-1 select-none">
-            {process.env.NODE_ENV === "development" && <CommandDialog />}
+            <React.Suspense>
+              {process.env.NODE_ENV === "development" && <CommandDialog />}
+            </React.Suspense>
             {modals}
             {children}
           </div>

@@ -5,19 +5,29 @@ import * as React from "react";
 import * as heroui from "@heroui/react";
 import { HTMLMotionProps } from "framer-motion";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { RedirectType, redirect, useRouter } from "next/navigation";
+import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import addQuest, { AddQuestErrors, AddQuestState } from "@/actions/add-quest";
 import { UserState, useState as useUserState } from "@/app/providers/user";
+import { DailiesState, useDailies } from "@/components/daily";
 import AddQuestForm from "@/components/daily/forms/add";
 import { QuestType, useQuestTypes } from "@/components/daily/providers/quest-types";
 import { Option } from "@/types/option";
 
 export default function Modal(): React.ReactElement {
-  const router: AppRouterInstance = useRouter();
-
   const userState: UserState = useUserState();
   const questTypes: QuestType[] = useQuestTypes();
+  const dailiesState: DailiesState = useDailies();
+
+  const router: AppRouterInstance = useRouter();
+  const searchParams: ReadonlyURLSearchParams = useSearchParams();
+  const pathname: string = usePathname();
+
+  const getReturnPathname = React.useCallback((): string => {
+    const currentParams = new URLSearchParams(searchParams.toString());
+    currentParams.delete("modal");
+    return `${pathname}?${currentParams.toString()}`;
+  }, [pathname, searchParams]);
 
   const [_, action, pending] = React.useActionState(
     async (state: AddQuestState, payload: FormData): Promise<AddQuestErrors> => {
@@ -29,8 +39,12 @@ export default function Modal(): React.ReactElement {
         questTypes.find((questType: QuestType) => questType.name == typeId)!.id.replace("_", "-"),
       );
 
-      const result = addQuest(state, payload) as AddQuestErrors;
-      router.back();
+      const result = (await addQuest(state, payload)) as AddQuestErrors;
+
+      // TODO(ayvi): fix daily list refresh after add quest http://ayvi:3000/ayvi/dailies/issues/155
+      dailiesState.triggerRefreshDailies();
+      window.location.replace(getReturnPathname());
+
       return result;
     },
     undefined,
@@ -91,9 +105,9 @@ export default function Modal(): React.ReactElement {
                 color="danger"
                 size="sm"
                 variant="light"
-                onPress={() => {
+                onPress={(_: heroui.PressEvent) => {
                   onClose();
-                  redirect("/", RedirectType.replace);
+                  router.replace(getReturnPathname(), { scroll: false });
                 }}
               >
                 Close
@@ -104,7 +118,9 @@ export default function Modal(): React.ReactElement {
                 isLoading={isLoading}
                 size="sm"
                 type="submit"
-                onPress={() => formRef?.current?.requestSubmit()}
+                onPress={(_: heroui.PressEvent) => {
+                  formRef?.current?.requestSubmit();
+                }}
               >
                 Submit
               </heroui.Button>
