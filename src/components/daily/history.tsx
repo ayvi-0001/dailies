@@ -4,7 +4,7 @@ import * as heroui from "@heroui/react";
 import * as RadixContextMenu from "@radix-ui/react-context-menu";
 import * as ReactUse from "@reactuses/core";
 import { CalendarDate, parseDate } from "@internationalized/date";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { CalendarCogIcon } from "lucide-react";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 
@@ -225,12 +225,24 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
   const { isOpen, onOpen, onOpenChange } = heroui.useDisclosure();
   const { value: contextMenuOpen, toggle: toggleContextMenu } = ReactUse.useBoolean();
 
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  React.useEffect(() => setIsLoading(false), [daily]);
+
   return (
     <>
       <RadixContextMenu.Root modal onOpenChange={toggleContextMenu}>
         <RadixContextMenu.Trigger className="flex items-center justify-center">
           <CardBorder daily={daily} divProps={{ className: questTypeStyles.borderClass as string }}>
-            <div className="flex w-full min-w-0 flex-row justify-between gap-2 p-1">
+            <motion.div
+              animate={isLoading ? { opacity: 0 } : {}}
+              className="flex w-full min-w-0 flex-row justify-between gap-2 p-1"
+              initial={isLoading ? { opacity: 100 } : {}}
+              transition={
+                isLoading
+                  ? { duration: 0.6, repeat: Infinity, repeatType: "reverse" }
+                  : { duration: 0, repeat: 0 }
+              }
+            >
               <CardContent
                 daily={daily}
                 descriptionContent="note"
@@ -243,9 +255,12 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
                 points={points}
                 setPointsAction={setPoints}
                 totalWeight={totalWeight}
-                onRefreshAction={onRefreshAction}
+                onRefreshAction={() => {
+                  setIsLoading(true);
+                  onRefreshAction();
+                }}
               />
-            </div>
+            </motion.div>
           </CardBorder>
         </RadixContextMenu.Trigger>
         <RadixContextMenu.Portal>
@@ -266,6 +281,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
         historic
         daily={daily}
         isOpen={isOpen}
+        setIsLoadingAction={setIsLoading}
         title={`${daily.name} (${daily.date})`}
         user={user}
         onOpenChange={onOpenChange}

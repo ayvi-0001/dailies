@@ -20,12 +20,13 @@ type EditModalProps = {
   historic?: boolean;
   isOpen: boolean;
   onOpenChange: () => void;
+  setIsLoadingAction: React.Dispatch<React.SetStateAction<boolean>>;
   title: string;
   user: User;
 };
 
 export default function EditModal(props: EditModalProps): React.ReactNode {
-  const { daily, historic, isOpen, onOpenChange, title, user } = props;
+  const { daily, historic, isOpen, onOpenChange, setIsLoadingAction, title, user } = props;
 
   const dailiesState: DailiesState = useDailies();
   const questTypes: QuestType[] = useQuestTypes();
@@ -41,12 +42,14 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
 
   const [_, dispatch, isPending] = React.useActionState(
     async (state: EditQuestState, payload: FormData): Promise<EditQuestState> => {
+      setIsLoadingAction(true);
+
       const diff = (await editQuest(state, payload, daily, questTypes, historic)) as Partial<Daily>;
+      log.debug(JSON.stringify(diff));
+
       if (Object.hasOwn(diff, "errors")) return;
 
       const dailies: Daily[] = dailiesState.dailies;
-
-      log.debug(JSON.stringify(diff));
 
       for (const entry of Object.entries(diff)) {
         let key = entry[0];

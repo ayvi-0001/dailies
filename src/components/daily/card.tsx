@@ -51,12 +51,24 @@ export default function DailyCard(props: DailyCardProps): React.ReactNode {
     questTypes.find(type => `${type.id}` == `${daily.type}`) || null;
   const questTypeStyles: QuestTypeStyles = questType?.styles || DEFAULT_QUEST_TYPE_STYLES;
 
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  React.useEffect(() => setIsLoading(false), [daily]);
+
   return (
     <>
       <RadixContextMenu.Root modal onOpenChange={toggleContextMenu}>
         <RadixContextMenu.Trigger className="flex items-center justify-center">
           <CardBorder daily={daily} divProps={{ className: questTypeStyles.borderClass as string }}>
-            <div className="flex w-full min-w-0 flex-row justify-between gap-2 p-1">
+            <motion.div
+              animate={isLoading ? { opacity: 0 } : {}}
+              className="flex w-full min-w-0 flex-row justify-between gap-2 p-1"
+              initial={isLoading ? { opacity: 100 } : {}}
+              transition={
+                isLoading
+                  ? { duration: 0.6, repeat: Infinity, repeatType: "reverse" }
+                  : { duration: 0, repeat: 0 }
+              }
+            >
               <CardContent
                 daily={daily}
                 name={daily.name}
@@ -68,9 +80,12 @@ export default function DailyCard(props: DailyCardProps): React.ReactNode {
                 points={points}
                 setPointsAction={setPoints}
                 totalWeight={totalWeight}
-                onRefreshAction={onRefreshAction}
+                onRefreshAction={() => {
+                  setIsLoading(true);
+                  onRefreshAction();
+                }}
               />
-            </div>
+            </motion.div>
           </CardBorder>
         </RadixContextMenu.Trigger>
         <RadixContextMenu.Portal>
@@ -90,6 +105,7 @@ export default function DailyCard(props: DailyCardProps): React.ReactNode {
       <EditModal
         daily={daily}
         isOpen={editDisclosure.isOpen}
+        setIsLoadingAction={setIsLoading}
         title={daily.name}
         user={user}
         onOpenChange={editDisclosure.onOpenChange}
