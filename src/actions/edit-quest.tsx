@@ -14,6 +14,7 @@ export type EditQuestErrors = {
     days?: string[];
     name?: string[];
     description?: string[];
+    note?: string[];
     requirements?: string[];
     streakTarget?: string[];
     timeStart?: string[];
@@ -33,20 +34,22 @@ export default async function editQuest(
   formData: FormData,
   originalValues: Daily,
   questTypes: QuestType[],
+  historic?: boolean,
 ): Promise<EditQuestErrors | Partial<Daily>> {
   const validatedFields = Quest.EditQuestFormSchema.safeParse({
-    archived: formData.get("archived"),
-    chain: formData.get("chain"),
-    days: formData.getAll("days"),
-    name: formData.get("name"),
-    description: formData.get("description"),
-    requirements: formData.get("requirements"),
+    archived: historic ? originalValues.archived : formData.get("archived"),
+    chain: historic ? originalValues.chain : formData.get("chain"),
+    days: historic ? originalValues.days : formData.getAll("days"),
+    name: historic ? originalValues.name : formData.get("name"),
+    description: historic ? originalValues.description : formData.get("description"),
+    note: formData.get("note"),
+    requirements: historic ? originalValues.requirements : formData.get("requirements"),
     streakTarget: formData.get("streakTarget"),
-    timeStart: formData.get("timeStart"),
-    timeEnd: formData.get("timeEnd"),
-    defaultPoints: formData.get("defaultPoints"),
+    timeStart: historic ? originalValues.timeStart : formData.get("timeStart"),
+    timeEnd: historic ? originalValues.timeEnd : formData.get("timeEnd"),
+    defaultPoints: historic ? originalValues.defaultPoints : formData.get("defaultPoints"),
     total: formData.get("total"),
-    typeId: formData.get("typeId"),
+    typeId: historic ? originalValues.type : formData.get("typeId"),
     weight: formData.get("weight"),
   });
 
@@ -54,7 +57,7 @@ export default async function editQuest(
     validatedFields.data.archived = formatDateTimeISO8601(validatedFields.data.archived as Date);
   }
 
-  if (validatedFields.data?.typeId) {
+  if (!historic && validatedFields.data?.typeId) {
     validatedFields.data.typeId = questTypes
       .find((questType: QuestType) => questType.name == validatedFields.data.typeId)!
       .id.replace("_", "-");
@@ -72,6 +75,7 @@ export default async function editQuest(
         days: errTree.properties?.days?.errors,
         name: errTree.properties?.name?.errors,
         description: errTree.properties?.description?.errors,
+        note: errTree.properties?.note?.errors,
         requirements: errTree.properties?.requirements?.errors,
         streakTarget: errTree.properties?.streakTarget?.errors,
         timeStart: errTree.properties?.timeStart?.errors,
@@ -90,6 +94,7 @@ export default async function editQuest(
     days: originalValues.days,
     name: originalValues.name,
     description: originalValues.description,
+    note: originalValues.note,
     requirements: originalValues.requirements,
     streakTarget: originalValues.streakTarget,
     timeEnd: originalValues.timeEnd,

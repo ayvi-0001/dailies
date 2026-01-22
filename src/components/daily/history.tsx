@@ -233,6 +233,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
             <div className="flex w-full min-w-0 flex-row justify-between gap-2 p-1">
               <CardContent
                 daily={daily}
+                descriptionContent="note"
                 name={formatDateISO8601(daily.date)}
                 questType={questType}
                 questTypeStyles={questTypeStyles}

@@ -16,16 +16,16 @@ import EditDailyForm from "../forms/edit";
 import { QuestType, useQuestTypes } from "../providers/quest-types";
 
 type EditModalProps = {
-  user: User;
   daily: Daily;
+  historic?: boolean;
   isOpen: boolean;
   onOpenChange: () => void;
   title: string;
-  historic?: boolean;
+  user: User;
 };
 
 export default function EditModal(props: EditModalProps): React.ReactNode {
-  const { user, daily, isOpen, onOpenChange, title, historic } = props;
+  const { daily, historic, isOpen, onOpenChange, title, user } = props;
 
   const dailiesState: DailiesState = useDailies();
   const questTypes: QuestType[] = useQuestTypes();
@@ -41,7 +41,7 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
 
   const [_, dispatch, isPending] = React.useActionState(
     async (state: EditQuestState, payload: FormData): Promise<EditQuestState> => {
-      const diff = (await editQuest(state, payload, daily, questTypes)) as Partial<Daily>;
+      const diff = (await editQuest(state, payload, daily, questTypes, historic)) as Partial<Daily>;
       if (Object.hasOwn(diff, "errors")) return;
 
       const dailies: Daily[] = dailiesState.dailies;

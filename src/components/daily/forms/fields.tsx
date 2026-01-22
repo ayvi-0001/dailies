@@ -261,12 +261,34 @@ export function DescriptionField({ daily }: { daily?: Daily }): React.ReactEleme
       className="-mt-1 text-sm text-white"
       classNames={{
         base: "text-sm",
-        input: "resize-y min-h-[40px] text-sm",
         innerWrapper: "text-xs",
+        input: "resize-y min-h-[40px] text-xs",
+        label: "text-xs",
       }}
       defaultValue={daily?.description ?? ""}
       label="Description"
       name="description"
+      radius="none"
+      variant="bordered"
+    />
+  );
+}
+
+export function NoteField({ daily }: { daily?: Daily }): React.ReactElement {
+  return (
+    <heroui.Textarea
+      disableAutosize
+      isClearable
+      className="-mt-1 text-sm text-white"
+      classNames={{
+        base: "text-sm",
+        innerWrapper: "text-xs",
+        input: "resize-y min-h-[40px] text-xs",
+        label: "text-xs",
+      }}
+      defaultValue={daily?.note ?? ""}
+      label={`Note ${daily?.date && `(${daily.date})`}`}
+      name="note"
       radius="none"
       variant="bordered"
     />

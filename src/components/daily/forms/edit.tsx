@@ -124,6 +124,7 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
         <DailyForm.DaysField days={days} setDaysAction={setDays} />
       )}
       {!historic && <DailyForm.DescriptionField daily={daily} />}
+      {<DailyForm.NoteField daily={daily} />}
       {!historic && (
         <DailyForm.ArchivedField
           archivedDate={archivedDate}

@@ -28,6 +28,7 @@ export type Daily = {
   archived: Option<Date>;
   days: Option<number[]>;
   description: Option<string>;
+  note: Option<string>;
   streak: Readonly<Option<number>>;
   complete: Readonly<Option<number>>;
   pointsWeighted: Readonly<Option<number>>;
@@ -48,7 +49,7 @@ export type Quest = {
   // TODO(ayvi): set type to Date
   accepted: Readonly<string>;
   archived: Option<Date>;
-  days: number[];
+  days: Option<number[]>;
   description: Option<string>;
   streak: Readonly<Option<number>>;
 };
@@ -99,7 +100,7 @@ export namespace Quest {
     timeStart: z.preprocess<Option<string>, SomeType, string>( val => (`${val}` === "" ? null : val), z.iso.time().nullable()),
     timeEnd: z.preprocess<Option<string>, SomeType, string>( val => (`${val}` === "" ? null : val), z.iso.time().nullable()),
     accepted: z.coerce.date<Option<Date>>().nullable().transform((arg: Option<Date>) => (arg ? formatDateTimeISO8601(arg) : null)),
-    days: z.preprocess<number[], SomeType, string[]>( val => (val.length === 0 ? [] : val.map(v => parseInt(v))), z.array(z.number())),
+    days: z.preprocess<Option<number[]>, SomeType, Option<string[]>>(val => (val && val?.length > 0 ? val.map(v => parseInt(v)) : null), z.array(z.number()).nullable()),
     description: z.preprocess<Option<string>, SomeType, string>( val => (val === "" ? null : val), z.string().nullable()),
   });
 
@@ -107,9 +108,10 @@ export namespace Quest {
   export const EditQuestFormSchema = z.object({
     archived: z.preprocess<Option<Date>, SomeType, string | null>(val => val ? parseDateTime(val).toDate(LOCAL_TZ) : null, z.coerce.date().nullable()),
     chain: z.string().nonempty(),
-    days: z.preprocess<number[], SomeType, string[]>( val => (val.length === 0 ? [] : val.map(v => parseInt(v))), z.array(z.number())),
+    days: z.preprocess<Option<number[]>, SomeType, Option<string[]>>(val => (val && val?.length > 0 ? val.map(v => parseInt(v)) : null), z.array(z.number()).nullable()),
     name: z.string().nonempty(),
     description: z.preprocess<Option<string>, SomeType, string>( val => (val === "" ? null : val), z.string().nullable()),
+    note: z.preprocess<Option<string>, SomeType, string>( val => (val === "" ? null : val), z.string().nullable()),
     requirements: z.preprocess<Option<unknown>, SomeType, unknown>( val => { if (!val) { return null } else { return val } }, z.any().nullable()),
     streakTarget: z.preprocess<Option<number>, SomeType, number>( val => (`${val}` === "" ? null : val), z.coerce.number<number>().nullable()),
     timeStart: z.preprocess<Option<string>, SomeType, string>( val => (`${val}` === "" ? null : val), z.iso.time().nullable()),

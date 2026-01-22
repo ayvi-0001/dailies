@@ -325,18 +325,30 @@ pub async fn update_days(
     user_id: i64,
     quest_id: String,
     point_id: String,
-    value: Json<Vec<i64>>,
+    value: Option<Json<Vec<i64>>>,
 ) -> Result<(), crate::errors::Error> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
-    sqlx::query!(
-        r#"UPDATE "quests" SET days = $1 WHERE id = $2;"#,
-        value,
-        quest_id,
-    )
-    .execute(pool)
-    .await?;
+    match value {
+        Some(days) => {
+            sqlx::query!(
+                r#"UPDATE "quests" SET days = $1 WHERE id = $2;"#,
+                days,
+                quest_id,
+            )
+            .execute(pool)
+            .await?;
+        }
+        None => {
+            sqlx::query!(
+                r#"UPDATE "quests" SET days = NULL WHERE id = $1;"#,
+                quest_id,
+            )
+            .execute(pool)
+            .await?;
+        }
+    }
 
     Ok(())
 }
@@ -453,7 +465,7 @@ pub async fn update_note(
     user_id: i64,
     quest_id: String,
     point_id: String,
-    value: Option<NaiveTime>,
+    value: Option<String>,
 ) -> Result<(), crate::errors::Error> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;

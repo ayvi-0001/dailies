@@ -110,17 +110,18 @@ type CardContentProps = {
   daily: Daily;
   questType: Option<QuestType>;
   questTypeStyles: QuestTypeStyles;
+  descriptionContent?: "description" | "note";
 };
 
 export function CardContent(props: CardContentProps): React.ReactElement {
-  const { name, daily, questType, questTypeStyles } = props;
+  const { name, daily, questType, questTypeStyles, descriptionContent } = props;
 
   return (
     <div className="flex min-w-0 grow flex-col items-start gap-[2]">
       <QuestName name={name} />
       <Details daily={daily} questType={questType} questTypeStyles={questTypeStyles} />
       <heroui.Divider />
-      <Description description={daily.description} />
+      <Description description={descriptionContent == "note" ? daily.note : daily.description} />
     </div>
   );
 }
