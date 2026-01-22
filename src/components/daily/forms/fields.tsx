@@ -1,8 +1,7 @@
 import * as React from "react";
 
 import * as heroui from "@heroui/react";
-import { Time } from "@internationalized/date";
-import { DateValue, today } from "@internationalized/date";
+import { CalendarDate, DateValue, Time, today } from "@internationalized/date";
 import type { ValidationResult } from "@react-types/shared/src/inputs";
 import { X } from "lucide-react";
 
@@ -322,7 +321,7 @@ type ArchivedFieldProps = {
 
 export function ArchivedField(props: ArchivedFieldProps): React.ReactElement {
   const { archivedDate, setArchivedDateAction } = props;
-  const now: heroui.CalendarDate = today(LOCAL_TZ);
+  const now: CalendarDate = today(LOCAL_TZ);
 
   return (
     <heroui.DatePicker

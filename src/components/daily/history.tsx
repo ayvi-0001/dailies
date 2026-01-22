@@ -270,6 +270,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
                 daily={daily}
                 editOnOpenAction={onOpen}
                 setPointsAction={setPoints}
+                user_id={user.id}
                 onRefreshAction={onRefreshAction}
               />
             )}

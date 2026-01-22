@@ -1,6 +1,15 @@
 import AbandonDailyMenuOption from "./abandon";
+import ArchiveDailyMenuOption from "./archive";
 import DeleteMenuOption from "./delete";
 import EditMenuOption from "./edit";
 import HistoryMenuOption from "./history";
+import RestoreDailyMenuOption from "./unarchive";
 
-export { AbandonDailyMenuOption, EditMenuOption, HistoryMenuOption, DeleteMenuOption };
+export {
+  AbandonDailyMenuOption,
+  ArchiveDailyMenuOption,
+  EditMenuOption,
+  HistoryMenuOption,
+  DeleteMenuOption,
+  RestoreDailyMenuOption,
+};

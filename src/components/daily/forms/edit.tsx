@@ -1,9 +1,7 @@
 import * as React from "react";
 
 import * as heroui from "@heroui/react";
-import { Time, parseDateTime } from "@internationalized/date";
-import { DateValue } from "@internationalized/date";
-import { parseTime } from "@internationalized/date";
+import { /* DateValue, */ Time /* , parseDateTime */, parseTime } from "@internationalized/date";
 
 import type { Option } from "@/types/option";
 
@@ -51,14 +49,14 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
   if (total && defaultPoints && defaultPoints > total)
     defaultPointsErrors.push("Default points cannot be greater than total points.");
 
-  const [archivedDate, setArchivedDate] = React.useState<Option<DateValue>>(null);
+  // const [archivedDate, setArchivedDate] = React.useState<Option<DateValue>>(null);
 
   const [days, setDays] = React.useState<string[]>([]);
 
   React.useEffect(() => {
     setName(daily?.name || "");
     setDays(daily?.days?.map(v => `${v}`) || []);
-    setArchivedDate(daily?.archived ? parseDateTime(daily.archived.toString()) : null);
+    // setArchivedDate(daily?.archived ? parseDateTime(daily.archived.toString()) : null);
     setQuestType(daily?.type);
     setTotal(daily?.total);
     setDefaultPoints(daily?.defaultPoints);
@@ -125,12 +123,12 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
       )}
       {!historic && <DailyForm.DescriptionField daily={daily} />}
       {<DailyForm.NoteField daily={daily} />}
-      {!historic && (
+      {/* !historic && (
         <DailyForm.ArchivedField
           archivedDate={archivedDate}
           setArchivedDateAction={setArchivedDate}
         />
-      )}
+      ) */}
     </heroui.Form>
   );
 }

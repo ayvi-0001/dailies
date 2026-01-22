@@ -11,7 +11,13 @@ import { User } from "@/app/providers/user";
 import type { Option } from "@/types/option";
 
 import CardBorder from "./border";
-import { AbandonDailyMenuOption, EditMenuOption, HistoryMenuOption } from "./context-menu/items";
+import {
+  AbandonDailyMenuOption,
+  ArchiveDailyMenuOption,
+  EditMenuOption,
+  HistoryMenuOption,
+  RestoreDailyMenuOption,
+} from "./context-menu/items";
 import Description from "./description";
 import Details from "./details";
 import HistoryDrawer from "./history";
@@ -96,6 +102,7 @@ export default function DailyCard(props: DailyCardProps): React.ReactNode {
                 editOnOpenAction={editDisclosure.onOpen}
                 setPointsAction={setPoints}
                 toggleHistoryAction={toggleHistory}
+                user_id={user.id}
                 onRefreshAction={onRefreshAction}
               />
             )}
@@ -172,14 +179,22 @@ export function CardStats(props: CardStatsProps): React.ReactElement {
 
 type ContextMenuContentProps = {
   daily: Daily;
-  setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
-  onRefreshAction: () => void;
   editOnOpenAction: () => void;
+  onRefreshAction: () => void;
+  setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
   toggleHistoryAction?: () => void;
+  user_id: number;
 };
 
 export function ContextMenuContent(props: ContextMenuContentProps): React.ReactElement {
-  const { daily, setPointsAction, onRefreshAction, editOnOpenAction, toggleHistoryAction } = props;
+  const {
+    daily,
+    editOnOpenAction,
+    onRefreshAction,
+    setPointsAction,
+    toggleHistoryAction,
+    user_id,
+  } = props;
 
   return (
     <RadixContextMenu.Content asChild forceMount className="dark relative z-100 bg-black p-2">
@@ -197,6 +212,21 @@ export function ContextMenuContent(props: ContextMenuContentProps): React.ReactE
         />
         <EditMenuOption onOpen={editOnOpenAction} />
         {toggleHistoryAction && <HistoryMenuOption toggleHistory={toggleHistoryAction} />}
+        {!daily.archived ? (
+          <ArchiveDailyMenuOption
+            daily={daily}
+            setPointsAction={setPointsAction}
+            user_id={user_id}
+            onRefreshAction={onRefreshAction}
+          />
+        ) : (
+          <RestoreDailyMenuOption
+            daily={daily}
+            setPointsAction={setPointsAction}
+            user_id={user_id}
+            onRefreshAction={onRefreshAction}
+          />
+        )}
       </motion.div>
     </RadixContextMenu.Content>
   );
