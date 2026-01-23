@@ -34,14 +34,14 @@ import {
 import type { Daily } from "./types";
 
 type DailyCardProps = {
-  user: User;
   daily: Daily;
-  totalWeight: number;
   onRefreshAction: () => void;
+  totalWeight: number;
+  user: User;
 };
 
 export default function DailyCard(props: DailyCardProps): React.ReactNode {
-  const { user, daily, totalWeight, onRefreshAction } = props;
+  const { daily, onRefreshAction, totalWeight, user } = props;
 
   const [points, setPoints] = React.useState<Option<string>>(
     daily.points !== null ? `${daily.points}` : null,
@@ -63,35 +63,38 @@ export default function DailyCard(props: DailyCardProps): React.ReactNode {
   return (
     <>
       <RadixContextMenu.Root modal onOpenChange={toggleContextMenu}>
-        <RadixContextMenu.Trigger className="flex items-center justify-center">
+        <RadixContextMenu.Trigger className="flex">
           <CardBorder daily={daily} divProps={{ className: questTypeStyles.borderClass as string }}>
-            <motion.div
-              animate={isLoading ? { opacity: 0 } : {}}
-              className="flex w-full min-w-0 flex-row justify-between gap-2 p-1"
-              initial={isLoading ? { opacity: 100 } : {}}
-              transition={
-                isLoading
-                  ? { duration: 0.6, repeat: Infinity, repeatType: "reverse" }
-                  : { duration: 0, repeat: 0 }
-              }
-            >
-              <CardContent
-                daily={daily}
-                name={daily.name}
-                questType={questType}
-                questTypeStyles={questTypeStyles}
-              />
-              <CardStats
-                daily={daily}
-                points={points}
-                setPointsAction={setPoints}
-                totalWeight={totalWeight}
-                onRefreshAction={() => {
-                  setIsLoading(true);
-                  onRefreshAction();
-                }}
-              />
-            </motion.div>
+            <AnimatePresence>
+              <motion.div
+                key={`card-effect-${daily.pointId}`}
+                animate={isLoading ? { opacity: 0 } : {}}
+                className="flex w-full min-w-0 flex-row justify-between gap-2 p-1"
+                initial={isLoading ? { opacity: 100 } : {}}
+                transition={
+                  isLoading
+                    ? { duration: 0.6, repeat: Infinity, repeatType: "reverse" }
+                    : { duration: 0, repeat: 0 }
+                }
+              >
+                <CardContent
+                  daily={daily}
+                  name={daily.name}
+                  questType={questType}
+                  questTypeStyles={questTypeStyles}
+                />
+                <CardStats
+                  daily={daily}
+                  points={points}
+                  setPointsAction={setPoints}
+                  totalWeight={totalWeight}
+                  onRefreshAction={() => {
+                    setIsLoading(true);
+                    onRefreshAction();
+                  }}
+                />
+              </motion.div>
+            </AnimatePresence>
           </CardBorder>
         </RadixContextMenu.Trigger>
         <RadixContextMenu.Portal>
@@ -129,15 +132,15 @@ export default function DailyCard(props: DailyCardProps): React.ReactNode {
 }
 
 type CardContentProps = {
-  name: string;
   daily: Daily;
+  descriptionContent?: "description" | "note";
+  name: string;
   questType: Option<QuestType>;
   questTypeStyles: QuestTypeStyles;
-  descriptionContent?: "description" | "note";
 };
 
 export function CardContent(props: CardContentProps): React.ReactElement {
-  const { name, daily, questType, questTypeStyles, descriptionContent } = props;
+  const { daily, descriptionContent, questType, questTypeStyles, name } = props;
 
   return (
     <div className="flex min-w-0 grow flex-col items-start gap-[2]">

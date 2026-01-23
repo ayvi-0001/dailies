@@ -26,15 +26,15 @@ import {
 import type { Daily } from "./types";
 
 type HistoryDrawerProps = {
-  user: User;
+  daily: Daily;
   isOpen: boolean;
   setHistoryIsOpenAction: React.Dispatch<React.SetStateAction<boolean>>;
-  daily: Daily;
   totalWeight: number;
+  user: User;
 };
 
 export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactElement {
-  const { user, isOpen, setHistoryIsOpenAction, daily, totalWeight } = props;
+  const { daily, isOpen, setHistoryIsOpenAction, totalWeight, user } = props;
 
   const searchParams: ReadonlyURLSearchParams = useSearchParams();
 
@@ -204,16 +204,16 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
 }
 
 type HistoryDailyCardProps = {
-  user: User;
   daily: Daily;
   index: number;
+  onRefreshAction: () => void;
   questTypes: QuestType[];
   totalWeight: number;
-  onRefreshAction: () => void;
+  user: User;
 };
 
 export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactElement {
-  const { user, daily, index, questTypes, totalWeight, onRefreshAction } = props;
+  const { daily, index, onRefreshAction, questTypes, totalWeight, user } = props;
 
   const questType: Option<QuestType> =
     questTypes.find(type => `${type.id}` == `${daily.type}`) || null;
@@ -231,36 +231,39 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
   return (
     <>
       <RadixContextMenu.Root modal onOpenChange={toggleContextMenu}>
-        <RadixContextMenu.Trigger className="flex items-center justify-center">
+        <RadixContextMenu.Trigger className="flex">
           <CardBorder daily={daily} divProps={{ className: questTypeStyles.borderClass as string }}>
-            <motion.div
-              animate={isLoading ? { opacity: 0 } : {}}
-              className="flex w-full min-w-0 flex-row justify-between gap-2 p-1"
-              initial={isLoading ? { opacity: 100 } : {}}
-              transition={
-                isLoading
-                  ? { duration: 0.6, repeat: Infinity, repeatType: "reverse" }
-                  : { duration: 0, repeat: 0 }
-              }
-            >
-              <CardContent
-                daily={daily}
-                descriptionContent="note"
-                name={formatDateISO8601(daily.date)}
-                questType={questType}
-                questTypeStyles={questTypeStyles}
-              />
-              <CardStats
-                daily={daily}
-                points={points}
-                setPointsAction={setPoints}
-                totalWeight={totalWeight}
-                onRefreshAction={() => {
-                  setIsLoading(true);
-                  onRefreshAction();
-                }}
-              />
-            </motion.div>
+            <AnimatePresence>
+              <motion.div
+                key={`card-effect-${daily.pointId}`}
+                animate={isLoading ? { opacity: 0 } : {}}
+                className="flex w-full min-w-0 flex-row justify-between gap-2 p-1"
+                initial={isLoading ? { opacity: 100 } : {}}
+                transition={
+                  isLoading
+                    ? { duration: 0.6, repeat: Infinity, repeatType: "reverse" }
+                    : { duration: 0, repeat: 0 }
+                }
+              >
+                <CardContent
+                  daily={daily}
+                  descriptionContent="note"
+                  name={formatDateISO8601(daily.date)}
+                  questType={questType}
+                  questTypeStyles={questTypeStyles}
+                />
+                <CardStats
+                  daily={daily}
+                  points={points}
+                  setPointsAction={setPoints}
+                  totalWeight={totalWeight}
+                  onRefreshAction={() => {
+                    setIsLoading(true);
+                    onRefreshAction();
+                  }}
+                />
+              </motion.div>
+            </AnimatePresence>
           </CardBorder>
         </RadixContextMenu.Trigger>
         <RadixContextMenu.Portal>
