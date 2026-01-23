@@ -8,7 +8,8 @@ import type { Option } from "@/types/option";
 
 export type Daily = {
   user: Readonly<string>;
-  date: Readonly<Date>;
+  // TODO(ayvi): set type to Date
+  date: Readonly<string>;
   pointId: Readonly<string>;
   questId: Readonly<string>;
   sequence: number;
