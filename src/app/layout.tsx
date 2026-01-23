@@ -36,11 +36,15 @@ export default function RootLayout(pages: Pages): React.ReactNode {
           // eslint-disable-next-line @next/next/no-sync-scripts
           <script src="http://localhost:8097"></script>
         ) */}
+        <meta
+          content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content"
+          name="viewport"
+        />
       </head>
-      <body>
+      <body className="touch-none overflow-hidden select-none">
         <Providers>
           <Toaster />
-          <div className="relative z-1 select-none">
+          <div className="relative z-1">
             <React.Suspense>
               {process.env.NODE_ENV === "development" && <CommandDialog />}
             </React.Suspense>
