@@ -379,7 +379,7 @@ export function DaysField(props: DaysFieldProps): React.ReactElement {
         .filter(value => typeof value !== "number")
         .map((day: string, idx: number) => (
           <div key={day} className="flex flex-col">
-            <div className="place-self-center text-xs">{day.at(0)}</div>
+            <div className="place-self-center text-xs">{`${day}`.at(0)}</div>
             <heroui.Checkbox
               classNames={{
                 base: "m-0 p-0  flex flex-row",
