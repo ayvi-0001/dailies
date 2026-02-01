@@ -15,7 +15,7 @@ export type Daily = {
   sequence: number;
   chain: string;
   name: string;
-  type: string;
+  type: Quest.Type;
   points: Option<number>;
   defaultPoints: number;
   total: number;
