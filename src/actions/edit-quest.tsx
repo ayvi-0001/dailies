@@ -45,8 +45,8 @@ export default async function editQuest(
     note: formData.get("note"),
     requirements: historic ? originalValues.requirements : formData.get("requirements"),
     streakTarget: formData.get("streakTarget"),
-    timeStart: historic ? originalValues.timeStart : formData.get("timeStart"),
-    timeEnd: historic ? originalValues.timeEnd : formData.get("timeEnd"),
+    timeStart: formData.get("timeStart"),
+    timeEnd: formData.get("timeEnd"),
     defaultPoints: historic ? originalValues.defaultPoints : formData.get("defaultPoints"),
     total: formData.get("total"),
     typeId: historic ? originalValues.type : formData.get("typeId"),
@@ -62,6 +62,20 @@ export default async function editQuest(
       .find((questType: QuestType) => questType.name == validatedFields.data.typeId)!
       .id.replace("_", "-");
   }
+
+  if (validatedFields.data?.typeId) {
+    if (
+      [Quest.Type.QR, Quest.Type.QW].includes(originalValues.type) &&
+      ![`${Quest.Type.QR}`, `${Quest.Type.QW}`].includes(validatedFields.data?.typeId)
+    ) {
+      validatedFields.data.days = originalValues.days;
+      validatedFields.data.timeStart = originalValues.timeStart;
+      validatedFields.data.timeEnd = originalValues.timeEnd;
+    }
+  }
+
+  log.debug(`validatedFields: ${JSON.stringify(validatedFields.data)}`);
+  log.debug(`originalValues: ${JSON.stringify(originalValues)}`);
 
   if (!validatedFields.success) {
     const errTree = z.treeifyError(validatedFields.error);

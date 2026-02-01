@@ -100,14 +100,14 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
         <DailyForm.StreakTargetField daily={daily} />
       </div>
       <div className="flex w-full flex-row gap-3">
-        {!historic && questType == Quest.Type.QR && (
+        {questType == Quest.Type.QR && (
           <DailyForm.TimeStartField
             setTimeStartAction={setTimeStart}
             timeStart={timeStart}
             timeStartErrors={timeStartErrors}
           />
         )}
-        {!historic && questType == Quest.Type.QR && (
+        {questType == Quest.Type.QR && (
           <DailyForm.TimeEndField
             setTimeEndAction={setTimeEnd}
             timeEnd={timeEnd}
