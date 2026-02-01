@@ -894,42 +894,80 @@ pub async fn insert_dailies(
               $1 AS date,
               CASE
                 WHEN archived IS NOT NULL THEN NULL
-                WHEN type_id = "q-o" THEN NULL
-                WHEN type_id = "q-w" AND INSTR(days, STRFTIME('%w', 'now')) < 1 THEN NULL
-                WHEN type_id IN ("q-d", "q-w") THEN default_points
-                WHEN type_id = 'q-dm' THEN (
+                WHEN type_id = 'q-o' THEN NULL
+                /*                                             Fixed Monday week start                     */
+                WHEN type_id IN ('q-w', 'q-r') AND INSTR(days, (STRFTIME('%w', 'now') + 6) % 7) < 1 THEN NULL
+                WHEN type_id IN ('q-d', 'q-w', 'q-r') THEN default_points
+                WHEN type_id IN ('q-dm') THEN (
                   SELECT COALESCE(points, 0)
                   FROM
                     "points" AS p1
                   WHERE
-                    p1.quest_id = q.id
-                    AND p1.date = DATE($1, '-1 days')
+                    "p1".quest_id = q.id
+                    AND "p1".date = DATE($1, '-1 days')
                   LIMIT 1
                 )
-                WHEN type_id LIKE 'q-w-%' THEN (
+                WHEN type_id = 'q-w-m' THEN (
                   WITH
                     p2 AS (
-                      SELECT
-                        points,
-                        total
+                      SELECT MAX(CASE WHEN points IS NOT NULL THEN points ELSE 0 END) AS points
                       FROM
                         "points"
                       WHERE
-                        quest_id = q.id AND date > DATE(
+                        quest_id = "q".id
+                        AND date >= DATE(
                           $1, '-'
-                          || CAST(COALESCE(CAST(q.requirements AS INT), 0) + 1 AS TEXT)
+                          || CAST(COALESCE(CAST(requirements ->> '$' AS INT), 0) AS TEXT)
                           || ' days'
                         )
                     )
                   SELECT CASE
-                      WHEN type_id LIKE '%-m'
-                        THEN CASE WHEN MAX(p2.points) / p2.total = 1 THEN NULL ELSE default_points END
-                      WHEN type_id LIKE '%-s'
-                        THEN CASE WHEN SUM(p2.points) / SUM(p2.total) = 1 THEN NULL ELSE default_points END
+                      WHEN "p2".points / "q".total = 1
+                      THEN NULL ELSE "q".default_points
                     END
                   FROM
-                    p2
+                    "p2"
                 )
+                WHEN type_id = 'q-w-s' THEN (
+                  WITH
+                    p3 AS (
+                      SELECT SUM(CASE WHEN points IS NOT NULL THEN points ELSE 0 END) AS points
+                      FROM
+                        "points"
+                      WHERE
+                        quest_id = "q".id
+                        -- In current week
+                        AND "date" >= DATE($1, 'weekday 1', '-7 days')
+                        AND "date" <= DATE($1, 'weekday 6', '+1 days')
+                    )
+                  SELECT CASE
+                      WHEN CAST("p3".points AS REAL) >= CAST(requirements ->> '$' AS REAL)
+                      THEN NULL ELSE "q".default_points
+                    END
+                  FROM
+                    "p3"
+                )
+                /*
+                -- Type does not exist yet
+                WHEN type_id = 'q-w-?' THEN (
+                  WITH
+                    p4 AS (
+                      SELECT SUM(CASE WHEN points IS NOT NULL THEN points ELSE 0 END) AS points
+                      FROM
+                        "points"
+                      WHERE
+                        quest_id = "q".id
+                        -- Over last 7 days
+                        AND date >= DATE($1, '-7 days')
+                    )
+                  SELECT CASE
+                      WHEN CAST("p4".points AS REAL) >= CAST(requirements ->> '$' AS REAL)
+                      THEN NULL ELSE "q".default_points
+                    END
+                  FROM
+                    "p4"
+                )
+                */
               END AS points,
               weight,
               total,
@@ -942,7 +980,7 @@ pub async fn insert_dailies(
             FROM
               _staging_dailies_missing AS q
             ORDER BY
-              q.sequence;
+              "q".sequence;
         "#,
         date,
         datetime,
