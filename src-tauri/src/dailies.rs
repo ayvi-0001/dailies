@@ -53,6 +53,7 @@ pub async fn query_dailies(
                 description,
                 note,
                 streak AS "streak: i64",
+                previous_streak AS "previous_streak: i64",
                 complete AS "complete: f64",
                 points_weighted AS "points_weighted: f64"
             FROM

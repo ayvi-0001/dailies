@@ -31,6 +31,7 @@ export type Daily = {
   description: Option<string>;
   note: Option<string>;
   streak: Readonly<Option<number>>;
+  previousStreak: Readonly<Option<number>>;
   complete: Readonly<Option<number>>;
   pointsWeighted: Readonly<Option<number>>;
 };

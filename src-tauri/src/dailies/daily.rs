@@ -43,6 +43,8 @@ pub struct Daily {
     pub note: Option<String>,
     #[serde_as(as = "Option<i64>")]
     pub streak: Option<i64>,
+    #[serde_as(as = "Option<i64>")]
+    pub previous_streak: Option<i64>,
     #[serde_as(as = "Option<f64>")]
     pub complete: Option<f64>,
     #[serde_as(as = "Option<f64>")]
