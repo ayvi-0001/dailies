@@ -148,9 +148,7 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const [countRefreshDailies, setCountRefreshDailies] = React.useState<number>(0);
 
-  ReactUse.useOnceEffect(() => {
-    setIsLoading(true);
-  }, [dateRange]);
+  ReactUse.useOnceEffect(() => setIsLoading(true), [dateRange]);
 
   React.useEffect(() => {
     const query_dailies = async (): Promise<void> => {
@@ -174,7 +172,7 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
   return (
     <heroui.ScrollShadow
       hideScrollBar
-      className="h-[calc(100vh-60vh)] rounded-md"
+      className="flex h-[calc(100vh-60vh)] w-full flex-col gap-2 rounded-md"
       offset={80}
       size={10}
       style={{ scrollbarWidth: "none" }}
@@ -186,7 +184,7 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
           </div>
         ) : (
           dailies.map((daily: Daily, index: number) => (
-            <div key={`${daily.pointId}-${index}`} className="mr-2 mb-4 ml-2">
+            <div key={`${daily.pointId}-${index}`} className="mx-2">
               <HistoryDailyCard
                 daily={daily}
                 index={index}
