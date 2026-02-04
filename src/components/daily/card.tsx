@@ -18,12 +18,10 @@ import {
   HistoryMenuOption,
   RestoreDailyMenuOption,
 } from "./context-menu/items";
-import Description from "./description";
 import Details from "./details";
 import HistoryDrawer from "./history";
 import PointsInput from "./input";
 import EditModal from "./modals/edit";
-import QuestName from "./name";
 import PointsDisplay from "./points";
 import {
   DEFAULT_QUEST_TYPE_STYLES,
@@ -143,11 +141,24 @@ export function CardContent(props: CardContentProps): React.ReactElement {
   const { daily, descriptionContent, questType, questTypeStyles, name } = props;
 
   return (
-    <div className="flex min-w-0 grow flex-col items-start gap-[2]">
+    <div className="flex min-w-0 grow flex-col items-stretch gap-[2]">
       <QuestName name={name} />
-      <Details daily={daily} questType={questType} questTypeStyles={questTypeStyles} />
-      <heroui.Divider />
-      <Description description={descriptionContent == "note" ? daily.note : daily.description} />
+      <Details
+        daily={daily}
+        descriptionContent={descriptionContent}
+        questType={questType}
+        questTypeStyles={questTypeStyles}
+      />
+    </div>
+  );
+}
+
+export function QuestName({ name }: { name: string }): React.ReactElement {
+  return (
+    <div className="w-full wrap-anywhere">
+      <p className="overflow-hidden pb-[1] text-xl leading-none font-bold tracking-tight text-ellipsis whitespace-nowrap">
+        {name}
+      </p>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-use chrono::{DateTime, Local, NaiveDateTime, NaiveTime};
+use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_with::serde_as;
@@ -120,4 +120,18 @@ pub struct QuestChain {
     pub chain: String,
     pub sequence: i64,
     pub collapsed: bool,
+}
+
+#[derive(Default, Serialize, Deserialize, sqlx::Decode, sqlx::Encode, sqlx::FromRow)]
+#[serde_as]
+#[serde(rename_all = "camelCase")]
+pub struct WeeklyQuestStats {
+    pub date: NaiveDate,
+    pub quest_id: String,
+    pub point_id: String,
+    pub requirements: f64,
+    #[serde_as(as = "Option<NaiveTime>")]
+    pub latest_complete_date: Option<NaiveDate>,
+    pub rolling_points: f64,
+    pub is_weekly_requirement_complete: bool,
 }

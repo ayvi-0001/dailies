@@ -5,7 +5,7 @@ import * as React from "react";
 import * as heroui from "@heroui/react";
 import * as ReactUse from "@reactuses/core";
 import { ScrollShadow } from "@heroui/react";
-import { DateValue, today } from "@internationalized/date";
+import { CalendarDate, today } from "@internationalized/date";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
 
@@ -22,7 +22,7 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
   const userState: UserState = useUserState();
   const dailiesState: DailiesState = useDailies();
 
-  const [listDate, setListDate] = React.useState<DateValue>(today(LOCAL_TZ));
+  const [listDate, setListDate] = React.useState<CalendarDate>(today(LOCAL_TZ));
 
   const router: AppRouterInstance = useRouter();
 

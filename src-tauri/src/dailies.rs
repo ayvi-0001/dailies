@@ -10,7 +10,7 @@ use tokio::sync::{Mutex, MutexGuard};
 
 crate::mod_flat!(daily, enums, quest, points);
 
-use crate::{dailies::{daily::Daily, enums::SortDirection, points::TotalPointEval, quest::{Quest, QuestChain, QuestSequence, QuestType, QuestTypeRecord, QuestTypeStyles}}, db::User, state, state::app_handle};
+use crate::{dailies::{daily::Daily, enums::SortDirection, points::TotalPointEval, quest::{Quest, QuestChain, QuestSequence, QuestType, QuestTypeRecord, QuestTypeStyles, WeeklyQuestStats}}, db::User, state, state::app_handle};
 
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn query_dailies(
@@ -1238,4 +1238,173 @@ pub async fn set_quest_chain_collapsed(
     .await?;
 
     Ok(())
+}
+
+#[allow(unused_variables)]
+#[tauri::command(async, rename_all = "snake_case")]
+pub async fn get_weekly_sum_type_stats(
+    state: tauri::State<'_, Mutex<state::AppState>>,
+    quest_id: &str,
+    requirements: i64,
+    date: &str,
+) -> Result<WeeklyQuestStats, crate::errors::Error> {
+    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+    let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
+    let conn: &mut SqliteConnection = pool.acquire().await?;
+
+    let parsed_date = NaiveDate::from_str(date)?;
+
+    let row: WeeklyQuestStats = sqlx::query_as!(
+        WeeklyQuestStats,
+        r#"
+            WITH dailies_L AS (
+              SELECT
+                date,
+                quest_id,
+                point_id,
+                requirements,
+                LAST_VALUE(CASE WHEN complete = 1 THEN date ELSE NULL END) OVER(
+                  PARTITION BY quest_id ORDER BY date DESC
+                ) AS last_complete_date
+              FROM
+                "dailies"
+              WHERE
+                quest_id = $1
+              ),
+              weekly_sum_requirements as (
+                SELECT
+                  point_id,
+                  date,
+                  SUM(CASE WHEN points IS NOT NULL THEN points ELSE 0 END) OVER(ORDER BY date ROWS BETWEEN 7 PRECEDING AND CURRENT ROW) AS weekly_sum_rolling
+                FROM
+                  "dailies"
+                WHERE
+                  quest_id = $1
+              )
+            SELECT
+              "d".date AS "date!: NaiveDate",
+              "d".quest_id AS "quest_id!: String",
+              "d".point_id AS "point_id!: String",
+              CAST("d".requirements ->> '$' AS REAL) AS "requirements!: f64",
+              (
+                SELECT MAX(last_complete_date)
+                FROM
+                  "dailies_L"
+                WHERE
+                  quest_id = "d".quest_id
+                  AND date <= "d".date
+              ) AS "latest_complete_date!: Option<NaiveDate>",
+              "wsr".weekly_sum_rolling AS "rolling_points!: f64",
+              "wsr".weekly_sum_rolling >= CAST("d".requirements ->> '$' AS REAL) AS "is_weekly_requirement_complete!: bool"
+            FROM
+              "dailies_L" AS "d"
+            LEFT JOIN
+            	weekly_sum_requirements "wsr"
+            ON
+              "d".point_id = "wsr".point_id
+              AND "wsr".date >= DATE("d".date, '-7 days')
+            WHERE
+              "d".date = $2;
+        "#,
+        quest_id,
+        parsed_date,
+    )
+    .fetch_one(&mut *conn)
+    .await?;
+
+    Ok(row)
+}
+
+#[tauri::command(async, rename_all = "snake_case")]
+pub async fn get_weekly_max_type_stats(
+    state: tauri::State<'_, Mutex<state::AppState>>,
+    quest_id: &str,
+    requirements: i64,
+    date: &str,
+) -> Result<WeeklyQuestStats, crate::errors::Error> {
+    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+    let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
+    let conn: &mut SqliteConnection = pool.acquire().await?;
+
+    let parsed_date = NaiveDate::from_str(date)?;
+
+    let row: WeeklyQuestStats = sqlx::query_as(
+        &format!(
+            r#"
+                WITH dailies_L AS (
+                  SELECT
+                    date,
+                    quest_id,
+                    point_id,
+                    total,
+                    requirements,
+                    LAST_VALUE(CASE WHEN complete = 1 THEN date ELSE NULL END) OVER(
+                      PARTITION BY quest_id ORDER BY date DESC
+                    ) AS last_complete_date,
+                    MAX(CASE WHEN points IS NOT NULL THEN points ELSE 0 END) OVER(ORDER BY date ROWS BETWEEN {} PRECEDING AND CURRENT ROW) AS rolling_points
+                  FROM
+                    "dailies"
+                  WHERE
+                    quest_id = $1
+                  )
+                SELECT
+                  "d".date,
+                  "d".quest_id,
+                  "d".point_id,
+                  CAST("d".requirements ->> '$' AS REAL) AS requirements,
+                  (
+                    SELECT MAX(last_complete_date)
+                    FROM
+                      "dailies_L"
+                    WHERE
+                      quest_id = "d".quest_id
+                      AND date <= "d".date
+                  ) AS latest_complete_date,
+                  CAST("d".rolling_points AS REAL) AS rolling_points,
+                  CAST("d".rolling_points AS REAL) = CAST("d".total AS REAL) AS is_weekly_requirement_complete
+                FROM
+                  "dailies_L" AS "d"
+                WHERE
+                  "d".date = $2
+            "#,
+            requirements,
+        )
+    )
+    .bind(quest_id)
+    .bind(parsed_date)
+    .fetch_one(&mut *conn)
+    .await?;
+
+    Ok(row)
+}
+
+#[tauri::command(async, rename_all = "snake_case")]
+pub async fn get_daily_last_completed_date(
+    state: tauri::State<'_, Mutex<state::AppState>>,
+    quest_id: &str,
+) -> Result<NaiveDate, crate::errors::Error> {
+    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+    let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
+    let conn: &mut SqliteConnection = pool.acquire().await?;
+
+    let value: NaiveDate = sqlx::query_scalar!(
+        r#"
+            SELECT DISTINCT FIRST_VALUE(date) OVER(
+                PARTITION BY quest_id
+                ORDER BY
+                    CASE WHEN date IS NULL THEN 1 ELSE 0 END,
+                    CASE WHEN complete = 1 THEN 0 ELSE 1 END,
+                    date desc) AS "last_complete_date!: NaiveDate"
+            FROM
+                "dailies"
+            WHERE
+                quest_id = $1
+            LIMIT 1;
+        "#,
+        quest_id,
+    )
+    .fetch_one(&mut *conn)
+    .await?;
+
+    Ok(value)
 }

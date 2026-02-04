@@ -1,16 +1,43 @@
 import { CalendarDate, getLocalTimeZone, parseDate } from "@internationalized/date";
 
+import { isNumeric } from "./number";
+import { identicalArrays } from "./utils";
+
 export const LOCAL_TZ = getLocalTimeZone();
 
-export enum Weekdays {
-  Mon,
-  Tue,
-  Wed,
-  Thu,
-  Fri,
-  Sat,
-  Sun,
+export enum WeekDays {
+  Mon = 0,
+  Tue = 1,
+  Wed = 2,
+  Thu = 3,
+  Fri = 4,
 }
+
+export enum WeekEnds {
+  Sat = 5,
+  Sun = 6,
+}
+
+export const DaysOfWeek = {
+  ...WeekDays,
+  ...WeekEnds,
+};
+
+const getDaysOfWeek = (e: typeof WeekDays | typeof WeekEnds): number[] => {
+  return [...Object.keys(e)].filter(v => isNumeric(v)).map(v => +v);
+};
+
+export const isWeekend = (days: number[]): boolean => {
+  return identicalArrays<number>([...getDaysOfWeek(WeekEnds)], days);
+};
+
+export const isWeekDay = (days: number[]): boolean => {
+  return identicalArrays<number>([...getDaysOfWeek(WeekDays)], days);
+};
+
+export const isEveryDay = (days: number[]): boolean => {
+  return identicalArrays<number>([...getDaysOfWeek(WeekDays), ...getDaysOfWeek(WeekEnds)], days);
+};
 
 export function formatDateTimeISO8601(date: Date, tzOffset: boolean = false): string {
   const year = date.getFullYear();

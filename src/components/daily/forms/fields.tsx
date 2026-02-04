@@ -6,7 +6,7 @@ import type { ValidationResult } from "@react-types/shared/src/inputs";
 import { X } from "lucide-react";
 
 import { Daily } from "@/components/daily";
-import { LOCAL_TZ, Weekdays } from "@/lib/dates";
+import { DaysOfWeek, LOCAL_TZ } from "@/lib/dates";
 import type { Option } from "@/types/option";
 
 import { QuestType } from "../providers/quest-types";
@@ -375,7 +375,7 @@ export function DaysField(props: DaysFieldProps): React.ReactElement {
       value={days ?? []}
       onValueChange={setDaysAction}
     >
-      {Object.values(Weekdays)
+      {Object.values(DaysOfWeek)
         .filter(value => typeof value !== "number")
         .map((day: string, idx: number) => (
           <div key={day} className="flex flex-col">
