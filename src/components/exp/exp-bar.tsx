@@ -3,13 +3,18 @@
 import * as React from "react";
 
 import * as heroui from "@heroui/react";
+import * as ReactUse from "@reactuses/core";
+import clsx, { ClassValue } from "clsx";
+import { AnimatePresence, motion } from "framer-motion";
 
 import { AppMetaState, useAppMetaState } from "@/app/providers/app-meta";
 import CursorTracker from "@/components/animata/container/cursor-tracker";
 import Progress from "@/components/animata/graphs/progress";
 import Counter from "@/components/animata/text/counter";
 import { DailiesState, useDailies } from "@/components/daily/providers/dailies";
-import { roundTo } from "@/lib/number";
+import { isRealNumber, roundTo } from "@/lib/number";
+import { cn } from "@/lib/utils";
+import { Option } from "@/types/option";
 
 export default function ExpBar(): React.ReactNode {
   const dailiesState: DailiesState = useDailies();
@@ -19,46 +24,106 @@ export default function ExpBar(): React.ReactNode {
   const totalWeight = dailiesState.totalWeight;
   const countRefreshDailies = dailiesState.countRefreshDailies;
 
-  let value: number = roundTo((totalPoints / totalWeight) * 100, 2);
-  value = !Number.isNaN(value) ? value : +``;
+  const previousTotalPoints = ReactUse.usePrevious(totalPoints);
 
+  const pointDiff: number = previousTotalPoints ? totalPoints - previousTotalPoints : 0;
+
+  const [percentChange, setPercentChange] = React.useState<Option<number>>(null);
+
+  React.useEffect(() => {
+    let x: Option<number>;
+    x = roundTo((pointDiff / totalWeight) * 100, 2);
+    x = isRealNumber(x) ? x : null;
+    setPercentChange(x);
+  }, [pointDiff, totalWeight]);
+  React.useEffect(() => setPercentChange(null), [dailiesState.date]);
+
+  let percentValue: number = roundTo((totalPoints / totalWeight) * 100, 2);
+  percentValue = !Number.isNaN(percentValue) && Number.isFinite(percentValue) ? percentValue : +``;
+
+  const [isVisible, setIsVisible] = React.useState(true);
+  React.useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(false), 5000);
+    return () => clearTimeout(timer);
+  }, [isVisible]);
+  React.useEffect(() => setIsVisible(true), [previousTotalPoints]);
+
+  const textClassValue: ClassValue = "text-xs font-bold text-[#f0f0ff]";
+
+  const showExpToast: boolean = isVisible && !!percentChange && previousTotalPoints !== undefined;
+  const key: string = `point-diff-${countRefreshDailies}`;
   const bar: React.ReactElement = (
-    <div className="flex h-10 items-center gap-3 rounded" id="exp-bar">
-      {!!totalWeight ? (
-        <>
-          <div className="grow empty:w-12">
-            <Counter
-              className="text-sm text-white"
-              direction="up"
-              format={(value: number): string => `${value.toFixed(2)}%`}
-              targetValue={value ?? 0}
+    <AnimatePresence>
+      {showExpToast ? (
+        <motion.div
+          key={key}
+          animate={{ opacity: 1, y: 0 }}
+          className="z-100 -mb-3 flex w-full justify-end"
+          exit={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: 10 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        >
+          <p
+            className={cn(
+              textClassValue,
+              clsx(
+                Math.sign(pointDiff) === 1 && "text-green-400",
+                Math.sign(pointDiff) === -1 && "text-red-400",
+              ),
+            )}
+          >
+            {Math.sign(pointDiff) === 1 && "+"}
+            {percentChange}
+            {"%"}
+          </p>
+        </motion.div>
+      ) : (
+        <div key={key} className="flex w-full justify-self-end" id={key}></div>
+      )}
+      <div className="flex h-10 items-center gap-3 rounded" id="exp-bar">
+        {!!totalWeight ? (
+          <>
+            <div className="grow">
+              <Progress<number> deps={[countRefreshDailies]} progress={percentValue} />
+            </div>
+            <div className="flex grow flex-row">
+              {!!totalPoints && (
+                <>
+                  <span className={cn(textClassValue, "opacity-80")}>[</span>
+                  <Counter
+                    className={cn(textClassValue, "opacity-80")}
+                    direction="up"
+                    format={(value: number): string => `${value.toFixed(2)}`}
+                    targetValue={!!totalPoints ? totalPoints : 0}
+                  />
+                  <span className={cn(textClassValue, "opacity-80")}>{`/${totalWeight}]`}</span>
+                </>
+              )}
+              <Counter
+                className={cn(textClassValue, "px-1")}
+                direction="up"
+                format={(value: number): string => `${value.toFixed(2)}%`}
+                targetValue={percentValue ?? 0}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="flex h-full w-full flex-col">
+            <heroui.Spinner
+              as={"div"}
+              className="dark z-1000"
+              classNames={{ label: "text-foreground mt-4" }}
+              variant="dots"
             />
           </div>
-          <div className="grow">
-            <Progress<number> deps={[countRefreshDailies]} progress={value} />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-white">
-              {totalWeight !== 0 && (totalWeight ?? "")}
-            </p>
-          </div>
-        </>
-      ) : (
-        <div className="flex h-full w-full flex-col">
-          <heroui.Spinner
-            as={"div"}
-            className="dark z-1000"
-            classNames={{ label: "text-foreground mt-4" }}
-            variant="dots"
-          />
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </AnimatePresence>
   );
 
   const focusContent: React.ReactElement = (
     <div className="top-2 rounded-full bg-black/60 px-4 py-1">
-      <span className="text-xs font-bold text-white">
+      <span className={textClassValue}>
         <span className="pr-1">{totalPoints.toFixed(2)}</span>
         <span>{` / `}</span>
         <span>{totalWeight}</span>
