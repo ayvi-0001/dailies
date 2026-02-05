@@ -18,6 +18,7 @@ import QuestTypesProvider from "./quest-types";
 export const dynamic = "force-dynamic";
 
 export type DailiesState = {
+  date: string;
   dailies: Daily[];
   setDailies: React.Dispatch<React.SetStateAction<Daily[]>>;
   questChains: string[];
@@ -31,7 +32,7 @@ export type DailiesState = {
   isLoading: boolean;
 };
 
-export const DailiesContext = React.createContext<DailiesState | null>(null);
+export const DailiesContext = React.createContext<Option<DailiesState>>(null);
 
 type DailiesProviderProps = {
   children?: Readonly<React.ReactNode>;
@@ -108,6 +109,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
   }, [countRefreshDailies]);
 
   const value: DailiesState = {
+    date,
     dailies,
     setDailies,
     questChains,
