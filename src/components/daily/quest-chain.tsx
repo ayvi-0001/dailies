@@ -33,11 +33,12 @@ import {
   ListChevronsDownUpIcon,
   ListChevronsUpDownIcon,
   ListFilterIcon,
-  SwordsIcon,
+  ScrollTextIcon,
 } from "lucide-react";
 
 import { User } from "@/app/providers/user";
 import { LOCAL_TZ } from "@/lib/dates";
+import { roundTo } from "@/lib/number";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
@@ -79,15 +80,15 @@ export function QuestsHeader(props: QuestsHeaderProps): React.ReactNode {
 
   return (
     <div
-      className="bg-opacity-90 relative h-8 bg-[#6B6C76] bg-blend-overlay select-none"
+      className="bg-opacity-60 relative h-9 bg-slate-400/80 bg-blend-overlay select-none"
       id="dailies-list-header"
     >
-      <div className="flex flex-row items-center gap-2">
-        <div className="box-content aspect-square size-8 place-items-center place-self-center bg-yellow-400 shadow-md">
-          <SwordsIcon className="size-8 opacity-20" />
+      <div className="flex flex-row items-center justify-items-stretch gap-2">
+        <div className="box-content flex aspect-square size-9 place-items-center justify-items-center bg-yellow-400 shadow-md">
+          <ScrollTextIcon className="size-8 w-full opacity-20" />
         </div>
         <div className="flex grow">
-          <p className="text-xl leading-none font-bold text-black text-shadow-sm">{title}</p>
+          <p className="text-xl leading-none font-bold text-black text-shadow-md">{title}</p>
         </div>
         <div className="mr-2 flex flex-row">
           <QuestListDatePicker listDate={listDate} setListDateAction={setListDateAction} />
@@ -194,6 +195,16 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
 
   const filteredDailies = dailies.filter(daily => isDailyFilteredAction(daily));
 
+  let questChainCompletion: Option<number> =
+    filteredDailies.map(d => d.points || 0).reduce((sum, current) => sum + current, 0) /
+    filteredDailies.map(d => d.total || 0).reduce((sum, current) => sum + current, 0);
+
+  if (!Number.isNaN(questChainCompletion)) {
+    questChainCompletion = roundTo(questChainCompletion * 100, 2);
+  } else {
+    questChainCompletion = null;
+  }
+
   return (
     <heroui.Accordion
       key={chain}
@@ -230,7 +241,18 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
             />
           )
         }
-        startContent={<div className={"text-md ml-10 p-1 leading-5 text-white"}>{chain}</div>}
+        startContent={
+          <div
+            className={
+              "text-md mr-3 ml-10 flex w-full flex-row items-center justify-between p-1 leading-5 text-white"
+            }
+          >
+            <span>{chain}</span>
+            <span className="ml-1 text-xs font-bold text-[#f0f0ff] opacity-80">
+              {questChainCompletion !== null && `[${questChainCompletion.toFixed(2)}%]`}
+            </span>
+          </div>
+        }
         textValue={chain ?? ""}
       >
         <div className="flex flex-col items-center justify-center gap-4">
@@ -373,7 +395,7 @@ function QuestListDatePicker(props: QuestListDatePickerProps): React.ReactElemen
       aria-label="quest list date picker"
       className="dark"
       classNames={{
-        inputWrapper: "w-fit bg-[#6B6C76] hover:bg-[#6B6C76] focus-within:hover:bg-[#6B6C76]",
+        inputWrapper: "w-fit bg-transparent hover:bg-transparent focus-within:hover:bg-transparent",
         segment:
           "text-xs font-bold text-black transition-colors focus:bg-slate-900/40 data-[editable=true]:text-black data-[editable=true]:focus:text-black data-[editable=true]:data-[placeholder=true]:text-black",
         calendarContent: "dark",
