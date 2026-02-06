@@ -3,13 +3,17 @@
 import * as React from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
+import { today } from "@internationalized/date";
 import { OnBackButtonPressPayload, onBackButtonPress } from "@tauri-apps/api/app";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 import * as Command from "@/components/ui/command";
 import { truncate_sessions } from "@/actions/logout";
+import { LOCAL_TZ } from "@/lib/dates";
+import { formatDateTimeISO8601 } from "@/lib/dates";
 
 import { AppMetaState, useAppMetaState } from "./providers/app-meta";
 
@@ -53,6 +57,28 @@ export default function CommandDialog(): React.ReactElement {
       callback: async () => {
         await truncate_sessions();
         router.push("/login");
+      },
+    },
+    {
+      name: "insert dailies",
+      callback: async () => {
+        toast.promise(
+          async () => {
+            await (
+              await import("@/lib/tauri")
+            ).invoke("insert_dailies", {
+              datetime: formatDateTimeISO8601(today(LOCAL_TZ).toDate(LOCAL_TZ), true),
+            });
+            window.location.reload();
+          },
+          {
+            success: () => {
+              return `Done, Reloading..`;
+            },
+            // backend will toast error type and message
+            // error: err => JSON.stringify(err),
+          },
+        );
       },
     },
     appMeta.platform == "android"

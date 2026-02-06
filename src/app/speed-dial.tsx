@@ -2,17 +2,12 @@
 
 import * as React from "react";
 
-import { today } from "@internationalized/date";
-import { BookPlusIcon, ChartAreaIcon, ListRestartIcon, LogOutIcon } from "lucide-react";
+import { BookPlusIcon, ChartAreaIcon, LogOutIcon } from "lucide-react";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
 
 import { truncate_sessions } from "@/actions/logout";
 import Speeddial from "@/components/animata/container/speed-dial";
-import { LOCAL_TZ } from "@/lib/dates";
-import { formatDateTimeISO8601 } from "@/lib/dates";
-import { invoke } from "@/lib/tauri";
 
 import { ModalParam } from "./@modals/params";
 
@@ -56,28 +51,6 @@ export default function App(): React.ReactElement {
       label: <p className="text-xs">Add Quest</p>,
       key: "add",
       buttonAction: () => updateParam([{ key: "modal", value: ModalParam.AddQuest }]),
-    },
-    {
-      icon: <ListRestartIcon size={14} />,
-      label: <p className="text-xs">Insert Dailies</p>,
-      key: "insert-dailies",
-      buttonAction: async () => {
-        toast.promise(
-          async () => {
-            await invoke("insert_dailies", {
-              datetime: formatDateTimeISO8601(today(LOCAL_TZ).toDate(LOCAL_TZ), true),
-            });
-            window.location.reload();
-          },
-          {
-            success: () => {
-              return `Done, Reloading..`;
-            },
-            // backend will toast error type and message
-            // error: err => JSON.stringify(err),
-          },
-        );
-      },
     },
   ];
 
