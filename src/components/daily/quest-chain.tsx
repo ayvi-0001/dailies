@@ -50,11 +50,13 @@ type QuestsHeaderProps = {
   isCompletedQuestsFiltered: boolean;
   isOptionalQuestsFiltered: boolean;
   listDate: DateValue;
+  questNameFilterText: string;
   setArchivedQuestsFilteredAction: (value: boolean) => Promise<void>;
   setCompletedQuestsFilteredAction: (value: boolean) => Promise<void>;
   setIsAllQuestChainCollapsedAction: (value: boolean) => Promise<void>;
-  setListDateAction: React.Dispatch<React.SetStateAction<DateValue>>;
+  setListDateAction: React.Dispatch<React.SetStateAction<CalendarDate>>;
   setOptionalQuestsFilteredAction: (value: boolean) => Promise<void>;
+  setQuestNameFilterTextAction: (value: string) => Promise<void>;
   title: string;
 };
 
@@ -65,11 +67,13 @@ export function QuestsHeader(props: QuestsHeaderProps): React.ReactNode {
     isCompletedQuestsFiltered,
     isOptionalQuestsFiltered,
     listDate,
+    questNameFilterText,
     setArchivedQuestsFilteredAction,
     setCompletedQuestsFilteredAction,
     setIsAllQuestChainCollapsedAction,
     setListDateAction,
     setOptionalQuestsFilteredAction,
+    setQuestNameFilterTextAction,
     title,
   } = props;
 
@@ -95,9 +99,11 @@ export function QuestsHeader(props: QuestsHeaderProps): React.ReactNode {
             isArchivedQuestsFiltered={isArchivedQuestsFiltered}
             isCompletedQuestsFiltered={isCompletedQuestsFiltered}
             isOptionalQuestsFiltered={isOptionalQuestsFiltered}
+            nameFilterText={questNameFilterText}
             setArchivedQuestsFilteredAction={setArchivedQuestsFilteredAction}
             setCompletedQuestsFilteredAction={setCompletedQuestsFilteredAction}
             setOptionalQuestsFilteredAction={setOptionalQuestsFilteredAction}
+            setQuestNameFilterTextAction={setQuestNameFilterTextAction}
           />
         </div>
       </div>
@@ -182,12 +188,11 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
       });
     };
 
-    if (isAllQuestChainsCollapsed) {
-      setSelectedKeys(new Set([]));
-    } else {
-      get_collapsed();
-    }
-  }, [isAllQuestChainsCollapsed, user.id, chain, isQuestChainCollapsed]);
+    if (isAllQuestChainsCollapsed) setSelectedKeys(new Set([]));
+    else get_collapsed();
+  }, [isAllQuestChainsCollapsed, user.id, chain, isQuestChainCollapsed, dailies]);
+
+  const filteredDailies = dailies.filter(daily => isDailyFilteredAction(daily));
 
   return (
     <heroui.Accordion
@@ -240,23 +245,21 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
               items={dailies.map(d => d.sequence) || []}
               strategy={verticalListSortingStrategy}
             >
-              {dailies
-                ?.filter(daily => isDailyFilteredAction(daily))
-                .map(daily => (
-                  <SortableItem
-                    key={`${daily.pointId}-${daily.sequence}`}
-                    className="w-[100%] flex-shrink-0"
-                    // @ts-expect-error: overwrite assigning number to id
-                    id={daily.sequence}
-                  >
-                    <DailyCard
-                      daily={daily}
-                      totalWeight={totalWeight}
-                      user={user}
-                      onRefreshAction={onUpdateAction}
-                    />
-                  </SortableItem>
-                ))}
+              {filteredDailies.map(daily => (
+                <SortableItem
+                  key={`${daily.pointId}-${daily.sequence}`}
+                  className="w-[100%] flex-shrink-0"
+                  // @ts-expect-error: overwrite assigning number to id
+                  id={daily.sequence}
+                >
+                  <DailyCard
+                    daily={daily}
+                    totalWeight={totalWeight}
+                    user={user}
+                    onRefreshAction={onUpdateAction}
+                  />
+                </SortableItem>
+              ))}
             </SortableContext>
           </DndContext>
         </div>
@@ -358,7 +361,7 @@ const motionProps: Omit<HTMLMotionProps<"div">, "ref"> = {
 
 type QuestListDatePickerProps = {
   listDate: DateValue;
-  setListDateAction: React.Dispatch<React.SetStateAction<DateValue>>;
+  setListDateAction: React.Dispatch<React.SetStateAction<CalendarDate>>;
 };
 
 function QuestListDatePicker(props: QuestListDatePickerProps): React.ReactElement {
@@ -395,7 +398,7 @@ function QuestListDatePicker(props: QuestListDatePickerProps): React.ReactElemen
       value={listDate}
       variant="flat"
       onChange={(value: CalendarDate | CalendarDateTime | ZonedDateTime | null) =>
-        value && setListDateAction(value as DateValue)
+        value && setListDateAction(value as CalendarDate)
       }
     />
   );
@@ -456,6 +459,8 @@ type QuestsFilterProps = {
   setArchivedQuestsFilteredAction: (value: boolean) => Promise<void>;
   setCompletedQuestsFilteredAction: (value: boolean) => Promise<void>;
   setOptionalQuestsFilteredAction: (value: boolean) => Promise<void>;
+  nameFilterText: string;
+  setQuestNameFilterTextAction: (value: string) => Promise<void>;
 };
 
 function QuestsFilterMenu(props: QuestsFilterProps): React.ReactElement {
@@ -466,6 +471,8 @@ function QuestsFilterMenu(props: QuestsFilterProps): React.ReactElement {
     setArchivedQuestsFilteredAction,
     setCompletedQuestsFilteredAction,
     setOptionalQuestsFilteredAction,
+    nameFilterText,
+    setQuestNameFilterTextAction: setNameFilterTextAction,
   } = props;
 
   return (
@@ -495,7 +502,26 @@ function QuestsFilterMenu(props: QuestsFilterProps): React.ReactElement {
         </heroui.Button>
       </heroui.DropdownTrigger>
       <heroui.DropdownMenu aria-label="Static Actions" className="w-fit">
-        <heroui.DropdownItem key="archived" classNames={{ title: "text-xs text-white" }}>
+        <heroui.DropdownItem
+          key="name"
+          classNames={{ title: "text-xs text-white" }}
+          textValue="name filter"
+        >
+          <heroui.Input
+            isClearable
+            className="dark"
+            classNames={{ input: "text-xs" }}
+            placeholder="Quest Name"
+            size="sm"
+            value={nameFilterText}
+            onValueChange={setNameFilterTextAction}
+          ></heroui.Input>
+        </heroui.DropdownItem>
+        <heroui.DropdownItem
+          key="archived"
+          classNames={{ title: "text-xs text-white" }}
+          textValue="archived toggle"
+        >
           <heroui.Switch
             classNames={{ label: "text-xs text-white" }}
             isSelected={!isArchivedQuestsFiltered}
@@ -507,7 +533,11 @@ function QuestsFilterMenu(props: QuestsFilterProps): React.ReactElement {
             Archived
           </heroui.Switch>
         </heroui.DropdownItem>
-        <heroui.DropdownItem key="completed" classNames={{ title: "text-xs text-white" }}>
+        <heroui.DropdownItem
+          key="completed"
+          classNames={{ title: "text-xs text-white" }}
+          textValue="completed toggle"
+        >
           <heroui.Switch
             classNames={{ label: "text-xs text-white" }}
             isSelected={!isCompletedQuestsFiltered}
@@ -519,7 +549,11 @@ function QuestsFilterMenu(props: QuestsFilterProps): React.ReactElement {
             Completed
           </heroui.Switch>
         </heroui.DropdownItem>
-        <heroui.DropdownItem key="optional" classNames={{ title: "text-xs text-white" }}>
+        <heroui.DropdownItem
+          key="optional"
+          classNames={{ title: "text-xs text-white" }}
+          textValue="optional toggle"
+        >
           <heroui.Switch
             classNames={{ label: "text-xs text-white" }}
             isSelected={!isOptionalQuestsFiltered}

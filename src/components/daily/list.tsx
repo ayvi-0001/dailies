@@ -53,10 +53,12 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
     isCompletedQuestsFiltered,
     isDailyFilteredAction,
     isOptionalQuestsFiltered,
+    questNameFilterText,
     setArchivedQuestsFilteredAction,
     setCompletedQuestsFilteredAction,
     setIsAllQuestChainCollapsedAction,
     setOptionalQuestsFilteredAction,
+    setQuestNameFilterTextAction,
   } = useQuestListConfig(userState.user);
 
   const groupedDailies: Record<string, Option<Daily[]>> = dailiesState.dailies.reduce(
@@ -80,11 +82,13 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
           isCompletedQuestsFiltered={isCompletedQuestsFiltered}
           isOptionalQuestsFiltered={isOptionalQuestsFiltered}
           listDate={listDate}
+          questNameFilterText={questNameFilterText}
           setArchivedQuestsFilteredAction={setArchivedQuestsFilteredAction}
           setCompletedQuestsFilteredAction={setCompletedQuestsFilteredAction}
           setIsAllQuestChainCollapsedAction={setIsAllQuestChainCollapsedAction}
           setListDateAction={setListDate}
           setOptionalQuestsFilteredAction={setOptionalQuestsFilteredAction}
+          setQuestNameFilterTextAction={setQuestNameFilterTextAction}
           title={title}
         />
       </div>
@@ -130,15 +134,18 @@ function useQuestListConfig(user: User): {
   isCompletedQuestsFiltered: boolean;
   isDailyFilteredAction: (daily: Daily) => Option<Daily>;
   isOptionalQuestsFiltered: boolean;
+  questNameFilterText: string;
   setArchivedQuestsFilteredAction: (value: boolean) => Promise<void>;
   setCompletedQuestsFilteredAction: (value: boolean) => Promise<void>;
   setIsAllQuestChainCollapsedAction: (value: boolean) => Promise<void>;
   setOptionalQuestsFilteredAction: (value: boolean) => Promise<void>;
+  setQuestNameFilterTextAction: (value: string) => Promise<void>;
 } {
   const [isArchivedQuestsFiltered, setArchivedQuestsFiltered] = React.useState(false);
   const [isCompletedQuestsFiltered, setCompletedQuestsFiltered] = React.useState(false);
   const [isOptionalQuestsFiltered, setOptionalQuestsFiltered] = React.useState(false);
   const [isAllQuestChainsCollapsed, setIsAllQuestChainCollapsed] = React.useState(false);
+  const [questNameFilterText, setQuestNameFilterText] = React.useState("");
 
   React.useEffect(() => {
     const get_config_is_archived_quests_filtered = async () => {
@@ -216,7 +223,15 @@ function useQuestListConfig(user: User): {
     });
   };
 
+  const setQuestNameFilterTextAction = async (value: string): Promise<void> => {
+    setQuestNameFilterText(value);
+  };
+
   const isDailyFilteredAction = (daily: Daily): Option<Daily> => {
+    if (questNameFilterText)
+      if (daily.name.includes(questNameFilterText)) return daily;
+      else return null;
+
     if (isArchivedQuestsFiltered && !!daily.archived) {
       return null;
     } else if (isCompletedQuestsFiltered && daily.complete == 1) {
@@ -234,9 +249,11 @@ function useQuestListConfig(user: User): {
     isCompletedQuestsFiltered,
     isDailyFilteredAction,
     isOptionalQuestsFiltered,
+    questNameFilterText,
     setArchivedQuestsFilteredAction,
     setCompletedQuestsFilteredAction,
     setIsAllQuestChainCollapsedAction,
     setOptionalQuestsFilteredAction,
+    setQuestNameFilterTextAction,
   };
 }
