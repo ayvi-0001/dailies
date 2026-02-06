@@ -3,12 +3,12 @@
 import * as React from "react";
 
 import * as ReactUse from "@reactuses/core";
-import { today } from "@internationalized/date";
+import { now, today } from "@internationalized/date";
 import ok from "assert";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 
 import { User, useState as useUserState } from "@/app/providers/user";
-import { LOCAL_TZ } from "@/lib/dates";
+import { LOCAL_TZ, formatDateTimeISO8601 } from "@/lib/dates";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
@@ -107,6 +107,54 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
     setCountRefreshDailies(countRefreshDailies + 1);
     console.debug(`countRefreshDailies=${countRefreshDailies}`);
   }, [countRefreshDailies]);
+
+  ReactUse.useOnceEffect(() => {
+    const insert_dailies = async (): Promise<void> => {
+      await invoke("insert_dailies", {
+        datetime: formatDateTimeISO8601(today(LOCAL_TZ).toDate(LOCAL_TZ), true),
+      });
+    };
+    const query_dailies = async (): Promise<void> => {
+      setIsLoading(true);
+      await invoke<Daily[]>("query_dailies", {
+        user: user.name,
+        quest_id: null, // pull all dailies
+        start_date: date,
+        end_date: date,
+      })
+        .then(result => {
+          setDailies(result);
+          setIsLoading(false);
+        })
+        .catch(console.error);
+    };
+
+    const midnightDailyRefresh = (): void => {
+      insert_dailies();
+      query_dailies();
+    };
+
+    const getMsToMidnight = (): number => {
+      const currentDateTime = now(LOCAL_TZ);
+      const midnight = currentDateTime
+        .cycle("day", 1)
+        .cycle("hour", 24 - currentDateTime.hour)
+        .cycle("minute", 60 - currentDateTime.minute)
+        .cycle("second", 60 - currentDateTime.second)
+        .cycle("millisecond", 1000 - currentDateTime.millisecond);
+      const timeToMidnight = midnight.compare(currentDateTime);
+
+      return timeToMidnight;
+    };
+
+    const timeoutId = setTimeout(() => {
+      midnightDailyRefresh();
+      const intervalId = setInterval(midnightDailyRefresh, 24 * 60 * 60 * 1000);
+      return () => clearInterval(intervalId);
+    }, getMsToMidnight());
+
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   const value: DailiesState = {
     date,
