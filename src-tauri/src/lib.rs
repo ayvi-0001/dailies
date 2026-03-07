@@ -4,7 +4,7 @@ use tauri::Manager;
 use tokio::sync::Mutex;
 
 pub(crate) mod macros;
-crate::mod_flat!(config, dailies, state, db, errors);
+crate::mod_flat!(config, dailies, state, db, errors, build_info);
 
 #[cfg(target_os = "android")]
 mod android;
@@ -91,6 +91,11 @@ pub fn run() {
             android::export_db,
             #[cfg(target_os = "android")]
             android::import_db,
+            build_info::vergen_build_date,
+            build_info::vergen_build_timestamp,
+            build_info::vergen_cargo_target_triple,
+            build_info::vergen_git_branch,
+            build_info::vergen_git_describe,
             config::get_key_as_bool,
             config::get_key_as_float,
             config::get_key_as_int,
