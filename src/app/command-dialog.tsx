@@ -12,6 +12,7 @@ import { toast } from "sonner";
 
 import * as Command from "@/components/ui/command";
 import { truncate_sessions } from "@/actions/logout";
+import { getSession } from "@/actions/session";
 import { LOCAL_TZ } from "@/lib/dates";
 import { formatDateTimeISO8601 } from "@/lib/dates";
 
@@ -84,13 +85,21 @@ export default function CommandDialog(): React.ReactElement {
     appMeta.platform == "android"
       ? {
           name: "export-db",
-          callback: async () => (await import("@tauri-apps/api/core")).invoke("export_db", {}),
+          callback: async () => {
+            (await import("@tauri-apps/api/core")).invoke("export_db", {
+              user_id: await getSession().then(r => r?.id),
+            });
+          },
         }
       : null,
     appMeta.platform == "android"
       ? {
           name: "import-db",
-          callback: async () => (await import("@tauri-apps/api/core")).invoke("import_db", {}),
+          callback: async () => {
+            (await import("@tauri-apps/api/core")).invoke("import_db", {
+              user_id: await getSession().then(r => r?.id),
+            });
+          },
         }
       : null,
   ];
