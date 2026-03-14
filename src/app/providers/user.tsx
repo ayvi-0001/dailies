@@ -2,12 +2,11 @@
 
 import * as React from "react";
 
-import { invoke } from "@tauri-apps/api/core";
 import ok from "assert";
 import { toast } from "sonner";
 
 import logout from "@/actions/logout";
-import { decrypt } from "@/lib/session";
+import { getSession } from "@/actions/session";
 import { Option } from "@/types/option";
 
 export type User = {
@@ -41,10 +40,7 @@ export default function UserProvider({
   React.useEffect(() => {
     const get_session = async () => {
       try {
-        const session = await invoke<Option<string>>("get_session");
-        const token = await decrypt<DecodedToken>(session);
-        const payload = { username: token?.userName };
-        await invoke<User>("get_user", payload).then(result => setUser(result));
+        await getSession().then(result => setUser(result));
       } catch (err: unknown) {
         console.log(err);
         toast.error(`${err}`);
