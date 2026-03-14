@@ -168,8 +168,8 @@ function getRaidStatus(daily: Daily, cardWeekDay: number): RaidStatus {
           status.isOver = true;
         } else if (status.isToday && nowRelativeToStart === -1) {
           status.isUpcoming = true;
-        } else if (status.isDaysRemaining) {
-          status.isUpcoming = true;
+          // } else if (status.isDaysRemaining) {
+          //   status.isUpcoming = true;
         }
       }
     }
