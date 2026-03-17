@@ -160,16 +160,14 @@ function getRaidStatus(daily: Daily, cardWeekDay: number): RaidStatus {
 
         if (cardWeekDay < getDayOfWeek(now, "mon")) {
           status.isOver = true;
-        } else if (!(`${daily.days}`.indexOf(`${cardWeekDay}`) > 0) && status.isDaysRemaining) {
-          status.isUpcoming = true;
         } else if (status.isToday && nowRelativeToStart >= 0 && nowRelativeToEnd < 0) {
           status.isOpen = true;
+        } else if (!(`${daily.days}`.indexOf(`${cardWeekDay}`) > 0) && status.isDaysRemaining) {
+          status.isUpcoming = true;
         } else if (status.isToday && nowRelativeToEnd === 1) {
           status.isOver = true;
         } else if (status.isToday && nowRelativeToStart === -1) {
           status.isUpcoming = true;
-          // } else if (status.isDaysRemaining) {
-          //   status.isUpcoming = true;
         }
       }
     }
