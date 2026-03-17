@@ -60,7 +60,7 @@ export default function App(): React.ReactElement {
         actionButtons={actionButtons}
         buttonProps={{ className: " border-none order-last" }}
         direction="up"
-        props={{ className: "dark z-999 absolute left-0 bottom-0 mb-5 ml-5 bg-transparent" }}
+        props={{ className: "dark z-999 absolute left-0 bottom-0 mb-6 ml-6 bg-transparent" }}
       />
     </div>
   );
