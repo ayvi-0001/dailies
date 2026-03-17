@@ -18,12 +18,12 @@ export default async function Page(_: PageProps): Promise<React.ReactElement> {
           <Speeddial />
           <DailiesProvider>
             <div
-              className="fixed w-full items-center justify-center self-start pt-15 pr-4 pl-4"
+              className="fixed w-full items-center justify-center self-start px-4 pt-12"
               id="main-content"
             >
               <QuestList title="Quests" />
             </div>
-            <div className="mr-7 mb-4 ml-20 w-full self-end">
+            <div className="mr-6 mb-6 ml-20 w-full self-end">
               <ExpBar />
             </div>
           </DailiesProvider>

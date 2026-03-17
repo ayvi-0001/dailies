@@ -27,6 +27,7 @@ export default function ExpBar(): React.ReactNode {
   const previousTotalPoints = ReactUse.usePrevious(totalPoints);
 
   const pointDiff: number = previousTotalPoints ? totalPoints - previousTotalPoints : 0;
+  const pointSign = Math.sign(pointDiff);
 
   const [percentChange, setPercentChange] = React.useState<Option<number>>(null);
 
@@ -58,7 +59,7 @@ export default function ExpBar(): React.ReactNode {
         <motion.div
           key={key}
           animate={{ opacity: 1, y: 0 }}
-          className="z-100 -mb-3 flex w-full justify-end"
+          className="z-100 -mb-2 flex w-full justify-end"
           exit={{ opacity: 0, y: -10 }}
           initial={{ opacity: 0, y: 10 }}
           transition={{ duration: 1, ease: "easeOut" }}
@@ -66,13 +67,10 @@ export default function ExpBar(): React.ReactNode {
           <p
             className={cn(
               textClassValue,
-              clsx(
-                Math.sign(pointDiff) === 1 && "text-green-400",
-                Math.sign(pointDiff) === -1 && "text-red-400",
-              ),
+              clsx(pointSign === 1 && "text-green-400", pointSign === -1 && "text-red-400"),
             )}
           >
-            {Math.sign(pointDiff) === 1 && "+"}
+            {pointSign === 1 && "+"}
             {percentChange}
             {"%"}
           </p>
@@ -82,11 +80,8 @@ export default function ExpBar(): React.ReactNode {
       )}
       <div className="flex h-10 items-center gap-3 rounded" id="exp-bar">
         {!!totalWeight ? (
-          <>
-            <div className="grow">
-              <Progress<number> deps={[countRefreshDailies]} progress={percentValue} />
-            </div>
-            <div className="flex grow flex-row">
+          <div className="flex w-full flex-col">
+            <div className="flex w-full grow flex-row justify-end">
               {!!totalPoints && (
                 <>
                   <span className={cn(textClassValue, "opacity-80")}>[</span>
@@ -106,7 +101,10 @@ export default function ExpBar(): React.ReactNode {
                 targetValue={percentValue ?? 0}
               />
             </div>
-          </>
+            <div className="grow">
+              <Progress<number> deps={[countRefreshDailies]} progress={percentValue} />
+            </div>
+          </div>
         ) : (
           <div className="flex h-full w-full flex-col">
             <heroui.Spinner

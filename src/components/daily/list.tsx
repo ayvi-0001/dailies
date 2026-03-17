@@ -103,7 +103,7 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
       ) : (
         <ScrollShadow
           hideScrollBar
-          className="h-[calc(100vh-20vh)]"
+          className="h-[calc(100vh-18vh)]"
           offset={40}
           orientation="vertical"
           size={40}
