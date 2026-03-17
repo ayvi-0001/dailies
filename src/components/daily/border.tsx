@@ -50,10 +50,27 @@ export default function CardBorder(props: CardBorderProps): React.ReactElement {
   React.useEffect(() => {
     setRaidStatus(getRaidStatus(daily, cardWeekDay));
   }, [daily, cardWeekDay, minutelyRefresh]);
+
   const [weeklyStatus, setWeeklyStatus] = React.useState<Option<WeeklyStatus>>(null);
   React.useEffect(() => {
     setWeeklyStatus(getWeeklyStatus(daily, cardWeekDay));
   }, [daily, cardWeekDay]);
+
+  const [isNotEditable, setIsNotEditable] = React.useState<boolean>(false);
+  React.useEffect(() => {
+    if (!!daily.archived) {
+      setIsNotEditable(true);
+    }
+    if (
+      raidStatus?.isRaid &&
+      [!raidStatus.isOpen, raidStatus.isUpcoming, raidStatus.isOver].some(Boolean)
+    ) {
+      setIsNotEditable(true);
+    }
+    if (weeklyStatus?.isWeekly && !weeklyStatus?.isAvailable) {
+      setIsNotEditable(true);
+    }
+  }, [daily, raidStatus, weeklyStatus]);
 
   const cardDimensionStyles: ClassValue = "h-20 w-full";
   const borderClass: ClassValue = cn(
@@ -72,20 +89,6 @@ export default function CardBorder(props: CardBorderProps): React.ReactElement {
     "absolute z-90 box-content h-full w-full shadow-lg",
   );
 
-  let isNotEditable: boolean = false;
-  if (!!daily.archived) {
-    isNotEditable = true;
-  }
-  if (
-    raidStatus?.isRaid &&
-    [!raidStatus.isOpen, raidStatus.isUpcoming, raidStatus.isOver].some(Boolean)
-  ) {
-    isNotEditable = true;
-  }
-  if (weeklyStatus?.isWeekly && !weeklyStatus?.isAvailable) {
-    isNotEditable = true;
-  }
-
   return (
     <>
       <motion.div
@@ -100,7 +103,10 @@ export default function CardBorder(props: CardBorderProps): React.ReactElement {
         whileTap={{ scale: 1.02 }}
       >
         {isNotEditable ? (
-          <div className={cn(cardCoverClassValue, cardDimensionStyles, bgClass)} />
+          <div
+            className={cn(cardCoverClassValue, cardDimensionStyles, bgClass)}
+            id="uneditable-card-cover"
+          />
         ) : (
           <></>
         )}
