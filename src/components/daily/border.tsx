@@ -131,7 +131,7 @@ type RaidStatus = {
 function getRaidStatus(daily: Daily, cardWeekDay: number): RaidStatus {
   const now: CalendarDateTime = parseDateTime(formatDateTimeISO8601(new Date()));
 
-  const status: RaidStatus = {
+  const raidStatus: RaidStatus = {
     isDaysFinished: false,
     isDaysRemaining: false,
     isOpen: false,
@@ -143,59 +143,60 @@ function getRaidStatus(daily: Daily, cardWeekDay: number): RaidStatus {
     bgClassValue: null,
   };
 
-  if (status.isRaid && daily.days) {
+  if (raidStatus.isRaid && daily.days) {
     const cardDate: CalendarDate = parseDate(daily.date);
+    const currentDayOfWeek: number = getDayOfWeek(now, "mon");
 
     if (cardDate.compare(now) < 0) {
-      status.isOver = true;
+      raidStatus.isOver = true;
     } else {
       const currentTime: Time = toTime(now);
 
       const latestAvailableDayOfWeek = Math.max(...daily.days);
-      status.isDaysFinished = latestAvailableDayOfWeek < cardWeekDay;
-      status.isToday = cardDate.compare(parseDate(now.toString().substring(0, 10))) === 0;
-      status.isDaysRemaining = latestAvailableDayOfWeek >= getDayOfWeek(now, "mon");
+      raidStatus.isDaysFinished = latestAvailableDayOfWeek < cardWeekDay;
+      raidStatus.isToday = cardDate.compare(parseDate(now.toString().substring(0, 10))) === 0;
+      raidStatus.isDaysRemaining = latestAvailableDayOfWeek >= currentDayOfWeek;
 
-      if (status.isDaysFinished) {
-        status.isOver = true;
+      if (raidStatus.isDaysFinished) {
+        raidStatus.isOver = true;
       } else if (daily.timeStart && daily.timeEnd) {
         const dailyTimeStart = parseTime(daily.timeStart);
         const nowRelativeToStart = Math.sign(currentTime.compare(dailyTimeStart)) as -1 | 0 | 1;
         const dailyTimeEnd = parseTime(daily.timeEnd);
         const nowRelativeToEnd = Math.sign(currentTime.compare(dailyTimeEnd)) as -1 | 0 | 1;
 
-        if (cardWeekDay < getDayOfWeek(now, "mon")) {
-          status.isOver = true;
-        } else if (status.isToday && nowRelativeToStart >= 0 && nowRelativeToEnd < 0) {
-          status.isOpen = true;
-        } else if (!(`${daily.days}`.indexOf(`${cardWeekDay}`) > 0) && status.isDaysRemaining) {
-          status.isUpcoming = true;
-        } else if (status.isToday && nowRelativeToEnd === 1) {
-          status.isOver = true;
-        } else if (status.isToday && nowRelativeToStart === -1) {
-          status.isUpcoming = true;
+        if (cardWeekDay < currentDayOfWeek) {
+          raidStatus.isOver = true;
+        } else if (raidStatus.isToday && nowRelativeToStart >= 0 && nowRelativeToEnd < 0) {
+          raidStatus.isOpen = true;
+        } else if (!(`${daily.days}`.indexOf(`${cardWeekDay}`) > 0) && raidStatus.isDaysRemaining) {
+          raidStatus.isUpcoming = true;
+        } else if (raidStatus.isToday && nowRelativeToEnd === 1) {
+          raidStatus.isOver = true;
+        } else if (raidStatus.isToday && nowRelativeToStart === -1) {
+          raidStatus.isUpcoming = true;
         }
       }
     }
   }
 
-  status.borderClassValue = clsx([
-    status.isOver && "border-slate-950/90",
-    status.isOver && daily.complete !== 1 && "border-red-950/90",
-    status.isOver && daily.complete === 1 && "border-green-950/90",
-    status.isDaysFinished && "border-slate-950/90",
-    status.isUpcoming && "border-slate-950/90",
+  raidStatus.borderClassValue = clsx([
+    raidStatus.isOver && "border-slate-950/90",
+    raidStatus.isOver && daily.complete !== 1 && "border-red-950/90",
+    raidStatus.isOver && daily.complete === 1 && "border-green-950/90",
+    raidStatus.isDaysFinished && "border-slate-950/90",
+    raidStatus.isUpcoming && "border-slate-950/90",
   ]);
 
-  status.bgClassValue = clsx([
-    status.isOver && "bg-slate-950/60",
-    status.isOver && daily.complete !== 1 && "bg-red-600/20",
-    status.isOver && daily.complete === 1 && "bg-green-600/20",
-    status.isDaysFinished && "bg-slate-950/60",
-    status.isUpcoming && "bg-slate-700/40",
+  raidStatus.bgClassValue = clsx([
+    raidStatus.isOver && "bg-slate-950/60",
+    raidStatus.isOver && daily.complete !== 1 && "bg-red-600/20",
+    raidStatus.isOver && daily.complete === 1 && "bg-green-600/20",
+    raidStatus.isDaysFinished && "bg-slate-950/60",
+    raidStatus.isUpcoming && "bg-slate-700/40",
   ]);
 
-  return status;
+  return raidStatus;
 }
 
 type WeeklyStatus = {
@@ -206,31 +207,52 @@ type WeeklyStatus = {
 };
 
 function getWeeklyStatus(daily: Daily, cardWeekDay: number): WeeklyStatus {
-  const status: WeeklyStatus = {
+  const weeklyStatus: WeeklyStatus = {
     isWeekly: [Quest.Type.QW].includes(daily.type),
     isAvailable: false,
     borderClassValue: null,
     bgClassValue: null,
   };
 
-  if (status.isWeekly && daily.days && daily.days.length > 0 && daily.days.includes(cardWeekDay)) {
-    status.isAvailable = true;
+  if (
+    weeklyStatus.isWeekly &&
+    daily.days &&
+    daily.days.length > 0 &&
+    daily.days.includes(cardWeekDay)
+  ) {
+    weeklyStatus.isAvailable = true;
   }
 
-  status.borderClassValue = clsx([
-    status.isWeekly && !status.isAvailable && "border-slate-950/90",
-    status.isWeekly && !status.isAvailable && daily.complete === 1 && "border-green-950/90",
-    status.isWeekly && !status.isAvailable && daily.complete !== 1 && "border-red-950/90",
-    status.isWeekly && !status.isAvailable && daily.complete === null && "border-slate-950/90",
+  weeklyStatus.borderClassValue = clsx([
+    weeklyStatus.isWeekly && !weeklyStatus.isAvailable && "border-slate-950/90",
+    weeklyStatus.isWeekly &&
+      !weeklyStatus.isAvailable &&
+      daily.complete === 1 &&
+      "border-green-950/90",
+    weeklyStatus.isWeekly &&
+      !weeklyStatus.isAvailable &&
+      daily.complete !== 1 &&
+      "border-red-950/90",
+    weeklyStatus.isWeekly &&
+      !weeklyStatus.isAvailable &&
+      daily.complete === null &&
+      "border-slate-950/90",
   ]);
 
-  status.bgClassValue = clsx([
-    status.isWeekly && !status.isAvailable && "border-slate-950/90",
-    status.isWeekly && !status.isAvailable && daily.complete === 1 && "bg-green-600/20",
-    status.isWeekly && !status.isAvailable && daily.complete !== 1 && "bg-red-600/20",
-    status.isWeekly && !status.isAvailable && daily.complete && daily.complete > 0 && "",
-    status.isWeekly && !status.isAvailable && daily.complete === null && "bg-slate-950/60",
+  weeklyStatus.bgClassValue = clsx([
+    weeklyStatus.isWeekly && !weeklyStatus.isAvailable && "border-slate-950/90",
+    weeklyStatus.isWeekly && !weeklyStatus.isAvailable && daily.complete === 1 && "bg-green-600/20",
+    weeklyStatus.isWeekly && !weeklyStatus.isAvailable && daily.complete !== 1 && "bg-red-600/20",
+    weeklyStatus.isWeekly &&
+      !weeklyStatus.isAvailable &&
+      daily.complete &&
+      daily.complete > 0 &&
+      "",
+    weeklyStatus.isWeekly &&
+      !weeklyStatus.isAvailable &&
+      daily.complete === null &&
+      "bg-slate-950/60",
   ]);
 
-  return status;
+  return weeklyStatus;
 }
