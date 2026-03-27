@@ -43,6 +43,7 @@ export default function RootLayout(pages: Pages): React.ReactNode {
       </head>
       <body className="touch-none overflow-hidden select-none">
         <Providers>
+          <AppBuildInfo as="header" />
           <Toaster />
           <div className="relative z-1">
             <React.Suspense>
@@ -51,7 +52,6 @@ export default function RootLayout(pages: Pages): React.ReactNode {
             {modals}
             {children}
           </div>
-          <AppBuildInfo as="header" />
           <BackgroundImage src="/images/background.png" />
         </Providers>
       </body>
