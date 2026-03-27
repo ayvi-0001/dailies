@@ -33,18 +33,20 @@ export default function CardBorder(props: CardBorderProps): React.ReactElement {
 
   const [minutelyRefresh, setMinutelyRefresh] = React.useState<Date>(new Date());
   React.useEffect(() => {
-    const now = new Date();
-    const secondsUntilNextMinute = 60 - now.getSeconds();
-    const millisecondsUntilNextMinute = secondsUntilNextMinute * 1000;
+    if ([Quest.Type.QR].includes(daily.type)) {
+      const now = new Date();
+      const secondsUntilNextMinute = 60 - now.getSeconds();
+      const millisecondsUntilNextMinute = secondsUntilNextMinute * 1000;
 
-    const initialTimeoutId = setTimeout(() => {
-      setMinutelyRefresh(new Date());
-      const intervalId = setInterval(() => setMinutelyRefresh(new Date()), 60 * 1000);
-      return () => clearInterval(intervalId);
-    }, millisecondsUntilNextMinute);
+      const initialTimeoutId = setTimeout(() => {
+        setMinutelyRefresh(new Date());
+        const intervalId = setInterval(() => setMinutelyRefresh(new Date()), 60 * 1000);
+        return () => clearInterval(intervalId);
+      }, millisecondsUntilNextMinute);
 
-    return () => clearTimeout(initialTimeoutId);
-  }, []);
+      return () => clearTimeout(initialTimeoutId);
+    }
+  }, [daily.type]);
 
   const [raidStatus, setRaidStatus] = React.useState<Option<RaidStatus>>(null);
   React.useEffect(() => {
