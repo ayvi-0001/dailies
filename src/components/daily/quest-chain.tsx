@@ -123,7 +123,10 @@ export type QuestChainProps = {
   user: User;
 };
 
-export function QuestChain(props: QuestChainProps): React.ReactElement {
+const MemoizedQuestChain = React.memo(QuestChain);
+export default MemoizedQuestChain;
+
+function QuestChain(props: QuestChainProps): React.ReactElement {
   const {
     chain,
     dailies,

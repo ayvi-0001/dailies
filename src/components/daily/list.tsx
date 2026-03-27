@@ -15,7 +15,7 @@ import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
 import { DailiesState, useDailies } from "./providers/dailies";
-import { QuestChain, QuestsHeader } from "./quest-chain";
+import QuestChain, { QuestsHeader } from "./quest-chain";
 import { Daily, Quest } from "./types";
 
 export default function QuestList({ title }: { title: string }): React.ReactElement {

@@ -38,7 +38,10 @@ type DailyCardProps = {
   user: User;
 };
 
-export default function DailyCard(props: DailyCardProps): React.ReactNode {
+const MemoizedDailyCard = React.memo(DailyCard);
+export default MemoizedDailyCard;
+
+function DailyCard(props: DailyCardProps): React.ReactNode {
   const { daily, onRefreshAction, totalWeight, user } = props;
 
   const [points, setPoints] = React.useState<Option<string>>(
@@ -137,7 +140,7 @@ type CardContentProps = {
   questTypeStyles: QuestTypeStyles;
 };
 
-export function CardContent(props: CardContentProps): React.ReactElement {
+export const CardContent = React.memo((props: CardContentProps): React.ReactElement => {
   const { daily, descriptionContent, questType, questTypeStyles, name } = props;
 
   return (
@@ -151,7 +154,9 @@ export function CardContent(props: CardContentProps): React.ReactElement {
       />
     </div>
   );
-}
+});
+
+CardContent.displayName = "CardContent";
 
 export function QuestName({ name }: { name: string }): React.ReactElement {
   return (

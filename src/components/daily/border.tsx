@@ -25,8 +25,11 @@ type CardBorderProps = Readonly<{
   divProps: React.ComponentProps<"div">;
 }>;
 
+const MemoizedCardBorder = React.memo(CardBorder);
+export default MemoizedCardBorder;
+
 // TODO(ayvi): display days or hours until quest available http://ayvi:3000/ayvi/dailies/issues/159
-export default function CardBorder(props: CardBorderProps): React.ReactElement {
+function CardBorder(props: CardBorderProps): React.ReactElement {
   const { children, divProps, daily } = props;
 
   const cardWeekDay: number = getDayOfWeek(parseDate(daily.date), "mon");
