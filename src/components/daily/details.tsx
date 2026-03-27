@@ -44,27 +44,32 @@ export default function Details(props: DetailsProps): React.ReactElement {
 
   const [weeklyQuestStats, setWeeklyQuestStats] = React.useState<Option<WeeklyQuestStats>>(null);
   React.useEffect(() => {
-    const get_weekly_max_type_stats = async (): Promise<void> => {
-      await invoke<WeeklyQuestStats>("get_weekly_max_type_stats", {
-        quest_id: daily.questId,
-        requirements: +`${daily.requirements}`,
-        date: daily.date,
-      })
-        .then(result => setWeeklyQuestStats(result))
-        .catch(console.error);
-    };
-    const get_weekly_sum_type_stats = async (): Promise<void> => {
-      await invoke<WeeklyQuestStats>("get_weekly_sum_type_stats", {
-        quest_id: daily.questId,
-        requirements: +`${daily.requirements}`,
-        date: daily.date,
-      })
-        .then(result => setWeeklyQuestStats(result))
-        .catch(console.error);
-    };
-    if (daily.type == Quest.Type.QWM) get_weekly_max_type_stats();
-    if (daily.type == Quest.Type.QWS) get_weekly_sum_type_stats();
-  }, [daily]);
+    if (daily.type == Quest.Type.QWM) {
+      const get_weekly_max_type_stats = async (): Promise<void> => {
+        await invoke<WeeklyQuestStats>("get_weekly_max_type_stats", {
+          quest_id: daily.questId,
+          requirements: +`${daily.requirements}`,
+          date: daily.date,
+        })
+          .then(result => setWeeklyQuestStats(result))
+          .catch(console.error);
+      };
+      get_weekly_max_type_stats();
+    }
+
+    if (daily.type == Quest.Type.QWS) {
+      const get_weekly_sum_type_stats = async (): Promise<void> => {
+        await invoke<WeeklyQuestStats>("get_weekly_sum_type_stats", {
+          quest_id: daily.questId,
+          requirements: +`${daily.requirements}`,
+          date: daily.date,
+        })
+          .then(result => setWeeklyQuestStats(result))
+          .catch(console.error);
+      };
+      get_weekly_sum_type_stats();
+    }
+  }, [daily.date, daily.questId, daily.requirements, daily.type]);
 
   const elements: React.ReactElement[] = [];
 
