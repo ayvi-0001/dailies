@@ -194,7 +194,7 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
 
     if (isAllQuestChainsCollapsed) setSelectedKeys(new Set([]));
     else get_collapsed();
-  }, [isAllQuestChainsCollapsed, user.id, chain, isQuestChainCollapsed, dailies]);
+  }, [isAllQuestChainsCollapsed, user.id, chain, isQuestChainCollapsed]);
 
   const filteredDailies = dailies.filter(daily => isDailyFilteredAction(daily));
 
