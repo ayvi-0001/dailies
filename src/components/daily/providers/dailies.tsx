@@ -104,9 +104,8 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
   }, [user, countRefreshDailies, date]);
 
   const triggerRefreshDailies: () => void = React.useCallback(() => {
-    setCountRefreshDailies(countRefreshDailies + 1);
-    console.debug(`countRefreshDailies=${countRefreshDailies}`);
-  }, [countRefreshDailies]);
+    setCountRefreshDailies(c => c + 1);
+  }, []);
 
   ReactUse.useOnceEffect(() => {
     const insert_dailies = async (): Promise<void> => {
