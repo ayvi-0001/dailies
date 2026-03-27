@@ -61,16 +61,20 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
     setQuestNameFilterTextAction,
   } = useQuestListConfig(userState.user);
 
-  const groupedDailies: Record<string, Option<Daily[]>> = dailiesState.dailies.reduce(
-    (accumulator, currentItem) => {
-      const category = currentItem.chain;
-      if (!accumulator[category]) {
-        accumulator[category] = [];
-      }
-      accumulator[category].push(currentItem);
-      return accumulator;
-    },
-    {} as Record<string, Option<Daily[]>>,
+  const groupedDailies: Record<string, Option<Daily[]>> = React.useMemo(
+    () =>
+      dailiesState.dailies.reduce(
+        (accumulator: Record<string, Option<Daily[]>>, currentItem: Daily) => {
+          const category = currentItem.chain;
+          if (!accumulator[category]) {
+            accumulator[category] = [];
+          }
+          accumulator[category].push(currentItem);
+          return accumulator;
+        },
+        {},
+      ),
+    [dailiesState.dailies],
   );
 
   return (
