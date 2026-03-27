@@ -268,9 +268,11 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
           <DndContext
             collisionDetection={closestCenter}
             sensors={sensors}
-            onDragEnd={(event: DragEndEvent) =>
-              handleDragEnd(event, user.id, chain, dailies, setDailiesAction)
-            }
+            onDragEnd={React.useCallback(
+              (event: DragEndEvent) =>
+                handleDragEnd(event, user.id, chain, dailies, setDailiesAction),
+              [chain, dailies, setDailiesAction, user],
+            )}
           >
             <SortableContext
               items={dailies.map(d => d.sequence) || []}
