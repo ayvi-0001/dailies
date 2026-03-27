@@ -86,10 +86,10 @@ export default function DailyCard(props: DailyCardProps): React.ReactNode {
                   points={points}
                   setPointsAction={setPoints}
                   totalWeight={totalWeight}
-                  onRefreshAction={() => {
+                  onRefreshAction={React.useCallback(() => {
                     setIsLoading(true);
                     onRefreshAction();
-                  }}
+                  }, [onRefreshAction])}
                 />
               </motion.div>
             </AnimatePresence>

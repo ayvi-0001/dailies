@@ -155,24 +155,27 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
   const [isQuestChainCollapsed, setIsQuestChainCollapsed] = React.useState<boolean>(false);
   const [selectedKeys, setSelectedKeys] = React.useState<heroui.Selection>(new Set([]));
 
-  const setSelectedKeysAction = async (keys: heroui.Selection): Promise<void> => {
-    if (keys != "all" && keys?.size === 0) {
-      await invoke<boolean>("set_quest_chain_collapsed", {
-        user_id: user.id,
-        chain: chain,
-        value: true,
-      });
-      setIsQuestChainCollapsed(true);
-    } else {
-      await invoke<boolean>("set_quest_chain_collapsed", {
-        user_id: user.id,
-        chain: chain,
-        value: false,
-      });
-      setIsQuestChainCollapsed(false);
-    }
-    setSelectedKeys(keys);
-  };
+  const setSelectedKeysAction = React.useCallback(
+    async (keys: heroui.Selection): Promise<void> => {
+      if (keys != "all" && keys?.size === 0) {
+        await invoke<boolean>("set_quest_chain_collapsed", {
+          user_id: user.id,
+          chain: chain,
+          value: true,
+        });
+        setIsQuestChainCollapsed(true);
+      } else {
+        await invoke<boolean>("set_quest_chain_collapsed", {
+          user_id: user.id,
+          chain: chain,
+          value: false,
+        });
+        setIsQuestChainCollapsed(false);
+      }
+      setSelectedKeys(keys);
+    },
+    [chain, user],
+  );
 
   React.useEffect(() => {
     const get_collapsed = async () => {
@@ -213,7 +216,10 @@ export function QuestChain(props: QuestChainProps): React.ReactElement {
       keepContentMounted
       selectedKeys={selectedKeys}
       variant="splitted"
-      onSelectionChange={(keys: heroui.Selection) => setSelectedKeysAction(keys)}
+      onSelectionChange={React.useCallback(
+        (keys: heroui.Selection) => setSelectedKeysAction(keys),
+        [setSelectedKeysAction],
+      )}
     >
       <heroui.AccordionItem
         key={chain}

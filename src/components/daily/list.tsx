@@ -227,21 +227,24 @@ function useQuestListConfig(user: User): {
     setQuestNameFilterText(value);
   };
 
-  const isDailyFilteredAction = (daily: Daily): Option<Daily> => {
-    if (questNameFilterText)
-      if (daily.name.includes(questNameFilterText)) return daily;
-      else return null;
+  const isDailyFilteredAction = React.useCallback(
+    (daily: Daily): Option<Daily> => {
+      if (questNameFilterText)
+        if (daily.name.includes(questNameFilterText)) return daily;
+        else return null;
 
-    if (isArchivedQuestsFiltered && !!daily.archived) {
-      return null;
-    } else if (isCompletedQuestsFiltered && daily.complete == 1) {
-      return null;
-    } else if (isOptionalQuestsFiltered && daily.type == `${Quest.Type.QO}`) {
-      return null;
-    } else {
-      return daily;
-    }
-  };
+      if (isArchivedQuestsFiltered && !!daily.archived) {
+        return null;
+      } else if (isCompletedQuestsFiltered && daily.complete == 1) {
+        return null;
+      } else if (isOptionalQuestsFiltered && daily.type == `${Quest.Type.QO}`) {
+        return null;
+      } else {
+        return daily;
+      }
+    },
+    [isArchivedQuestsFiltered, isCompletedQuestsFiltered, isOptionalQuestsFiltered],
+  );
 
   return {
     isAllQuestChainsCollapsed,
