@@ -155,20 +155,31 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
     return () => clearTimeout(timeoutId);
   }, []);
 
-  const value: DailiesState = {
-    date,
-    dailies,
-    setDailies,
-    questChains,
-    totalPoints,
-    setTotalPoints,
-    totalWeight,
-    setTotalWeight,
+  const value: DailiesState = React.useMemo(() => {
+    return {
+      date,
+      dailies,
+      setDailies,
+      questChains,
+      totalPoints,
+      setTotalPoints,
+      totalWeight,
+      setTotalWeight,
+      countRefreshDailies,
+      setCountRefreshDailies,
+      triggerRefreshDailies,
+      isLoading,
+    };
+  }, [
     countRefreshDailies,
-    setCountRefreshDailies,
-    triggerRefreshDailies,
+    dailies,
+    date,
     isLoading,
-  };
+    questChains,
+    totalWeight,
+    totalPoints,
+    triggerRefreshDailies,
+  ]);
 
   return (
     <>
