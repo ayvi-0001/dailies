@@ -38,7 +38,6 @@ import {
 
 import { User } from "@/app/providers/user";
 import { LOCAL_TZ } from "@/lib/dates";
-import { roundTo } from "@/lib/number";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
@@ -201,15 +200,15 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
 
   const filteredDailies = dailies.filter(daily => isDailyFilteredAction(daily));
 
-  let questChainCompletion: Option<number> =
-    filteredDailies.map(d => d.points || 0).reduce((sum, current) => sum + current, 0) /
-    filteredDailies.map(d => d.total || 0).reduce((sum, current) => sum + current, 0);
+  // let questChainCompletion: Option<number> =
+  //   filteredDailies.map(d => d.points || 0).reduce((sum, current) => sum + current, 0) /
+  //   filteredDailies.map(d => d.total || 0).reduce((sum, current) => sum + current, 0);
 
-  if (!Number.isNaN(questChainCompletion)) {
-    questChainCompletion = roundTo(questChainCompletion * 100, 2);
-  } else {
-    questChainCompletion = null;
-  }
+  // if (!Number.isNaN(questChainCompletion)) {
+  //   questChainCompletion = roundTo(questChainCompletion * 100, 2);
+  // } else {
+  //   questChainCompletion = null;
+  // }
 
   return (
     <heroui.Accordion
@@ -257,9 +256,9 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
             }
           >
             <span>{chain}</span>
-            <span className="ml-1 text-xs font-bold text-[#f0f0ff] opacity-80">
+            {/* <span className="ml-1 text-xs font-bold text-[#f0f0ff] opacity-80">
               {questChainCompletion !== null && `[${questChainCompletion.toFixed(2)}%]`}
-            </span>
+            </span> */}
           </div>
         }
         textValue={chain ?? ""}
