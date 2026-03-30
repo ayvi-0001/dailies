@@ -43,6 +43,21 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [minutelyRefresh, setMinutelyRefresh] = React.useState<Date>(new Date());
+  React.useEffect(() => {
+    const now = new Date();
+    const secondsUntilNextMinute = 60 - now.getSeconds();
+    const millisecondsUntilNextMinute = secondsUntilNextMinute * 1000;
+
+    const initialTimeoutId = setTimeout(() => {
+      setMinutelyRefresh(new Date());
+      const intervalId = setInterval(() => setMinutelyRefresh(new Date()), 60 * 1000);
+      return () => clearInterval(intervalId);
+    }, millisecondsUntilNextMinute);
+
+    return () => clearTimeout(initialTimeoutId);
+  }, []);
+
   ReactUse.useOnceEffect(() => {
     updateParam([{ key: "date", value: listDate.toString() }]);
   }, [listDate]);
@@ -120,6 +135,7 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
               dailies={groupedDailies[chain] ?? []}
               isAllQuestChainsCollapsed={isAllQuestChainsCollapsed}
               isDailyFilteredAction={isDailyFilteredAction}
+              minutelyRefresh={minutelyRefresh}
               setDailiesAction={dailiesState.setDailies}
               totalWeight={dailiesState.totalWeight}
               user={userState.user}

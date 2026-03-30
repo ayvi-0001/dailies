@@ -28,13 +28,14 @@ import type { Daily } from "./types";
 type HistoryDrawerProps = {
   daily: Daily;
   isOpen: boolean;
+  minutelyRefresh: Date;
   setHistoryIsOpenAction: React.Dispatch<React.SetStateAction<boolean>>;
   totalWeight: number;
   user: User;
 };
 
 export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactElement {
-  const { daily, isOpen, setHistoryIsOpenAction, totalWeight, user } = props;
+  const { daily, isOpen, minutelyRefresh, setHistoryIsOpenAction, totalWeight, user } = props;
 
   const searchParams: ReadonlyURLSearchParams = useSearchParams();
 
@@ -98,6 +99,7 @@ export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactEle
                     <HistoryCards
                       daily={daily}
                       dateRange={dateRange}
+                      minutelyRefresh={minutelyRefresh}
                       totalWeight={totalWeight}
                       user={user}
                     />
@@ -134,13 +136,14 @@ export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactEle
 type HistoryCardsProps = {
   daily: Daily;
   dateRange: Option<heroui.RangeValue<CalendarDate>>;
+  minutelyRefresh: Date;
   totalWeight: number;
   user: User;
 };
 
 // TODO(ayvi): infinite scroll history http://ayvi:3000/ayvi/dailies/issues/33
 export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
-  const { daily, dateRange, totalWeight, user } = props;
+  const { daily, dateRange, minutelyRefresh, totalWeight, user } = props;
 
   const questTypes: QuestType[] = useQuestTypes();
 
@@ -188,6 +191,7 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
               <HistoryDailyCard
                 daily={daily}
                 index={index}
+                minutelyRefresh={minutelyRefresh}
                 questTypes={questTypes}
                 totalWeight={totalWeight}
                 user={user}
@@ -204,6 +208,7 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
 type HistoryDailyCardProps = {
   daily: Daily;
   index: number;
+  minutelyRefresh: Date;
   onRefreshAction: () => void;
   questTypes: QuestType[];
   totalWeight: number;
@@ -211,7 +216,7 @@ type HistoryDailyCardProps = {
 };
 
 export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactElement {
-  const { daily, index, onRefreshAction, questTypes, totalWeight, user } = props;
+  const { daily, index, minutelyRefresh, onRefreshAction, questTypes, totalWeight, user } = props;
 
   const questType: Option<QuestType> =
     questTypes.find(type => `${type.id}` == `${daily.type}`) || null;
@@ -230,7 +235,11 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
     <>
       <RadixContextMenu.Root modal onOpenChange={toggleContextMenu}>
         <RadixContextMenu.Trigger className="flex">
-          <CardBorder daily={daily} divProps={{ className: questTypeStyles.borderClass as string }}>
+          <CardBorder
+            daily={daily}
+            divProps={{ className: questTypeStyles.borderClass as string }}
+            minutelyRefresh={minutelyRefresh}
+          >
             <AnimatePresence>
               <motion.div
                 key={`card-effect-${daily.pointId}`}

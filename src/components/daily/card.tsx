@@ -33,16 +33,17 @@ import type { Daily } from "./types";
 
 type DailyCardProps = {
   daily: Daily;
-  onRefreshAction: () => void;
+  minutelyRefresh: Date;
   totalWeight: number;
   user: User;
+  onRefreshAction: () => void;
 };
 
 const MemoizedDailyCard = React.memo(DailyCard);
 export default MemoizedDailyCard;
 
 function DailyCard(props: DailyCardProps): React.ReactNode {
-  const { daily, onRefreshAction, totalWeight, user } = props;
+  const { daily, minutelyRefresh, totalWeight, user, onRefreshAction } = props;
 
   const [points, setPoints] = React.useState<Option<string>>(
     daily.points !== null ? `${daily.points}` : null,
@@ -65,7 +66,11 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
     <>
       <RadixContextMenu.Root modal onOpenChange={toggleContextMenu}>
         <RadixContextMenu.Trigger className="flex">
-          <CardBorder daily={daily} divProps={{ className: questTypeStyles.borderClass as string }}>
+          <CardBorder
+            daily={daily}
+            divProps={{ className: questTypeStyles.borderClass as string }}
+            minutelyRefresh={minutelyRefresh}
+          >
             <AnimatePresence>
               <motion.div
                 key={`card-effect-${daily.pointId}`}
@@ -124,6 +129,7 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
       <HistoryDrawer
         daily={daily}
         isOpen={historyIsOpen}
+        minutelyRefresh={minutelyRefresh}
         setHistoryIsOpenAction={toggleHistory}
         totalWeight={totalWeight}
         user={user}
