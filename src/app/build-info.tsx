@@ -63,10 +63,10 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
     // </p>
 
     <div className="cursor-move pr-2 text-right select-none">
-      <p className={textClassValue}>
+      {/* <p className={textClassValue}>
         {appBuild?.identifier && appBuild.identifier}
         {appBuild?.version && ` v${appBuild.version}`}
-      </p>
+      </p> */}
       <p className={textClassValue}>
         {vergenCargoTargetTriple && ` ${vergenCargoTargetTriple}`} {vergenBuildDate}
       </p>
