@@ -247,7 +247,12 @@ function useQuestListConfig(user: User): {
         return daily;
       }
     },
-    [isArchivedQuestsFiltered, isCompletedQuestsFiltered, isOptionalQuestsFiltered],
+    [
+      isArchivedQuestsFiltered,
+      isCompletedQuestsFiltered,
+      isOptionalQuestsFiltered,
+      questNameFilterText,
+    ],
   );
 
   return {
