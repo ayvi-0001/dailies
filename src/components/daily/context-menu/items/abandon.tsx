@@ -11,16 +11,16 @@ type MenuOptionProps = {
   menuTitle?: string;
   daily: Daily;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
-  onRefreshAction: () => void;
+  updateDaily: (pointId: string, patch: Partial<Daily>) => void;
 };
 
 export default function AbandonDailyMenuOption(props: MenuOptionProps) {
-  const { menuTitle, daily, setPointsAction, onRefreshAction } = props;
+  const { menuTitle, daily, setPointsAction, updateDaily } = props;
 
   return (
     <RadixContextMenu.Item
       className={CONTEXT_MENU_CLASSNAME as string}
-      onSelect={async () => await setDailyPointsNull(daily, setPointsAction, onRefreshAction)}
+      onSelect={async () => await setDailyPointsNull(daily, setPointsAction, updateDaily)}
     >
       <div className="flex flex-row gap-2">
         <BookXIcon size={2} stroke="#e3e3e3" />
@@ -33,10 +33,10 @@ export default function AbandonDailyMenuOption(props: MenuOptionProps) {
 async function setDailyPointsNull(
   daily: Daily,
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>,
-  onRefreshAction: () => void,
+  updateDaily: (pointId: string, patch: Partial<Daily>) => void,
 ): Promise<void> {
   daily.points = null;
   setPointsAction(null);
+  updateDaily(daily.pointId, { points: null });
   await invoke("handle_point_change", { daily: daily });
-  onRefreshAction();
 }

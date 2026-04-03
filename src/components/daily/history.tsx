@@ -167,10 +167,30 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
     query_dailies();
   }, [daily, user, countRefreshDailies, dateRange]);
 
-  const triggerRefreshDailies: () => void = React.useCallback(() => {
-    console.debug(`countRefreshDailies=${countRefreshDailies}`);
-    setCountRefreshDailies(countRefreshDailies + 1);
-  }, [countRefreshDailies]);
+  const debouncedRefreshDailiesRef = React.useRef<ReturnType<typeof setTimeout>>(undefined);
+  const triggerRefreshDailies = React.useCallback(() => {
+    clearTimeout(debouncedRefreshDailiesRef.current);
+    debouncedRefreshDailiesRef.current = setTimeout(() => {
+      setCountRefreshDailies(c => c + 1);
+    }, 300);
+  }, []);
+
+  const updateDaily = React.useCallback(
+    (pointId: string, patch: Partial<Daily>) => {
+      setDailies(prev => prev.map(d => (d.pointId === pointId ? { ...d, ...patch } : d)));
+
+      const patchKeys = Object.keys(patch);
+      if (patchKeys.filter(k => ["points", "weight"].includes(k))) {
+        triggerRefreshDailies();
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  React.useEffect(() => {
+    return () => clearTimeout(debouncedRefreshDailiesRef.current);
+  }, []);
 
   return (
     <heroui.ScrollShadow
@@ -194,8 +214,8 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
                 minutelyRefresh={minutelyRefresh}
                 questTypes={questTypes}
                 totalWeight={totalWeight}
+                updateDailyAction={updateDaily}
                 user={user}
-                onRefreshAction={triggerRefreshDailies}
               />
             </div>
           ))
@@ -209,14 +229,14 @@ type HistoryDailyCardProps = {
   daily: Daily;
   index: number;
   minutelyRefresh: Date;
-  onRefreshAction: () => void;
   questTypes: QuestType[];
   totalWeight: number;
+  updateDailyAction: (pointId: string, patch: Partial<Daily>) => void;
   user: User;
 };
 
 export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactElement {
-  const { daily, index, minutelyRefresh, onRefreshAction, questTypes, totalWeight, user } = props;
+  const { daily, index, minutelyRefresh, questTypes, totalWeight, updateDailyAction, user } = props;
 
   const questType: Option<QuestType> =
     questTypes.find(type => `${type.id}` == `${daily.type}`) || null;
@@ -264,10 +284,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
                   points={points}
                   setPointsAction={setPoints}
                   totalWeight={totalWeight}
-                  onRefreshAction={() => {
-                    setIsLoading(true);
-                    onRefreshAction();
-                  }}
+                  updateDailyAction={updateDailyAction}
                 />
               </motion.div>
             </AnimatePresence>
@@ -280,8 +297,8 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
                 daily={daily}
                 editOnOpenAction={onOpen}
                 setPointsAction={setPoints}
+                updateDailyAction={updateDailyAction}
                 user_id={user.id}
-                onRefreshAction={onRefreshAction}
               />
             )}
           </AnimatePresence>

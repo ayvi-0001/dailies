@@ -10,22 +10,20 @@ import type { Daily } from "../../types";
 import CONTEXT_MENU_CLASSNAME from "./props";
 
 type MenuOptionProps = {
-  user_id: number;
-  menuTitle?: string;
   daily: Daily;
+  menuTitle?: string;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
-  onRefreshAction: () => void;
+  updateDaily: (pointId: string, patch: Partial<Daily>) => void;
+  user_id: number;
 };
 
 export default function ArchiveDailyMenuOption(props: MenuOptionProps) {
-  const { user_id, menuTitle, daily, setPointsAction, onRefreshAction } = props;
+  const { daily, menuTitle, setPointsAction, updateDaily, user_id } = props;
 
   return (
     <RadixContextMenu.Item
       className={CONTEXT_MENU_CLASSNAME as string}
-      onSelect={async () =>
-        await setDailyArchived(user_id, daily, setPointsAction, onRefreshAction)
-      }
+      onSelect={async () => await setDailyArchived(daily, setPointsAction, updateDaily, user_id)}
     >
       <div className="flex flex-row gap-2">
         <ArchiveIcon size={2} stroke="#e3e3e3" />
@@ -36,24 +34,26 @@ export default function ArchiveDailyMenuOption(props: MenuOptionProps) {
 }
 
 async function setDailyArchived(
-  user_id: number,
   daily: Daily,
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>,
-  onRefreshAction: () => void,
+  updateDaily: (pointId: string, patch: Partial<Daily>) => void,
+  user_id: number,
 ): Promise<void> {
   const now: CalendarDate = today(LOCAL_TZ);
 
-  daily.points = null;
-  daily.archived = formatDateTimeISO8601(now.toDate(LOCAL_TZ));
-  setPointsAction(null);
+  const archivedDate: string = formatDateTimeISO8601(now.toDate(LOCAL_TZ));
+  const patch = { points: null, archived: archivedDate };
+
+  daily = { ...daily, ...patch };
 
   await invoke("handle_point_change", { daily: daily });
   await invoke(`update_archived`, {
     user_id: user_id,
     quest_id: daily.questId,
     point_id: daily.pointId,
-    value: daily.archived,
+    value: archivedDate,
   });
 
-  onRefreshAction();
+  setPointsAction(null);
+  updateDaily(daily.pointId, patch);
 }

@@ -26,10 +26,9 @@ export type DailiesState = {
   setTotalPoints: React.Dispatch<React.SetStateAction<number>>;
   totalWeight: number;
   setTotalWeight: React.Dispatch<React.SetStateAction<number>>;
-  countRefreshDailies: number;
-  setCountRefreshDailies: React.Dispatch<React.SetStateAction<number>>;
   triggerRefreshDailies: () => void;
   isLoading: boolean;
+  updateDaily: (pointId: string, patch: Partial<Daily>) => void;
 };
 
 export const DailiesContext = React.createContext<Option<DailiesState>>(null);
@@ -103,8 +102,29 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
     get_total_points();
   }, [user, countRefreshDailies, date]);
 
-  const triggerRefreshDailies: () => void = React.useCallback(() => {
-    setCountRefreshDailies(c => c + 1);
+  const debouncedRefreshDailiesRef = React.useRef<ReturnType<typeof setTimeout>>(undefined);
+  const triggerRefreshDailies = React.useCallback(() => {
+    clearTimeout(debouncedRefreshDailiesRef.current);
+    debouncedRefreshDailiesRef.current = setTimeout(() => {
+      setCountRefreshDailies(c => c + 1);
+    }, 300);
+  }, []);
+
+  const updateDaily = React.useCallback(
+    (pointId: string, patch: Partial<Daily>) => {
+      setDailies(prev => prev.map(d => (d.pointId === pointId ? { ...d, ...patch } : d)));
+
+      const patchKeys = Object.keys(patch);
+      if (patchKeys.filter(k => ["points", "weight", "archived"].includes(k))) {
+        triggerRefreshDailies();
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  React.useEffect(() => {
+    return () => clearTimeout(debouncedRefreshDailiesRef.current);
   }, []);
 
   ReactUse.useOnceEffect(() => {
@@ -152,20 +172,19 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
       setTotalPoints,
       totalWeight,
       setTotalWeight,
-      countRefreshDailies,
-      setCountRefreshDailies,
       triggerRefreshDailies,
       isLoading,
+      updateDaily,
     };
   }, [
-    countRefreshDailies,
-    dailies,
     date,
-    isLoading,
+    dailies,
     questChains,
-    totalWeight,
     totalPoints,
+    totalWeight,
     triggerRefreshDailies,
+    isLoading,
+    updateDaily,
   ]);
 
   return (

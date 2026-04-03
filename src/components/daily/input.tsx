@@ -19,11 +19,11 @@ type PointsInputProps = {
   daily: Daily;
   points: Option<string>;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
-  onRefreshAction: () => void;
+  updateDailyAction: (pointId: string, patch: Partial<Daily>) => void;
 };
 
 export default function PointsInput(props: PointsInputProps): React.ReactNode {
-  const { daily, points, setPointsAction, onRefreshAction } = props;
+  const { daily, points, setPointsAction, updateDailyAction } = props;
 
   const appMeta: AppMetaState = useAppMetaState();
 
@@ -58,7 +58,7 @@ export default function PointsInput(props: PointsInputProps): React.ReactNode {
         setPointsAction(pointsEval.toString());
         setRestorePoints(pointsEval.toString());
         daily.points = pointsEval;
-        onRefreshAction();
+        updateDailyAction(daily.pointId, { points: pointsEval });
         await invoke<Daily[]>("handle_point_change", { daily: daily });
       } else {
         toast.error("Invalid value", { description: `${points} not a valid numeric value.` });
@@ -77,7 +77,7 @@ export default function PointsInput(props: PointsInputProps): React.ReactNode {
     if (["Backspace", "Delete"].includes(event.key) && event.ctrlKey) {
       setPointsAction(null);
       setRestorePoints(null);
-      daily.points = null;
+      updateDailyAction(daily.pointId, { points: null });
       await invoke<Daily[]>("handle_point_change", { daily: daily });
     } else if (["Escape"].includes(event.key)) {
       inputRef?.current?.blur();

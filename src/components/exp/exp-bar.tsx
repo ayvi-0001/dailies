@@ -22,7 +22,6 @@ export default function ExpBar(): React.ReactNode {
 
   const totalPoints = dailiesState.totalPoints;
   const totalWeight = dailiesState.totalWeight;
-  const countRefreshDailies = dailiesState.countRefreshDailies;
 
   const previousTotalPoints = ReactUse.usePrevious(totalPoints);
 
@@ -52,7 +51,7 @@ export default function ExpBar(): React.ReactNode {
   const textClassValue: ClassValue = "text-xs font-bold text-[#f0f0ff]";
 
   const showExpToast: boolean = isVisible && !!percentChange && previousTotalPoints !== undefined;
-  const key: string = `point-diff-${countRefreshDailies}`;
+  const key: string = `point-diff-${pointDiff}`;
   const bar: React.ReactElement = (
     <AnimatePresence>
       {showExpToast ? (
@@ -102,7 +101,7 @@ export default function ExpBar(): React.ReactNode {
               />
             </div>
             <div className="grow">
-              <Progress<number> deps={[countRefreshDailies]} progress={percentValue} />
+              <Progress<number> deps={[totalPoints]} progress={percentValue} />
             </div>
           </div>
         ) : (

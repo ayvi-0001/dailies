@@ -3,7 +3,6 @@ import * as React from "react";
 import * as heroui from "@heroui/react";
 import * as log from "@tauri-apps/plugin-log";
 import clsx from "clsx";
-import { ValueOf } from "next/dist/shared/lib/constants";
 
 import editQuest, { EditQuestState } from "@/actions/edit-quest";
 import { User } from "@/app/providers/user";
@@ -45,11 +44,9 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
       setIsLoadingAction(true);
 
       const diff = (await editQuest(state, payload, daily, questTypes, historic)) as Partial<Daily>;
-      log.debug(JSON.stringify(diff));
+      log.debug(`${daily.pointId} Edit patch: ${JSON.stringify(diff)}`);
 
       if (Object.hasOwn(diff, "errors")) return;
-
-      const dailies: Daily[] = dailiesState.dailies;
 
       for (const entry of Object.entries(diff)) {
         let key = entry[0];
@@ -64,21 +61,10 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
           quest_id: daily.questId,
           point_id: daily.pointId,
           value: sendValue,
-        }).then(_ => {
-          dailies.map(d => {
-            if (d.pointId == daily.pointId) {
-              // @ts-expect-error: TODO(ayvi): fix types on daily index
-              d[key as keyof Daily] = value as ValueOf<Daily>;
-            }
-            return d;
-          });
         });
       }
 
-      if (Object.entries(diff).length > 0) {
-        dailiesState.setDailies(dailies);
-        dailiesState.triggerRefreshDailies();
-      }
+      dailiesState.updateDaily(daily.pointId, diff);
     },
     undefined,
   );

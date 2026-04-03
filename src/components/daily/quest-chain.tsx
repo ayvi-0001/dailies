@@ -117,9 +117,9 @@ export type QuestChainProps = {
   isAllQuestChainsCollapsed: boolean;
   isDailyFilteredAction: (daily: Daily) => Option<Daily>;
   minutelyRefresh: Date;
-  onUpdateAction: () => void;
   setDailiesAction: React.Dispatch<React.SetStateAction<Daily[]>>;
   totalWeight: number;
+  updateDaily: (pointId: string, patch: Partial<Daily>) => void;
   user: User;
 };
 
@@ -133,9 +133,9 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
     isAllQuestChainsCollapsed,
     isDailyFilteredAction,
     minutelyRefresh,
-    onUpdateAction,
     setDailiesAction,
     totalWeight,
+    updateDaily,
     user,
   } = props;
 
@@ -290,8 +290,8 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
                     daily={daily}
                     minutelyRefresh={minutelyRefresh}
                     totalWeight={totalWeight}
+                    updateDaily={updateDaily}
                     user={user}
-                    onRefreshAction={onUpdateAction}
                   />
                 </SortableItem>
               ))}

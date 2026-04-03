@@ -35,15 +35,15 @@ type DailyCardProps = {
   daily: Daily;
   minutelyRefresh: Date;
   totalWeight: number;
+  updateDaily: (pointId: string, patch: Partial<Daily>) => void;
   user: User;
-  onRefreshAction: () => void;
 };
 
 const MemoizedDailyCard = React.memo(DailyCard);
 export default MemoizedDailyCard;
 
 function DailyCard(props: DailyCardProps): React.ReactNode {
-  const { daily, minutelyRefresh, totalWeight, user, onRefreshAction } = props;
+  const { daily, minutelyRefresh, totalWeight, updateDaily, user } = props;
 
   const [points, setPoints] = React.useState<Option<string>>(
     daily.points !== null ? `${daily.points}` : null,
@@ -94,10 +94,7 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
                   points={points}
                   setPointsAction={setPoints}
                   totalWeight={totalWeight}
-                  onRefreshAction={React.useCallback(() => {
-                    setIsLoading(true);
-                    onRefreshAction();
-                  }, [onRefreshAction])}
+                  updateDailyAction={updateDaily}
                 />
               </motion.div>
             </AnimatePresence>
@@ -111,8 +108,8 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
                 editOnOpenAction={editDisclosure.onOpen}
                 setPointsAction={setPoints}
                 toggleHistoryAction={toggleHistory}
+                updateDailyAction={updateDaily}
                 user_id={user.id}
-                onRefreshAction={onRefreshAction}
               />
             )}
           </AnimatePresence>
@@ -178,12 +175,12 @@ type CardStatsProps = {
   daily: Daily;
   points: Option<string>;
   totalWeight: number;
+  updateDailyAction: (pointId: string, patch: Partial<Daily>) => void;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
-  onRefreshAction: () => void;
 };
 
 export function CardStats(props: CardStatsProps): React.ReactElement {
-  const { daily, points, totalWeight, setPointsAction, onRefreshAction } = props;
+  const { daily, points, totalWeight, updateDailyAction, setPointsAction } = props;
 
   return (
     <div className="flex flex-none flex-col justify-between gap-1">
@@ -195,7 +192,7 @@ export function CardStats(props: CardStatsProps): React.ReactElement {
           daily={daily}
           points={points}
           setPointsAction={setPointsAction}
-          onRefreshAction={onRefreshAction}
+          updateDailyAction={updateDailyAction}
         />
       </div>
     </div>
@@ -205,9 +202,9 @@ export function CardStats(props: CardStatsProps): React.ReactElement {
 type ContextMenuContentProps = {
   daily: Daily;
   editOnOpenAction: () => void;
-  onRefreshAction: () => void;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
   toggleHistoryAction?: () => void;
+  updateDailyAction: (pointId: string, patch: Partial<Daily>) => void;
   user_id: number;
 };
 
@@ -215,9 +212,9 @@ export function ContextMenuContent(props: ContextMenuContentProps): React.ReactE
   const {
     daily,
     editOnOpenAction,
-    onRefreshAction,
     setPointsAction,
     toggleHistoryAction,
+    updateDailyAction,
     user_id,
   } = props;
 
@@ -234,7 +231,7 @@ export function ContextMenuContent(props: ContextMenuContentProps): React.ReactE
           <AbandonDailyMenuOption
             daily={daily}
             setPointsAction={setPointsAction}
-            onRefreshAction={onRefreshAction}
+            updateDaily={updateDailyAction}
           />
         )}
         <EditMenuOption onOpen={editOnOpenAction} />
@@ -243,15 +240,15 @@ export function ContextMenuContent(props: ContextMenuContentProps): React.ReactE
           <ArchiveDailyMenuOption
             daily={daily}
             setPointsAction={setPointsAction}
+            updateDaily={updateDailyAction}
             user_id={user_id}
-            onRefreshAction={onRefreshAction}
           />
         ) : (
           <RestoreDailyMenuOption
             daily={daily}
             setPointsAction={setPointsAction}
+            updateDaily={updateDailyAction}
             user_id={user_id}
-            onRefreshAction={onRefreshAction}
           />
         )}
       </motion.div>

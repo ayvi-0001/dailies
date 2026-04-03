@@ -122,8 +122,8 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
               minutelyRefresh={minutelyRefresh}
               setDailiesAction={dailiesState.setDailies}
               totalWeight={dailiesState.totalWeight}
+              updateDaily={dailiesState.updateDaily}
               user={userState.user}
-              onUpdateAction={dailiesState.triggerRefreshDailies}
             />
           ))}
         </ScrollShadow>
