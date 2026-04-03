@@ -8,6 +8,7 @@ import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/naviga
 
 import { truncate_sessions } from "@/actions/logout";
 import Speeddial from "@/components/animata/container/speed-dial";
+import { updateParam } from "@/lib/params";
 
 import { ModalParam } from "./@modals/params";
 
@@ -15,20 +16,6 @@ export default function App(): React.ReactElement {
   const router: AppRouterInstance = useRouter();
 
   const searchParams: ReadonlyURLSearchParams = useSearchParams();
-  const createQueryString = React.useCallback(
-    (values: Array<{ key: string; value: string }>): string => {
-      const params = new URLSearchParams(searchParams);
-      for (const { key, value } of values) {
-        params.set(key, value);
-      }
-      return params.toString();
-    },
-    [searchParams],
-  );
-
-  const updateParam = (values: Array<{ key: string; value: string }>): void => {
-    router.push(`?${createQueryString(values)}`);
-  };
 
   const actionButtons = [
     {
@@ -44,13 +31,15 @@ export default function App(): React.ReactElement {
       icon: <ChartAreaIcon size={16} />,
       label: <p className="text-xs">Stats</p>,
       key: "add",
-      buttonAction: () => updateParam([{ key: "modal", value: ModalParam.Stats }]),
+      buttonAction: () =>
+        updateParam(router, searchParams, [{ key: "modal", value: ModalParam.Stats }]),
     },
     {
       icon: <BookPlusIcon size={14} />,
       label: <p className="text-xs">Add Quest</p>,
       key: "add",
-      buttonAction: () => updateParam([{ key: "modal", value: ModalParam.AddQuest }]),
+      buttonAction: () =>
+        updateParam(router, searchParams, [{ key: "modal", value: ModalParam.AddQuest }]),
     },
   ];
 

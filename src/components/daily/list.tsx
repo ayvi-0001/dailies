@@ -11,6 +11,7 @@ import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/naviga
 
 import { User, UserState, useState as useUserState } from "@/app/providers/user";
 import { LOCAL_TZ } from "@/lib/dates";
+import { updateParam } from "@/lib/params";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
@@ -21,27 +22,10 @@ import { Daily, Quest } from "./types";
 export default function QuestList({ title }: { title: string }): React.ReactElement {
   const userState: UserState = useUserState();
   const dailiesState: DailiesState = useDailies();
+  const router: AppRouterInstance = useRouter();
+  const searchParams: ReadonlyURLSearchParams = useSearchParams();
 
   const [listDate, setListDate] = React.useState<CalendarDate>(today(LOCAL_TZ));
-
-  const router: AppRouterInstance = useRouter();
-
-  const searchParams: ReadonlyURLSearchParams = useSearchParams();
-  const createQueryString = React.useCallback(
-    (values: Array<{ key: string; value: string }>): string => {
-      const params = new URLSearchParams(searchParams);
-      for (const { key, value } of values) {
-        params.set(key, value);
-      }
-      return params.toString();
-    },
-    [searchParams],
-  );
-
-  const updateParam = React.useCallback((values: Array<{ key: string; value: string }>): void => {
-    router.push(`?${createQueryString(values)}`);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const [minutelyRefresh, setMinutelyRefresh] = React.useState<Date>(new Date());
   React.useEffect(() => {
@@ -59,7 +43,7 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
   }, []);
 
   ReactUse.useOnceEffect(() => {
-    updateParam([{ key: "date", value: listDate.toString() }]);
+    updateParam(router, searchParams, [{ key: "date", value: listDate.toString() }]);
   }, [listDate]);
 
   const {
