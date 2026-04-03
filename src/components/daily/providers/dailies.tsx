@@ -3,12 +3,12 @@
 import * as React from "react";
 
 import * as ReactUse from "@reactuses/core";
-import { now, today } from "@internationalized/date";
+import { today } from "@internationalized/date";
 import ok from "assert";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 
 import { User, useState as useUserState } from "@/app/providers/user";
-import { LOCAL_TZ, formatDateTimeISO8601 } from "@/lib/dates";
+import { LOCAL_TZ, formatDateTimeISO8601, getMsToMidnight } from "@/lib/dates";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
@@ -131,19 +131,6 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
     const midnightDailyRefresh = (): void => {
       insert_dailies();
       query_dailies();
-    };
-
-    const getMsToMidnight = (): number => {
-      const currentDateTime = now(LOCAL_TZ);
-      const midnight = currentDateTime
-        .cycle("day", 1)
-        .cycle("hour", 24 - currentDateTime.hour)
-        .cycle("minute", 60 - currentDateTime.minute)
-        .cycle("second", 60 - currentDateTime.second)
-        .cycle("millisecond", 1000 - currentDateTime.millisecond);
-      const timeToMidnight = midnight.compare(currentDateTime);
-
-      return timeToMidnight;
     };
 
     const timeoutId = setTimeout(() => {

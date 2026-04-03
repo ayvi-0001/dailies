@@ -36,7 +36,7 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
   const draggableRef = React.useRef<Option<HTMLElement>>(null);
   const { moveProps } = heroui.useDraggable({
     targetRef: draggableRef as React.RefObject<HTMLElement>,
-    canOverflow: true,
+    canOverflow: false,
     isDisabled: false,
   });
 

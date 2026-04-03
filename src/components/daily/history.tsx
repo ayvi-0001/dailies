@@ -58,7 +58,7 @@ export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactEle
       hideCloseButton
       isDismissable
       isKeyboardDismissDisabled
-      className="border-1 border-[#f0f0ff]/80 bg-black/85 select-none"
+      className="bg-black/85 select-none"
       isOpen={isOpen}
       placement="bottom"
       radius="none"

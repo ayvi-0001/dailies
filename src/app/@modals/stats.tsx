@@ -19,7 +19,7 @@ export default function Modal(): React.ReactElement {
   const draggableRef = React.useRef<HTMLElement>(null as unknown as HTMLElement);
   const { moveProps } = heroui.useDraggable({
     targetRef: draggableRef,
-    canOverflow: true,
+    canOverflow: false,
     isDisabled: false,
   });
 
