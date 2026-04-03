@@ -42,7 +42,10 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
   const [questChains, setQuestChains] = React.useState<string[]>([]);
   const [totalPoints, setTotalPoints] = React.useState<number>(0);
   const [totalWeight, setTotalWeight] = React.useState<number>(0);
+
   const [countRefreshDailies, setCountRefreshDailies] = React.useState<number>(0);
+  const [countRefreshExp, setCountRefreshExp] = React.useState<number>(0);
+  const [countRefreshQuestChains, setCountRefreshQuestChains] = React.useState<number>(0);
 
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
@@ -82,7 +85,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
         .catch(console.error);
     };
     query_quest_chains();
-  }, [user, countRefreshDailies, date]);
+  }, [user, countRefreshQuestChains]);
 
   ReactUse.useOnceEffect(() => {
     const get_total_points = async (): Promise<void> => {
@@ -100,13 +103,29 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
         .catch(console.error);
     };
     get_total_points();
-  }, [user, countRefreshDailies, date]);
+  }, [user, countRefreshExp, date]);
 
   const debouncedRefreshDailiesRef = React.useRef<ReturnType<typeof setTimeout>>(undefined);
   const triggerRefreshDailies = React.useCallback(() => {
     clearTimeout(debouncedRefreshDailiesRef.current);
     debouncedRefreshDailiesRef.current = setTimeout(() => {
       setCountRefreshDailies(c => c + 1);
+    }, 300);
+  }, []);
+
+  const debouncedRefreshExpRef = React.useRef<ReturnType<typeof setTimeout>>(undefined);
+  const triggerRefreshExp = React.useCallback(() => {
+    clearTimeout(debouncedRefreshExpRef.current);
+    debouncedRefreshExpRef.current = setTimeout(() => {
+      setCountRefreshExp(c => c + 1);
+    }, 300);
+  }, []);
+
+  const debouncedRefreshQuestChainsRef = React.useRef<ReturnType<typeof setTimeout>>(undefined);
+  const triggerRefreshQuestChains = React.useCallback(() => {
+    clearTimeout(debouncedRefreshQuestChainsRef.current);
+    debouncedRefreshQuestChainsRef.current = setTimeout(() => {
+      setCountRefreshQuestChains(c => c + 1);
     }, 300);
   }, []);
 
@@ -117,6 +136,9 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
       const patchKeys = Object.keys(patch);
       if (patchKeys.filter(k => ["points", "weight", "archived"].includes(k))) {
         triggerRefreshDailies();
+        triggerRefreshExp();
+      } else if (patchKeys.includes("chain")) {
+        triggerRefreshQuestChains();
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,6 +147,12 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
 
   React.useEffect(() => {
     return () => clearTimeout(debouncedRefreshDailiesRef.current);
+  }, []);
+  React.useEffect(() => {
+    return () => clearTimeout(debouncedRefreshExpRef.current);
+  }, []);
+  React.useEffect(() => {
+    return () => clearTimeout(debouncedRefreshQuestChainsRef.current);
   }, []);
 
   ReactUse.useOnceEffect(() => {
