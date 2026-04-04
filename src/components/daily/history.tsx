@@ -167,12 +167,16 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
     query_dailies();
   }, [daily, user, countRefreshDailies, dateRange]);
 
-  const debouncedRefreshDailiesRef = React.useRef<ReturnType<typeof setTimeout>>(undefined);
+  const debouncedRefreshRef = React.useRef<ReturnType<typeof setTimeout>>(undefined);
   const triggerRefreshDailies = React.useCallback(() => {
-    clearTimeout(debouncedRefreshDailiesRef.current);
-    debouncedRefreshDailiesRef.current = setTimeout(() => {
+    clearTimeout(debouncedRefreshRef.current);
+    debouncedRefreshRef.current = setTimeout(() => {
       setCountRefreshDailies(c => c + 1);
     }, 300);
+  }, []);
+
+  React.useEffect(() => {
+    return () => clearTimeout(debouncedRefreshRef.current);
   }, []);
 
   const updateDaily = React.useCallback(
@@ -180,17 +184,13 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
       setDailies(prev => prev.map(d => (d.pointId === pointId ? { ...d, ...patch } : d)));
 
       const patchKeys = Object.keys(patch);
-      if (patchKeys.filter(k => ["points", "weight"].includes(k))) {
+      if (patchKeys.filter(k => ["points", "weight"].includes(k)).length > 0) {
         triggerRefreshDailies();
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
-
-  React.useEffect(() => {
-    return () => clearTimeout(debouncedRefreshDailiesRef.current);
-  }, []);
 
   return (
     <heroui.ScrollShadow

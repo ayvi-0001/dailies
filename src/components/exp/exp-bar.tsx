@@ -35,7 +35,7 @@ export default function ExpBar(): React.ReactNode {
     x = roundTo((pointDiff / totalWeight) * 100, 2);
     x = isRealNumber(x) ? x : null;
     setPercentChange(x);
-  }, [pointDiff, totalWeight]);
+  }, [pointDiff, totalPoints, totalWeight]);
   React.useEffect(() => setPercentChange(null), [dailiesState.date]);
 
   let percentValue: number = roundTo((totalPoints / totalWeight) * 100, 2);
@@ -78,21 +78,17 @@ export default function ExpBar(): React.ReactNode {
         <div key={key} className="flex w-full justify-self-end" id={key}></div>
       )}
       <div className="flex h-10 items-center gap-3 rounded" id="exp-bar">
-        {!!totalWeight ? (
+        {!!totalPoints ? (
           <div className="flex w-full flex-col">
             <div className="flex w-full grow flex-row justify-end">
-              {!!totalPoints && (
-                <>
-                  <span className={cn(textClassValue, "opacity-80")}>[</span>
-                  <Counter
-                    className={cn(textClassValue, "opacity-80")}
-                    direction="up"
-                    format={(value: number): string => `${value.toFixed(2)}`}
-                    targetValue={!!totalPoints ? totalPoints : 0}
-                  />
-                  <span className={cn(textClassValue, "opacity-80")}>{`/${totalWeight}]`}</span>
-                </>
-              )}
+              <span className={cn(textClassValue, "opacity-80")}>[</span>
+              <Counter
+                className={cn(textClassValue, "opacity-80")}
+                direction="up"
+                format={(value: number): string => `${value.toFixed(2)}`}
+                targetValue={totalPoints}
+              />
+              <span className={cn(textClassValue, "opacity-80")}>{`/${totalWeight}]`}</span>
               <Counter
                 className={cn(textClassValue, "px-1")}
                 direction="up"
@@ -101,7 +97,7 @@ export default function ExpBar(): React.ReactNode {
               />
             </div>
             <div className="grow">
-              <Progress<number> deps={[totalPoints]} progress={percentValue} />
+              <Progress<number> deps={[totalPoints, totalWeight]} progress={percentValue} />
             </div>
           </div>
         ) : (
