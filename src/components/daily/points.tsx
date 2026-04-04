@@ -6,6 +6,7 @@ import { HTMLMotionProps } from "framer-motion";
 import { FlameIcon } from "lucide-react";
 
 import * as svgs from "@/components/svgs";
+import ComponentList from "@/components/ui/list";
 import { roundTo } from "@/lib/number";
 import { cn } from "@/lib/utils";
 import type { Option } from "@/types/option";
@@ -116,21 +117,6 @@ export default function PointsDisplay(props: PointsDisplayProps): React.ReactNod
       </Tooltip>
     );
   };
-
-  function ComponentList({
-    elements,
-    separator,
-  }: {
-    elements: React.ReactElement[];
-    separator: React.ReactElement;
-  }): React.ReactElement[] {
-    return elements.map((item, index, arr) => (
-      <React.Fragment key={item.key || index}>
-        {index < arr.length && index >= 1 && separator}
-        {item}
-      </React.Fragment>
-    ));
-  }
 
   const elements: React.ReactElement[] = [];
   if (
