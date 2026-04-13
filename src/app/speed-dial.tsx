@@ -2,12 +2,12 @@
 
 import * as React from "react";
 
-import { BookPlusIcon, ChartAreaIcon, LogOutIcon } from "lucide-react";
+import { BookPlusIcon, BoxIcon, ChartAreaIcon, LogOutIcon } from "lucide-react";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
 
 import { truncate_sessions } from "@/actions/logout";
-import Speeddial from "@/components/animata/container/speed-dial";
+import Speeddial, { SpeeddialDirection } from "@/components/animata/container/speed-dial";
 import { updateParam } from "@/lib/params";
 
 import { ModalParam } from "./@modals/params";
@@ -19,7 +19,7 @@ export default function App(): React.ReactElement {
 
   const actionButtons = [
     {
-      icon: <LogOutIcon size={14} />,
+      icon: <LogOutIcon size={14} stroke="#f0f0ff" />,
       label: <p className="text-xs">Logout</p>,
       key: "logout",
       buttonAction: async () => {
@@ -28,14 +28,14 @@ export default function App(): React.ReactElement {
       },
     },
     {
-      icon: <ChartAreaIcon size={16} />,
+      icon: <ChartAreaIcon size={16} stroke="#f0f0ff" />,
       label: <p className="text-xs">Stats</p>,
-      key: "add",
+      key: "stats",
       buttonAction: () =>
         updateParam(router, searchParams, [{ key: "modal", value: ModalParam.Stats }]),
     },
     {
-      icon: <BookPlusIcon size={14} />,
+      icon: <BookPlusIcon size={14} stroke="#f0f0ff" />,
       label: <p className="text-xs">Add Quest</p>,
       key: "add",
       buttonAction: () =>
@@ -47,9 +47,10 @@ export default function App(): React.ReactElement {
     <div suppressHydrationWarning>
       <Speeddial
         actionButtons={actionButtons}
-        buttonProps={{ className: " border-none order-last" }}
-        direction="up"
-        props={{ className: "dark z-999 absolute left-0 bottom-0 mb-6 ml-6 bg-transparent" }}
+        buttonIcon={<BoxIcon size={16} stroke="#f0f0ff" />}
+        buttonProps={{ className: "border-none order-last" }}
+        direction={SpeeddialDirection.up}
+        divProps={{ className: "dark z-999 absolute left-0 bottom-0 mb-6 ml-6 bg-transparent" }}
       />
     </div>
   );

@@ -2,44 +2,60 @@
 
 import * as React from "react";
 
-import { BoxIcon } from "lucide-react";
+import * as ReactUse from "@reactuses/core";
+import { type ClassValue, clsx } from "clsx";
 
 import { cn } from "@/lib/utils";
+import type { Option } from "@/types/option";
 
 interface SpeedialProps {
-  props?: React.ComponentProps<"div">;
-  buttonProps?: React.ComponentProps<"button">;
-  direction?: string;
   actionButtons?: Array<{
     icon: React.ReactNode;
     label: React.ReactNode;
     key: string;
     buttonAction: (event: React.MouseEvent<HTMLButtonElement>) => void;
   }>;
+  buttonIcon: React.ReactElement;
+  buttonProps?: React.ComponentProps<"button">;
+  direction: SpeeddialDirection;
+  divProps?: React.ComponentProps<"div">;
+}
+
+export enum SpeeddialDirection {
+  up = "up",
+  down = "down",
+  right = "right",
+  left = "left",
 }
 
 interface TooltipProps {
   text: React.ReactNode;
   children: React.ReactNode;
-  direction: string;
+  direction: SpeeddialDirection;
 }
 
-const Tooltip: React.FC<TooltipProps> = ({ text, children, direction }) => {
-  const [visible, setVisible] = React.useState(false);
+const GLASSY_CLASSES: ClassValue = cn(
+  "backdrop-filter backdrop-blur-xl bg-transparent ",
+  "border border-white rounded-xl ",
+  "shadow-lg transition-all duration-300",
+);
 
-  const showTooltip = () => setVisible(true);
-  const hideTooltip = () => setVisible(false);
+const Tooltip: React.FC<TooltipProps> = ({ text, children, direction }): React.ReactElement => {
+  const ref = React.useRef<Option<HTMLDivElement>>(null);
+  const hovered: boolean = ReactUse.useHover(ref);
 
   return (
-    <div className="relative inline-block" onMouseEnter={showTooltip} onMouseLeave={hideTooltip}>
+    <div ref={ref} className="relative inline-block">
       {children}
-      {visible && (
+      {hovered && (
         <div
-          className={` ${
-            direction === "up" || direction === "down"
-              ? "absolute top-1/2 left-full z-500 ml-2 -translate-y-1/2 transform rounded bg-gray-800 px-2 py-1 text-sm text-white"
-              : "absolute bottom-full left-1/2 z-500 mb-2 -translate-x-1/2 transform rounded bg-gray-800 px-2 py-1 text-sm text-white"
-          } `}
+          className={cn(
+            clsx(
+              [SpeeddialDirection.up, SpeeddialDirection.down].includes(direction)
+                ? "absolute top-1/2 left-full z-500 ml-2 -translate-y-1/2 transform rounded bg-gray-800 px-2 py-1 text-sm text-white"
+                : "absolute bottom-full left-1/2 z-500 mb-2 -translate-x-1/2 transform rounded bg-gray-800 px-2 py-1 text-sm text-white",
+            ),
+          )}
         >
           {text}
         </div>
@@ -48,73 +64,70 @@ const Tooltip: React.FC<TooltipProps> = ({ text, children, direction }) => {
   );
 };
 
-export default function Speeddial({ props, buttonProps, direction, actionButtons }: SpeedialProps) {
-  const [isHovered, setIsHovered] = React.useState(false);
-
-  if (direction === undefined) {
-    direction = "down";
-  }
+export default function Speeddial(props: SpeedialProps): React.ReactElement {
+  const ref = React.useRef<Option<HTMLDivElement>>(null);
+  const hovered: boolean = ReactUse.useHover(ref);
 
   const getAnimation = () => {
-    switch (direction) {
-      case "up":
+    switch (props.direction) {
+      case SpeeddialDirection.up:
         return "origin-bottom flex-col order-0";
-      case "down":
+      case SpeeddialDirection.down:
         return "origin-top flex-col order-2";
-      case "left":
+      case SpeeddialDirection.left:
         return "origin-right order-0";
-      case "right":
+      case SpeeddialDirection.right:
         return "origin-left order-2";
       default:
         return "";
     }
   };
 
-  const handleMouseEnter = () => setIsHovered(true);
-  const handleMouseLeave = () => setIsHovered(false);
-
-  const getGlassyClasses = () => {
-    return "backdrop-filter backdrop-blur-xl bg-white border border-white rounded-xl shadow-lg transition-all duration-300";
-  };
-
   return (
     <div
-      {...props}
+      {...props.divProps}
+      ref={ref}
       className={cn(
-        `relative mb-3 flex w-fit items-center gap-3 ${
-          direction === "up" || direction === "down" ? "flex-col" : "flex-row"
-        }`,
-        props?.className,
+        "relative mb-3 flex w-fit items-center gap-3",
+        clsx(
+          [SpeeddialDirection.up, SpeeddialDirection.down].includes(props.direction)
+            ? "flex-col"
+            : [SpeeddialDirection.right, SpeeddialDirection.left].includes(props.direction)
+              ? "flex-row"
+              : "",
+        ),
+        props.divProps?.className,
       )}
-      onMouseLeave={handleMouseLeave}
     >
       <button
         className={cn(
-          `${getGlassyClasses()} order-0 flex items-center p-3 text-gray-800 transition-all duration-300 hover:bg-slate-100`,
-          buttonProps?.className,
+          GLASSY_CLASSES,
+          "order-0 flex items-center p-3 text-gray-800 transition-all duration-300",
+          props.buttonProps?.className,
         )}
-        onMouseEnter={handleMouseEnter}
       >
-        <BoxIcon size={16} />
+        {props.buttonIcon}
       </button>
       {/* Speed Dial Actions */}
       <div
-        className={`${
-          isHovered ? "scale-100 opacity-100" : "scale-0 opacity-0"
-        } flex items-center gap-3 transition-all duration-500 ease-in-out ${getAnimation()}`}
+        className={cn(
+          clsx(hovered ? "scale-100 opacity-100" : "scale-0 opacity-0"),
+          "flex items-center gap-3 transition-all duration-500 ease-in-out",
+          getAnimation(),
+        )}
       >
-        {(actionButtons || []).map((action, index) => (
-          <Tooltip key={index} direction={direction} text={action.label}>
+        {(props.actionButtons || []).map((action, index) => (
+          <Tooltip key={index} direction={props.direction} text={action.label}>
             <button
               key={index}
               className={cn(
-                `${getGlassyClasses()} flex items-center p-3 text-gray-800 transition-all duration-300 hover:bg-slate-100`,
-                buttonProps?.className,
+                GLASSY_CLASSES,
+                "flex items-center p-3 text-gray-800 transition-all duration-300",
+                props.buttonProps?.className,
               )}
-              onClick={event => {
-                setIsHovered(false);
-                action.buttonAction(event);
-              }}
+              onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
+                action.buttonAction(event)
+              }
             >
               {action.icon}
             </button>

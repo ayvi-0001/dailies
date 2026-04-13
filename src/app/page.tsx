@@ -12,24 +12,28 @@ import Speeddial from "./speed-dial";
 
 export default async function Page(_: PageProps): Promise<React.ReactElement> {
   return (
-    <div className="fixed flex h-screen w-screen justify-between select-none">
+    <>
       <React.Suspense>
-        <Speeddial />
         <UserProvider>
           <DailiesProvider>
-            <div
-              className="fixed w-full items-center justify-center self-start px-4 pt-14"
-              id="main-content"
-            >
-              <QuestList title="Quests" />
-            </div>
-            <div className="mr-6 mb-6 ml-20 w-full self-end">
-              <ExpBar />
+            <div className="fixed flex h-screen w-screen justify-between select-none">
+              <div
+                className="fixed w-full items-center justify-center self-start px-4 pt-14"
+                id="main-content"
+              >
+                <QuestList title="Quests" />
+              </div>
+              <div className="mr-6 mb-6 ml-20 w-full self-end">
+                <ExpBar />
+              </div>
             </div>
           </DailiesProvider>
         </UserProvider>
       </React.Suspense>
-    </div>
+      <React.Suspense>
+        <Speeddial />
+      </React.Suspense>
+    </>
   );
 }
 
