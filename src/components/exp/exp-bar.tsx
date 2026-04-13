@@ -93,6 +93,7 @@ export default function ExpBar(): React.ReactNode {
                 className={cn(textClassValue, "px-1")}
                 direction="up"
                 format={(value: number): string => `${value.toFixed(2)}%`}
+                springOptions={{ damping: 10, stiffness: 80 }}
                 targetValue={percentValue ?? 0}
               />
             </div>
