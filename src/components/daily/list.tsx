@@ -78,23 +78,21 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
 
   return (
     <div className="flex h-full w-full flex-col gap-2 overflow-hidden" id="dailies-list">
-      <div className="mx-2">
-        <QuestsHeader
-          isAllQuestChainsCollapsed={isAllQuestChainsCollapsed}
-          isArchivedQuestsFiltered={isArchivedQuestsFiltered}
-          isCompletedQuestsFiltered={isCompletedQuestsFiltered}
-          isOptionalQuestsFiltered={isOptionalQuestsFiltered}
-          listDate={listDate}
-          questNameFilterText={questNameFilterText}
-          setArchivedQuestsFilteredAction={setArchivedQuestsFilteredAction}
-          setCompletedQuestsFilteredAction={setCompletedQuestsFilteredAction}
-          setIsAllQuestChainCollapsedAction={setIsAllQuestChainCollapsedAction}
-          setListDateAction={setListDate}
-          setOptionalQuestsFilteredAction={setOptionalQuestsFilteredAction}
-          setQuestNameFilterTextAction={setQuestNameFilterTextAction}
-          title={title}
-        />
-      </div>
+      <QuestsHeader
+        isAllQuestChainsCollapsed={isAllQuestChainsCollapsed}
+        isArchivedQuestsFiltered={isArchivedQuestsFiltered}
+        isCompletedQuestsFiltered={isCompletedQuestsFiltered}
+        isOptionalQuestsFiltered={isOptionalQuestsFiltered}
+        listDate={listDate}
+        questNameFilterText={questNameFilterText}
+        setArchivedQuestsFilteredAction={setArchivedQuestsFilteredAction}
+        setCompletedQuestsFilteredAction={setCompletedQuestsFilteredAction}
+        setIsAllQuestChainCollapsedAction={setIsAllQuestChainCollapsedAction}
+        setListDateAction={setListDate}
+        setOptionalQuestsFilteredAction={setOptionalQuestsFilteredAction}
+        setQuestNameFilterTextAction={setQuestNameFilterTextAction}
+        title={title}
+      />
       {dailiesState.isLoading ? (
         <div className="flex h-full w-full flex-col">
           <heroui.Spinner

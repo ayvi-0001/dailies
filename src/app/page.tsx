@@ -16,14 +16,18 @@ export default async function Page(_: PageProps): Promise<React.ReactElement> {
       <React.Suspense>
         <UserProvider>
           <DailiesProvider>
-            <div className="fixed flex h-screen w-screen justify-between select-none">
+            <div
+              className="relative flex h-full w-screen flex-col items-stretch justify-between select-none"
+              id="default-page"
+            >
               <div
-                className="fixed w-full items-center justify-center self-start px-4 pt-14"
+                className="h-[calc(80vh)] w-full items-center justify-center self-start px-4"
                 id="main-content"
               >
                 <QuestList title="Quests" />
               </div>
-              <div className="mr-6 mb-6 ml-20 w-full self-end">
+              <div className="flex grow"></div>
+              <div className="h-fit w-full">
                 <ExpBar />
               </div>
             </div>

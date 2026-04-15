@@ -48,57 +48,61 @@ export default function ExpBar(): React.ReactNode {
   }, [isVisible]);
   React.useEffect(() => setIsVisible(true), [previousTotalPoints]);
 
-  const textClassValue: ClassValue = "text-xs font-bold text-[#f0f0ff]";
+  const textClass: ClassValue = "text-xs font-bold text-[#f0f0ff]";
+  const paddingClass: ClassValue = "px-5 ml-1";
 
   const showExpToast: boolean = isVisible && !!percentChange && previousTotalPoints !== undefined;
-  const key: string = `point-diff-${pointDiff}`;
   const bar: React.ReactElement = (
-    <AnimatePresence>
-      {showExpToast ? (
-        <motion.div
-          key={key}
-          animate={{ opacity: 1, y: 0 }}
-          className="z-100 -mb-2 flex w-full justify-end"
-          exit={{ opacity: 0, y: -10 }}
-          initial={{ opacity: 0, y: 10 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-        >
-          <p
-            className={cn(
-              textClassValue,
-              clsx(pointSign === 1 && "text-green-400", pointSign === -1 && "text-red-400"),
-            )}
+    <>
+      <AnimatePresence>
+        {showExpToast ? (
+          <motion.div
+            animate={{ opacity: 1, y: 0 }}
+            className={cn(paddingClass, "relative z-400 flex w-full justify-end")}
+            exit={{ opacity: 0, y: -18 }}
+            initial={{ opacity: 0, y: 18 }}
+            transition={{ duration: 1, ease: "easeInOut" }}
           >
-            {pointSign === 1 && "+"}
-            {percentChange}
-            {"%"}
-          </p>
-        </motion.div>
-      ) : (
-        <div key={key} className="flex w-full justify-self-end" id={key}></div>
-      )}
-      <div className="flex h-10 items-center gap-3 rounded" id="exp-bar">
+            <p
+              className={cn(
+                textClass,
+                clsx(pointSign === 1 && "text-green-400", pointSign === -1 && "text-red-400"),
+              )}
+            >
+              {pointSign === 1 && "+"}
+              {percentChange}
+              {"%"}
+            </p>
+          </motion.div>
+        ) : (
+          <div className="relative flex w-full"></div>
+        )}
+      </AnimatePresence>
+      <div
+        className={cn(paddingClass, "flex max-h-10 min-h-10 items-center gap-3 rounded")}
+        id="exp-bar"
+      >
         {!!totalPoints ? (
           <div className="flex w-full flex-col">
-            <div className="flex w-full grow flex-row justify-end">
-              <span className={cn(textClassValue, "opacity-80")}>[</span>
+            <div className="grow">
+              <Progress<number> deps={[totalPoints, totalWeight]} progress={percentValue ?? 0} />
+            </div>
+            <div className="mt-1 flex w-full grow flex-row justify-end">
+              <span className={cn(textClass, "opacity-80")}>[</span>
               <Counter
-                className={cn(textClassValue, "opacity-80")}
+                className={cn(textClass, "opacity-80")}
                 direction="up"
                 format={(value: number): string => `${value.toFixed(2)}`}
                 targetValue={totalPoints}
               />
-              <span className={cn(textClassValue, "opacity-80")}>{`/${totalWeight}]`}</span>
+              <span className={cn(textClass, "opacity-80")}>{`/${totalWeight}]`}</span>
               <Counter
-                className={cn(textClassValue, "px-1")}
+                className={cn(textClass, "px-1")}
                 direction="up"
                 format={(value: number): string => `${value.toFixed(2)}%`}
                 springOptions={{ damping: 10, stiffness: 80 }}
                 targetValue={percentValue ?? 0}
               />
-            </div>
-            <div className="grow">
-              <Progress<number> deps={[totalPoints, totalWeight]} progress={percentValue} />
             </div>
           </div>
         ) : (
@@ -112,12 +116,12 @@ export default function ExpBar(): React.ReactNode {
           </div>
         )}
       </div>
-    </AnimatePresence>
+    </>
   );
 
   const focusContent: React.ReactElement = (
     <div className="top-2 rounded-full bg-black/60 px-4 py-1">
-      <span className={textClassValue}>
+      <span className={textClass}>
         <span className="pr-1">{totalPoints.toFixed(2)}</span>
         <span>{` / `}</span>
         <span>{totalWeight}</span>
@@ -143,7 +147,7 @@ export default function ExpBar(): React.ReactNode {
           {bar}
           <CursorTracker platform={appMeta.platform}>
             {focusContent}
-            <div className="absolute bottom-0 h-10 w-screen"></div>
+            <div className={cn(paddingClass, "relative bottom-0 max-h-10 min-h-10 w-full")}></div>
           </CursorTracker>
         </>
       );

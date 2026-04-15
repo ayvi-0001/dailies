@@ -45,7 +45,7 @@ export default function RootLayout(pages: Pages): React.ReactNode {
         <Providers>
           <AppBuildInfo as="header" />
           <Toaster />
-          <div className="relative z-1">
+          <div className="fixed z-1 flex h-screen w-screen bg-transparent py-15" id="layout">
             <React.Suspense>
               {process.env.NODE_ENV === "development" && <CommandDialog />}
             </React.Suspense>

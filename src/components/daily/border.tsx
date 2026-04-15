@@ -61,45 +61,36 @@ function CardBorder(props: CardBorderProps): React.ReactElement {
     }
   }, [daily, raidStatus, weeklyStatus]);
 
-  const cardDimensionStyles: ClassValue = "h-20 w-full";
-  const borderClass: ClassValue = cn(
-    divProps.className,
-    raidStatus?.borderClassValue,
-    weeklyStatus?.borderClassValue,
-    clsx([!!daily.archived && "border-black"]),
-  );
-  const bgClass: ClassValue = cn(
-    raidStatus?.bgClassValue,
-    weeklyStatus?.bgClassValue,
-    clsx([!!daily.archived && "bg-black/70"]),
-  );
-  const cardCoverClassValue: ClassValue = cn(
-    borderClass,
-    "absolute z-90 box-content h-full w-full shadow-lg",
-  );
-
   return (
     <>
       <motion.div
+        layout
         className={cn(
-          cardDimensionStyles,
-          borderClass,
-          "relative z-90 box-content border-3 bg-white/70 shadow-lg",
+          "relative z-90 max-h-[88] min-h-[88] max-w-full min-w-full border-3 bg-white/70",
+          divProps.className,
+          raidStatus?.borderClassValue,
+          weeklyStatus?.borderClassValue,
+          clsx([!!daily.archived && "border-black"]),
         )}
         id={`daily-${daily.name}`}
-        whileFocus={{ scale: 1.02 }}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 1.02 }}
+        whileFocus={{ scale: 1.03 }}
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 1.03 }}
       >
         {isNotEditable ? (
           <div
-            className={cn(cardCoverClassValue, cardDimensionStyles, bgClass)}
+            className={cn(
+              "absolute z-90 size-full",
+              raidStatus?.bgClassValue,
+              weeklyStatus?.bgClassValue,
+              clsx([!!daily.archived && "bg-black/70"]),
+            )}
             id="uneditable-card-cover"
           />
         ) : (
           <></>
         )}
-        <div className={cn("flex", cardDimensionStyles)}>{children}</div>
+        <div className={cn("flex size-full")}>{children}</div>
       </motion.div>
     </>
   );

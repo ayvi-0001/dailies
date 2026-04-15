@@ -65,7 +65,7 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
   return (
     <>
       <RadixContextMenu.Root modal onOpenChange={toggleContextMenu}>
-        <RadixContextMenu.Trigger className="flex">
+        <RadixContextMenu.Trigger className="flex size-full">
           <CardBorder
             daily={daily}
             divProps={{ className: questTypeStyles.borderClass as string }}
@@ -75,7 +75,7 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
               <motion.div
                 key={`card-effect-${daily.pointId}`}
                 animate={isLoading ? { opacity: 0 } : {}}
-                className="flex w-full min-w-0 flex-row justify-between gap-2 p-1"
+                className="flex size-full flex-row justify-between gap-2 p-1"
                 initial={isLoading ? { opacity: 100 } : {}}
                 transition={
                   isLoading
@@ -219,11 +219,11 @@ export function ContextMenuContent(props: ContextMenuContentProps): React.ReactE
   } = props;
 
   return (
-    <RadixContextMenu.Content asChild forceMount className="dark relative z-100 bg-black p-2">
+    <RadixContextMenu.Content asChild forceMount className="dark relative z-100 bg-black/90 p-2">
       <motion.div
         animate={{ opacity: 1, scale: 1 }}
-        className="z-10 flex flex-col gap-3 border-2 border-black bg-black/90"
-        exit={{ opacity: 0, scale: 0.95 }}
+        className="z-10 flex flex-col gap-3 bg-black/90"
+        exit={{ opacity: 0, scale: 0.9 }}
         initial={{ opacity: 0, scale: 0.9 }}
         transition={{ duration: 0.2 }}
       >

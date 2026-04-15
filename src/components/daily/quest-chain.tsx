@@ -79,7 +79,7 @@ export function QuestsHeader(props: QuestsHeaderProps): React.ReactNode {
 
   return (
     <div
-      className="bg-opacity-60 relative h-9 bg-slate-400/80 bg-blend-overlay select-none"
+      className="bg-opacity-60 relative mx-2 h-9 bg-slate-400/80 bg-blend-overlay select-none"
       id="dailies-list-header"
     >
       <div className="flex flex-row items-center justify-items-stretch gap-2">
@@ -217,6 +217,8 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
       key={chain}
       fullWidth
       isCompact
+      // TODO(ayvi): might cause issues with resize observer,
+      // set false or upgrade heroui/react to where patch is applied.
       keepContentMounted
       selectedKeys={selectedKeys}
       variant="splitted"
@@ -228,10 +230,11 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
       <heroui.AccordionItem
         key={chain}
         classNames={{
-          base: "px-0 shadow-medium rounded-medium relative bg-transparent",
-          startContent: "flex w-full items-center border-2 border-[#ece5d8] bg-[#2d3b4a]/70",
+          base: "px-0 shadow-medium rounded-medium relative bg-transparent items-center",
+          startContent:
+            "flex max-w-full min-w-full items-center border-3 border-[#ece5d8] bg-[#2d3b4a]/70",
           indicator: "z-11 justify-self-start absolute ml-4",
-          content: "bg-white/20 pl-3 pr-3 pt-4 pb-4",
+          content: "bg-white/20 py-4 place-content-center px-4",
           heading: "leading-none",
         }}
         id={`chain-${chain}`}
@@ -282,7 +285,7 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
               {filteredDailies.map(daily => (
                 <SortableItem
                   key={`${daily.pointId}-${daily.sequence}`}
-                  className="w-[100%] flex-shrink-0"
+                  className="max-w-full min-w-full flex-shrink-0"
                   // @ts-expect-error: overwrite assigning number to id
                   id={daily.sequence}
                 >
