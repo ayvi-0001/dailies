@@ -20,42 +20,45 @@ export default function ExpBar(): React.ReactNode {
   const dailiesState: DailiesState = useDailies();
   // const appMeta: AppMetaState = useAppMetaState();
 
-  const totalPoints = dailiesState.totalPoints;
-  const totalWeight = dailiesState.totalWeight;
-
-  const previousTotalPoints = ReactUse.usePrevious(totalPoints);
-
-  const pointDiff: number = previousTotalPoints ? totalPoints - previousTotalPoints : 0;
-  const pointSign = Math.sign(pointDiff);
+  const previousTotalPoints = ReactUse.usePrevious(
+    dailiesState.totalPoints === 0 ? undefined : dailiesState.totalPoints,
+  );
 
   const [percentChange, setPercentChange] = React.useState<Option<number>>(null);
+  const throttledPercentChange = ReactUse.useThrottle(percentChange, 2000);
 
   React.useEffect(() => {
-    let x: Option<number>;
-    x = roundTo((pointDiff / totalWeight) * 100, 2);
-    x = isRealNumber(x) ? x : null;
-    setPercentChange(x);
-  }, [pointDiff, totalPoints, totalWeight]);
-  React.useEffect(() => setPercentChange(null), [dailiesState.date]);
+    const pointDiff: number = previousTotalPoints
+      ? dailiesState.totalPoints - previousTotalPoints
+      : 0;
+    const x = pointDiff / dailiesState.totalWeight;
+    setPercentChange(isRealNumber(x) ? roundTo(x * 100, 2) : +``);
+  }, [previousTotalPoints, dailiesState.totalPoints, dailiesState.totalWeight]);
 
-  let percentValue: number = roundTo((totalPoints / totalWeight) * 100, 2);
-  percentValue = !Number.isNaN(percentValue) && Number.isFinite(percentValue) ? percentValue : +``;
+  const [percentValue, setPercentValue] = React.useState<Option<number>>(null);
+  React.useEffect(() => {
+    const x = dailiesState.totalPoints / dailiesState.totalWeight;
+    const y = !Number.isNaN(x) && Number.isFinite(x) ? roundTo(x * 100, 2) : +``;
+    setPercentValue(y);
+  }, [dailiesState.totalPoints, dailiesState.totalWeight]);
 
   const [isVisible, setIsVisible] = React.useState(true);
+
   React.useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(false), 5000);
+    const timer = setTimeout(() => setIsVisible(false), 2000);
     return () => clearTimeout(timer);
-  }, [isVisible]);
-  React.useEffect(() => setIsVisible(true), [previousTotalPoints]);
+  }, [isVisible, previousTotalPoints]);
+  React.useEffect(() => {
+    if (!!throttledPercentChange && previousTotalPoints !== undefined) setIsVisible(true);
+  }, [throttledPercentChange, previousTotalPoints]);
 
   const textClass: ClassValue = "text-xs font-bold text-[#f0f0ff]";
   const paddingClass: ClassValue = "px-5 ml-1";
 
-  const showExpToast: boolean = isVisible && !!percentChange && previousTotalPoints !== undefined;
   const bar: React.ReactElement = (
     <>
       <AnimatePresence>
-        {showExpToast ? (
+        {isVisible ? (
           <motion.div
             animate={{ opacity: 1, y: 0 }}
             className={cn(paddingClass, "relative z-400 flex w-full justify-end")}
@@ -63,16 +66,7 @@ export default function ExpBar(): React.ReactNode {
             initial={{ opacity: 0, y: 18 }}
             transition={{ duration: 1, ease: "easeInOut" }}
           >
-            <p
-              className={cn(
-                textClass,
-                clsx(pointSign === 1 && "text-green-400", pointSign === -1 && "text-red-400"),
-              )}
-            >
-              {pointSign === 1 && "+"}
-              {percentChange}
-              {"%"}
-            </p>
+            {formatExpAnimationSpan(textClass, throttledPercentChange)}
           </motion.div>
         ) : (
           <div className="relative flex w-full"></div>
@@ -82,10 +76,13 @@ export default function ExpBar(): React.ReactNode {
         className={cn(paddingClass, "flex max-h-10 min-h-10 items-center gap-3 rounded")}
         id="exp-bar"
       >
-        {!!totalPoints ? (
+        {!!dailiesState.totalPoints ? (
           <div className="flex w-full flex-col">
             <div className="grow">
-              <Progress<number> deps={[totalPoints, totalWeight]} progress={percentValue ?? 0} />
+              <Progress<number>
+                deps={[dailiesState.totalPoints, dailiesState.totalWeight]}
+                progress={percentValue ?? 0}
+              />
             </div>
             <div className="mt-1 flex w-full grow flex-row justify-end">
               <span className={cn(textClass, "opacity-80")}>[</span>
@@ -93,9 +90,9 @@ export default function ExpBar(): React.ReactNode {
                 className={cn(textClass, "opacity-80")}
                 direction="up"
                 format={(value: number): string => `${value.toFixed(2)}`}
-                targetValue={totalPoints}
+                targetValue={dailiesState.totalPoints}
               />
-              <span className={cn(textClass, "opacity-80")}>{`/${totalWeight}]`}</span>
+              <span className={cn(textClass, "opacity-80")}>{`/${dailiesState.totalWeight}]`}</span>
               <Counter
                 className={cn(textClass, "px-1")}
                 direction="up"
@@ -124,9 +121,9 @@ export default function ExpBar(): React.ReactNode {
   // const focusContent: React.ReactElement = (
   //   <div className="top-2 rounded-full bg-black/60 px-4 py-1">
   //     <span className={textClass}>
-  //       <span className="pr-1">{totalPoints.toFixed(2)}</span>
+  //       <span className="pr-1">{dailiesState.totalPoints.toFixed(2)}</span>
   //       <span>{` / `}</span>
-  //       <span>{totalWeight}</span>
+  //       <span>{dailiesState.totalWeight}</span>
   //     </span>
   //   </div>
   // );
@@ -156,4 +153,28 @@ export default function ExpBar(): React.ReactNode {
   // default:
   return bar;
   // }
+}
+
+function formatExpAnimationSpan(
+  textClassValue: ClassValue,
+  number: Option<number>,
+): React.ReactElement<"span"> {
+  if (number) {
+    const pointSign = Math.sign(number);
+
+    return (
+      <span
+        className={cn(
+          textClassValue,
+          clsx(pointSign === 1 && "text-green-400", pointSign === -1 && "text-red-400"),
+        )}
+      >
+        {pointSign === 1 && "+"}
+        {number}
+        {"%"}
+      </span>
+    );
+  }
+
+  return <span></span>;
 }
