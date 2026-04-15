@@ -36,7 +36,7 @@ interface TooltipProps {
 
 const GLASSY_CLASSES: ClassValue = cn(
   "backdrop-filter backdrop-blur-xl bg-transparent ",
-  "border border-white rounded-xl ",
+  "border border-white rounded-xl",
   "shadow-lg transition-all duration-300",
 );
 
@@ -85,6 +85,8 @@ export default function Speeddial(props: SpeedialProps): React.ReactElement {
 
   return (
     <div
+      suppressHydrationWarning
+      id="speeddial"
       {...props.divProps}
       ref={ref}
       className={cn(
