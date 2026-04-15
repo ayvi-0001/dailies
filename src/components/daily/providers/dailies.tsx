@@ -3,12 +3,14 @@
 import * as React from "react";
 
 import * as ReactUse from "@reactuses/core";
-import { today } from "@internationalized/date";
+import { CalendarDate, parseDate, today } from "@internationalized/date";
 import ok from "assert";
-import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
 
 import { User, useState as useUserState } from "@/app/providers/user";
 import { LOCAL_TZ, formatDateTimeISO8601, getMsToMidnight } from "@/lib/dates";
+import { updateParam } from "@/lib/params";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
@@ -18,7 +20,8 @@ import QuestTypesProvider from "./quest-types";
 export const dynamic = "force-dynamic";
 
 export type DailiesState = {
-  date: string;
+  date: CalendarDate;
+  setDate: React.Dispatch<React.SetStateAction<CalendarDate>>;
   dailies: Daily[];
   setDailies: React.Dispatch<React.SetStateAction<Daily[]>>;
   questChains: string[];
@@ -48,11 +51,20 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
 
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
+  const router: AppRouterInstance = useRouter();
   const searchParams: ReadonlyURLSearchParams = useSearchParams();
 
   const user: User = useUserState().user;
 
-  const date: string = searchParams.get("date") ?? today(LOCAL_TZ).toString();
+  const [date, setDate] = React.useState<CalendarDate>(today(LOCAL_TZ));
+
+  ReactUse.useOnceEffect(() => {
+    if (searchParams.has("date")) setDate(parseDate(searchParams.get("date")!));
+  }, []);
+
+  ReactUse.useOnceEffect(() => {
+    updateParam(router, searchParams, [{ key: "date", value: date.toString() }]);
+  }, [date]);
 
   ReactUse.useOnceEffect(() => {
     setIsLoading(true);
@@ -65,8 +77,8 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
       await invoke<Daily[]>("query_dailies", {
         user: user.name,
         quest_id: null, // pull all dailies
-        start_date: date,
-        end_date: date,
+        start_date: date.toString(),
+        end_date: date.toString(),
       })
         .then(result => {
           setDailies(result);
@@ -142,19 +154,20 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
     [],
   );
 
-  ReactUse.useOnceEffect(() => {
-    const insert_dailies = async (): Promise<void> => {
+  React.useEffect(() => {
+    const insert_dailies = async (date: CalendarDate): Promise<void> => {
       await invoke("insert_dailies", {
-        datetime: formatDateTimeISO8601(today(LOCAL_TZ).toDate(LOCAL_TZ), true),
+        datetime: formatDateTimeISO8601(date.toDate(LOCAL_TZ), true),
       });
     };
-    const query_dailies = async (): Promise<void> => {
+
+    const query_dailies = async (date: CalendarDate): Promise<void> => {
       setIsLoading(true);
       await invoke<Daily[]>("query_dailies", {
         user: user.name,
         quest_id: null, // pull all dailies
-        start_date: date,
-        end_date: date,
+        start_date: date.toString(),
+        end_date: date.toString(),
       })
         .then(result => {
           setDailies(result);
@@ -164,8 +177,10 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
     };
 
     const midnightDailyRefresh = (): void => {
-      insert_dailies();
-      query_dailies();
+      const date: CalendarDate = today(LOCAL_TZ);
+      insert_dailies(date);
+      query_dailies(date);
+      setDate(date);
     };
 
     const timeoutId = setTimeout(() => {
@@ -175,11 +190,12 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
     }, getMsToMidnight());
 
     return () => clearTimeout(timeoutId);
-  }, []);
+  }, [user]);
 
   const value: DailiesState = React.useMemo(() => {
     return {
       date,
+      setDate,
       dailies,
       setDailies,
       questChains,

@@ -3,15 +3,9 @@
 import * as React from "react";
 
 import * as heroui from "@heroui/react";
-import * as ReactUse from "@reactuses/core";
 import { ScrollShadow } from "@heroui/react";
-import { CalendarDate, today } from "@internationalized/date";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
 
 import { User, UserState, useState as useUserState } from "@/app/providers/user";
-import { LOCAL_TZ } from "@/lib/dates";
-import { updateParam } from "@/lib/params";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
@@ -22,10 +16,6 @@ import { Daily, Quest } from "./types";
 export default function QuestList({ title }: { title: string }): React.ReactElement {
   const userState: UserState = useUserState();
   const dailiesState: DailiesState = useDailies();
-  const router: AppRouterInstance = useRouter();
-  const searchParams: ReadonlyURLSearchParams = useSearchParams();
-
-  const [listDate, setListDate] = React.useState<CalendarDate>(today(LOCAL_TZ));
 
   const [minutelyRefresh, setMinutelyRefresh] = React.useState<Date>(new Date());
   React.useEffect(() => {
@@ -41,10 +31,6 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
 
     return () => clearTimeout(initialTimeoutId);
   }, []);
-
-  ReactUse.useOnceEffect(() => {
-    updateParam(router, searchParams, [{ key: "date", value: listDate.toString() }]);
-  }, [listDate]);
 
   const {
     isAllQuestChainsCollapsed,
@@ -83,12 +69,12 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
         isArchivedQuestsFiltered={isArchivedQuestsFiltered}
         isCompletedQuestsFiltered={isCompletedQuestsFiltered}
         isOptionalQuestsFiltered={isOptionalQuestsFiltered}
-        listDate={listDate}
+        listDate={dailiesState.date}
         questNameFilterText={questNameFilterText}
         setArchivedQuestsFilteredAction={setArchivedQuestsFilteredAction}
         setCompletedQuestsFilteredAction={setCompletedQuestsFilteredAction}
         setIsAllQuestChainCollapsedAction={setIsAllQuestChainCollapsedAction}
-        setListDateAction={setListDate}
+        setListDateAction={dailiesState.setDate}
         setOptionalQuestsFilteredAction={setOptionalQuestsFilteredAction}
         setQuestNameFilterTextAction={setQuestNameFilterTextAction}
         title={title}

@@ -6,7 +6,6 @@ import * as ReactUse from "@reactuses/core";
 import { CalendarDate, parseDate } from "@internationalized/date";
 import { AnimatePresence, motion } from "framer-motion";
 import { CalendarCogIcon } from "lucide-react";
-import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 
 import { cachedQueryQuestHistory } from "@/actions/query";
 import { User } from "@/app/providers/user";
@@ -37,11 +36,8 @@ type HistoryDrawerProps = {
 export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactElement {
   const { daily, isOpen, minutelyRefresh, setHistoryIsOpenAction, totalWeight, user } = props;
 
-  const searchParams: ReadonlyURLSearchParams = useSearchParams();
-
   const questAcceptedDate: CalendarDate = parseDate(daily.accepted.substring(0, 10));
-  const dateParam: CalendarDate = parseDate(searchParams.get("date") as string);
-  const dateRangeEnd: CalendarDate = dateParam.subtract({ days: 1 });
+  const dateRangeEnd: CalendarDate = parseDate(daily.date).subtract({ days: 1 });
 
   let dateRangeStart: CalendarDate = dateRangeEnd.subtract({ days: 6 });
   if (Math.sign(dateRangeStart.compare(questAcceptedDate)) === -1) {

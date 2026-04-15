@@ -23,6 +23,7 @@ All notable changes to this project will be documented in this file.
 
 - Unresponsive Speed dial on hover.
 - Daily cards extending passed fixed length.
+- Midnight refresh not updating the date parameter or list view.
 
 ### Improved
 
