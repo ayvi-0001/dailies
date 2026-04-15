@@ -4,6 +4,7 @@ import * as React from "react";
 
 import * as heroui from "@heroui/react";
 import * as ReactUse from "@reactuses/core";
+import type { CalendarDate } from "@internationalized/date";
 import clsx, { ClassValue } from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -20,9 +21,19 @@ export default function ExpBar(): React.ReactNode {
   const dailiesState: DailiesState = useDailies();
   // const appMeta: AppMetaState = useAppMetaState();
 
-  const previousTotalPoints = ReactUse.usePrevious(
-    dailiesState.totalPoints === 0 ? undefined : dailiesState.totalPoints,
-  );
+  const previousTotalPointsRef = React.useRef<number | undefined>(undefined);
+  const previousDateRef = React.useRef<CalendarDate>(dailiesState.date);
+
+  if (previousDateRef.current.toString() !== dailiesState.date.toString()) {
+    previousDateRef.current = dailiesState.date;
+    previousTotalPointsRef.current = undefined;
+  }
+
+  const previousTotalPoints = previousTotalPointsRef.current;
+
+  React.useEffect(() => {
+    previousTotalPointsRef.current = dailiesState.totalPoints;
+  }, [dailiesState.totalPoints]);
 
   const [percentChange, setPercentChange] = React.useState<Option<number>>(null);
   const throttledPercentChange = ReactUse.useThrottle(percentChange, 2000);
@@ -76,7 +87,7 @@ export default function ExpBar(): React.ReactNode {
         className={cn(paddingClass, "flex max-h-10 min-h-10 items-center gap-3 rounded")}
         id="exp-bar"
       >
-        {!!dailiesState.totalPoints ? (
+        {!dailiesState.isLoading ? (
           <div className="flex w-full flex-col">
             <div className="grow">
               <Progress<number>
