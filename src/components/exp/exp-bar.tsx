@@ -7,8 +7,8 @@ import * as ReactUse from "@reactuses/core";
 import clsx, { ClassValue } from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 
-import { AppMetaState, useAppMetaState } from "@/app/providers/app-meta";
-import CursorTracker from "@/components/animata/container/cursor-tracker";
+// import { AppMetaState, useAppMetaState } from "@/app/providers/app-meta";
+// import CursorTracker from "@/components/animata/container/cursor-tracker";
 import Progress from "@/components/animata/graphs/progress";
 import Counter from "@/components/animata/text/counter";
 import { DailiesState, useDailies } from "@/components/daily/providers/dailies";
@@ -18,7 +18,7 @@ import { Option } from "@/types/option";
 
 export default function ExpBar(): React.ReactNode {
   const dailiesState: DailiesState = useDailies();
-  const appMeta: AppMetaState = useAppMetaState();
+  // const appMeta: AppMetaState = useAppMetaState();
 
   const totalPoints = dailiesState.totalPoints;
   const totalWeight = dailiesState.totalWeight;
@@ -119,39 +119,41 @@ export default function ExpBar(): React.ReactNode {
     </>
   );
 
-  const focusContent: React.ReactElement = (
-    <div className="top-2 rounded-full bg-black/60 px-4 py-1">
-      <span className={textClass}>
-        <span className="pr-1">{totalPoints.toFixed(2)}</span>
-        <span>{` / `}</span>
-        <span>{totalWeight}</span>
-      </span>
-    </div>
-  );
+  // TODO(ayvi): re-add focus content
 
-  switch (appMeta.platform) {
-    case "android":
-      return (
-        <>
-          <heroui.Popover backdrop="transparent" placement="top">
-            <heroui.PopoverTrigger>{bar}</heroui.PopoverTrigger>
-            <heroui.PopoverContent className="z-100 border-none bg-transparent shadow-none outline-none select-none">
-              {focusContent}
-            </heroui.PopoverContent>
-          </heroui.Popover>
-        </>
-      );
-    case "windows":
-      return (
-        <>
-          {bar}
-          <CursorTracker platform={appMeta.platform}>
-            {focusContent}
-            <div className={cn(paddingClass, "relative bottom-0 max-h-10 min-h-10 w-full")}></div>
-          </CursorTracker>
-        </>
-      );
-    default:
-      return bar;
-  }
+  // const focusContent: React.ReactElement = (
+  //   <div className="top-2 rounded-full bg-black/60 px-4 py-1">
+  //     <span className={textClass}>
+  //       <span className="pr-1">{totalPoints.toFixed(2)}</span>
+  //       <span>{` / `}</span>
+  //       <span>{totalWeight}</span>
+  //     </span>
+  //   </div>
+  // );
+
+  // switch (appMeta.platform) {
+  // case "android":
+  //   return (
+  //     <>
+  //       <heroui.Popover backdrop="transparent" placement="top">
+  //         <heroui.PopoverTrigger>{bar}</heroui.PopoverTrigger>
+  //         <heroui.PopoverContent className="z-100 border-none bg-transparent shadow-none outline-none select-none">
+  //           {focusContent}
+  //         </heroui.PopoverContent>
+  //       </heroui.Popover>
+  //     </>
+  //   );
+  // case "windows":
+  //   return (
+  //     <>
+  //       {bar}
+  //       <CursorTracker platform={appMeta.platform}>
+  //         {focusContent}
+  //         <div className={cn(paddingClass, "relative bottom-0 max-h-10 min-h-10 w-full")}></div>
+  //       </CursorTracker>
+  //     </>
+  //   );
+  // default:
+  return bar;
+  // }
 }
