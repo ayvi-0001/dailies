@@ -18,7 +18,7 @@ pub struct Database {
 
 impl Database {
     const NAME: &str = "dailies";
-    const MAX_CONNECTIONS: u32 = 32;
+    const MAX_CONNECTIONS: u32 = 8;
 
     pub async fn new(app_dir: PathBuf) -> Result<Self> {
         let db_path: PathBuf = app_dir.join(format!("{}.db", Database::NAME));
