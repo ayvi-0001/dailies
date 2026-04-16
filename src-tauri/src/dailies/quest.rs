@@ -83,7 +83,10 @@ impl EnumMatch for QuestType {}
 
 impl From<String> for QuestType {
     fn from(s: String) -> Self {
-        Self::match_string(s).expect("Database should always return a valid enum.")
+        Self::match_string(s.clone()).unwrap_or_else(|_| {
+            log::error!("Unknown quest type from database: {s}, defaulting to QD");
+            Self::QD
+        })
     }
 }
 

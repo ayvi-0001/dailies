@@ -46,12 +46,22 @@ impl Database {
         Ok(Self { pool })
     }
 
-    pub async fn register_sqlite_sha1_functions(&self, sqlx_conn: &mut SqliteConnection) {
-        let mut handle_lock: LockedSqliteHandle<'_> = sqlx_conn.lock_handle().await.unwrap();
+    pub async fn register_sqlite_sha1_functions(
+        &self,
+        sqlx_conn: &mut SqliteConnection,
+    ) -> Result<(), Error> {
+        let mut handle_lock: LockedSqliteHandle<'_> = sqlx_conn
+            .lock_handle()
+            .await
+            .map_err(Error::Sqlx)?;
         let handle = handle_lock.as_raw_handle().as_ptr();
-        let rusqlite_conn: Connection = unsafe { Connection::from_handle(handle) }.unwrap();
+        let rusqlite_conn: Connection = unsafe { Connection::from_handle(handle) }
+            .map_err(|e| Error::Io(std::io::Error::other(e.to_string())))?;
 
-        register_sha1_functions(&rusqlite_conn).unwrap();
+        register_sha1_functions(&rusqlite_conn)
+            .map_err(|e| Error::Io(std::io::Error::other(e.to_string())))?;
+
+        Ok(())
     }
 }
 
@@ -146,7 +156,7 @@ pub async fn verify_user<'a>(
 
     match stored_hash {
         Ok(hash) => {
-            let password_hash = PasswordHash::new(&hash).unwrap();
+            let password_hash = PasswordHash::new(&hash).map_err(Error::Argon2)?;
             match argon2.verify_password(password.as_bytes(), &password_hash) {
                 Ok(_) => Ok(()),
                 Err(_) => Err(Error::User(UserError::InvalidPassword)),

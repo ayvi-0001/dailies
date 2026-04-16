@@ -227,7 +227,7 @@ pub async fn insert_quest(
     guard
         .db
         .register_sqlite_sha1_functions(conn)
-        .await;
+        .await?;
 
     let mut tx: Transaction<'_, Sqlite> = conn.begin().await?;
 
@@ -281,7 +281,9 @@ pub async fn insert_quest(
 
     std::mem::drop(guard);
 
-    let app_handle: &tauri::AppHandle = app_handle();
+    let app_handle: &tauri::AppHandle = app_handle().ok_or_else(|| {
+        crate::errors::Error::Io(std::io::Error::other("App handle not available"))
+    })?;
     let current_datetime: DateTime<Local> = Local::now();
 
     insert_dailies(app_handle.clone(), current_datetime).await?;
@@ -741,7 +743,7 @@ pub async fn update_sequence(
     state
         .db
         .register_sqlite_sha1_functions(conn)
-        .await;
+        .await?;
 
     let mut tx: Transaction<'_, Sqlite> = conn.begin().await?;
 
@@ -848,7 +850,7 @@ pub async fn insert_dailies(
     guard
         .db
         .register_sqlite_sha1_functions(conn)
-        .await;
+        .await?;
 
     let mut tx: Transaction<'_, Sqlite> = conn.begin().await?;
 
@@ -1056,11 +1058,20 @@ pub async fn backfill_dailies(app_handle: tauri::AppHandle) -> Result<(), crate:
             while missing_date < current_date {
                 missing_date += Duration::days(1);
 
-                let local_dt = missing_date
+                let local_dt = match missing_date
                     .and_time(NaiveTime::default())
                     .and_local_timezone(Local)
                     .earliest()
-                    .unwrap();
+                {
+                    Some(dt) => dt,
+                    None => {
+                        log::error!(
+                            "Failed to convert date {} to local timezone, skipping backfill",
+                            missing_date
+                        );
+                        continue;
+                    }
+                };
 
                 let duration = std::time::Duration::from_secs(20);
                 let insert_dailies_future = insert_dailies(app_handle.clone(), local_dt);

@@ -17,8 +17,8 @@ impl AppState {
     }
 }
 
-pub fn app_handle<'a>() -> &'a tauri::AppHandle {
-    APP_HANDLE.get().unwrap()
+pub fn app_handle<'a>() -> Option<&'a tauri::AppHandle> {
+    APP_HANDLE.get()
 }
 
 #[tauri::command(async, rename_all = "snake_case")]

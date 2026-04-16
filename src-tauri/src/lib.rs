@@ -49,9 +49,8 @@ pub fn run() {
                 .build(),
         )
         .setup(move |app: &mut tauri::App| {
-            state::APP_HANDLE
-                .set(app.app_handle().to_owned())
-                .unwrap();
+            let _ = state::APP_HANDLE
+                .set(app.app_handle().to_owned());
 
             let app_dir: PathBuf = app
                 .path()

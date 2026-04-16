@@ -24,32 +24,19 @@ impl serde::Serialize for Error {
     where
         S: serde::ser::Serializer, {
         let error_message = self.to_string();
+        if let Some(handle) = app_handle() {
+            emit_app_error(handle, "tauri://error", &self);
+        } else {
+            log::error!("App handle not available to emit error: {error_message}");
+        }
         let error_kind = match self {
             // TODO(ayvi): custom errors/titles
-            Self::Io(_) => {
-                emit_app_error(app_handle(), "tauri://error", &self);
-                ErrorKind::Io(error_message)
-            }
-            Self::Chrono(_) => {
-                emit_app_error(app_handle(), "tauri://error", &self);
-                ErrorKind::Chrono(error_message)
-            }
-            Self::Sqlx(_) => {
-                emit_app_error(app_handle(), "tauri://error", &self);
-                ErrorKind::Sqlx(error_message)
-            }
-            Self::Argon2(_) => {
-                emit_app_error(app_handle(), "tauri://error", &self);
-                ErrorKind::Argon2(error_message)
-            }
-            Self::User(_) => {
-                emit_app_error(app_handle(), "tauri://error", &self);
-                ErrorKind::User(error_message)
-            }
-            Self::Tauri(_) => {
-                emit_app_error(app_handle(), "tauri://error", &self);
-                ErrorKind::Tauri(error_message)
-            }
+            Self::Io(_) => ErrorKind::Io(error_message),
+            Self::Chrono(_) => ErrorKind::Chrono(error_message),
+            Self::Sqlx(_) => ErrorKind::Sqlx(error_message),
+            Self::Argon2(_) => ErrorKind::Argon2(error_message),
+            Self::User(_) => ErrorKind::User(error_message),
+            Self::Tauri(_) => ErrorKind::Tauri(error_message),
         };
         error_kind.serialize(serializer)
     }
@@ -91,5 +78,7 @@ where
     T: std::error::Error + std::string::ToString, {
     let binding = error.to_string();
     let payload = ErrorMessage::new(&binding);
-    app.emit(event, payload).unwrap()
+    if let Err(e) = app.emit(event, payload) {
+        log::error!("Failed to emit app error event: {e}");
+    }
 }
