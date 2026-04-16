@@ -35,6 +35,9 @@ impl Database {
 
         let pool: SqlitePool = SqlitePoolOptions::new()
             .max_connections(Database::MAX_CONNECTIONS)
+            .idle_timeout(std::time::Duration::from_secs(300))
+            .max_lifetime(std::time::Duration::from_secs(1800))
+            .test_before_acquire(true)
             .connect_with(connection_options)
             .await?;
 

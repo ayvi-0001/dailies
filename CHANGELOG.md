@@ -25,10 +25,12 @@ All notable changes to this project will be documented in this file.
 - Daily cards extending passed fixed length.
 - Midnight refresh not updating the date parameter or list view.
 - Issue where switching dates would display point change animation on exp bar.
+- Issue where stale pool connections could cause app to panic after a long background period.
 
 ### Improved
 
 - Throttle total points update on exp bar for smoother animations.
+- Sqlx performance & pool health checks.
 
 ## [v0.2.2]
 
