@@ -9,8 +9,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Emitter::default()
         .add_instructions(&BuildBuilder::all_build()?)?
         .add_instructions(&CargoBuilder::all_cargo()?)?
-        .add_instructions(&GitclBuilder::all_git()?)?
         .add_instructions(&RustcBuilder::all_rustc()?)?
+        .add_instructions(&GitclBuilder::all_git()?)?
+        .add_instructions(
+            &GitclBuilder::default()
+                .describe(true, false, None)
+                .build()?,
+        )?
         .emit()?;
 
     let (insertions, deletions) = get_git_shortstat();
