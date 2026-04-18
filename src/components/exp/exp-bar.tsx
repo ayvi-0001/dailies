@@ -3,13 +3,10 @@
 import * as React from "react";
 
 import * as heroui from "@heroui/react";
-import * as ReactUse from "@reactuses/core";
 import type { CalendarDate } from "@internationalized/date";
 import clsx, { ClassValue } from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 
-// import { AppMetaState, useAppMetaState } from "@/app/providers/app-meta";
-// import CursorTracker from "@/components/animata/container/cursor-tracker";
 import Progress from "@/components/animata/graphs/progress";
 import Counter from "@/components/animata/text/counter";
 import { DailiesState, useDailies } from "@/components/daily/providers/dailies";
@@ -17,9 +14,11 @@ import { isRealNumber, roundTo } from "@/lib/number";
 import { cn } from "@/lib/utils";
 import { Option } from "@/types/option";
 
+// import { AppMetaState, useAppMetaState } from "@/app/providers/app-meta";
+// import CursorTracker from "@/components/animata/container/cursor-tracker";
+
 export default function ExpBar(): React.ReactNode {
   const dailiesState: DailiesState = useDailies();
-  // const appMeta: AppMetaState = useAppMetaState();
 
   const previousTotalPointsRef = React.useRef<number | undefined>(undefined);
   const previousDateRef = React.useRef<CalendarDate>(dailiesState.date);
@@ -35,15 +34,19 @@ export default function ExpBar(): React.ReactNode {
     previousTotalPointsRef.current = dailiesState.totalPoints;
   }, [dailiesState.totalPoints]);
 
-  const [percentChange, setPercentChange] = React.useState<Option<number>>(null);
-  const throttledPercentChange = ReactUse.useThrottle(percentChange, 2000);
+  const [percentChanges, setPercentChanges] = React.useState<PercentChangeItem[]>([]);
+  const nextIdRef = React.useRef(0);
 
   React.useEffect(() => {
     const pointDiff: number = previousTotalPoints
       ? dailiesState.totalPoints - previousTotalPoints
       : 0;
     const x = pointDiff / dailiesState.totalWeight;
-    setPercentChange(isRealNumber(x) ? roundTo(x * 100, 2) : +``);
+    const value = isRealNumber(x) ? roundTo(x * 100, 2) : 0;
+    if (value !== 0 && previousTotalPoints !== undefined) {
+      const id = nextIdRef.current++;
+      setPercentChanges(prev => [...prev, { id, value }]);
+    }
   }, [previousTotalPoints, dailiesState.totalPoints, dailiesState.totalWeight]);
 
   const [percentValue, setPercentValue] = React.useState<Option<number>>(null);
@@ -53,36 +56,29 @@ export default function ExpBar(): React.ReactNode {
     setPercentValue(y);
   }, [dailiesState.totalPoints, dailiesState.totalWeight]);
 
-  const [isVisible, setIsVisible] = React.useState(true);
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(false), 2000);
-    return () => clearTimeout(timer);
-  }, [isVisible, previousTotalPoints]);
-  React.useEffect(() => {
-    if (!!throttledPercentChange && previousTotalPoints !== undefined) setIsVisible(true);
-  }, [throttledPercentChange, previousTotalPoints]);
+  const dismissItem = React.useCallback((id: number) => {
+    setPercentChanges(prev => prev.filter(item => item.id !== id));
+  }, []);
 
   const textClass: ClassValue = "text-xs font-bold text-[#f0f0ff]";
   const paddingClass: ClassValue = "px-5 ml-1";
 
-  const bar: React.ReactElement = (
+  return (
     <>
-      <AnimatePresence>
-        {isVisible ? (
-          <motion.div
-            animate={{ opacity: 1, y: 0 }}
-            className={cn(paddingClass, "relative z-400 flex w-full justify-end")}
-            exit={{ opacity: 0, y: -18 }}
-            initial={{ opacity: 0, y: 18 }}
-            transition={{ duration: 1, ease: "easeInOut" }}
-          >
-            {formatExpAnimationSpan(textClass, throttledPercentChange)}
-          </motion.div>
-        ) : (
-          <div className="relative flex w-full"></div>
-        )}
-      </AnimatePresence>
+      <div className={cn(paddingClass, "absolute z-400 flex w-full flex-col-reverse items-end")}>
+        <div className="absolute flex h-fit flex-col items-start justify-items-end overflow-hidden">
+          <AnimatePresence mode="popLayout">
+            {percentChanges.map(item => (
+              <PercentChangeToast
+                key={item.id}
+                item={item}
+                textClass={textClass}
+                onDismiss={dismissItem}
+              />
+            ))}
+          </AnimatePresence>
+        </div>
+      </div>
       <div
         className={cn(paddingClass, "flex max-h-10 min-h-10 items-center gap-3 rounded")}
         id="exp-bar"
@@ -128,6 +124,7 @@ export default function ExpBar(): React.ReactNode {
   );
 
   // TODO(ayvi): re-add focus content
+  // const appMeta: AppMetaState = useAppMetaState();
 
   // const focusContent: React.ReactElement = (
   //   <div className="top-2 rounded-full bg-black/60 px-4 py-1">
@@ -140,52 +137,64 @@ export default function ExpBar(): React.ReactNode {
   // );
 
   // switch (appMeta.platform) {
-  // case "android":
-  //   return (
-  //     <>
-  //       <heroui.Popover backdrop="transparent" placement="top">
-  //         <heroui.PopoverTrigger>{bar}</heroui.PopoverTrigger>
-  //         <heroui.PopoverContent className="z-100 border-none bg-transparent shadow-none outline-none select-none">
+  //   case "android":
+  //     return (
+  //       <>
+  //         <heroui.Popover backdrop="transparent" placement="top">
+  //           <heroui.PopoverTrigger>{bar}</heroui.PopoverTrigger>
+  //           <heroui.PopoverContent className="z-100 border-none bg-transparent shadow-none outline-none select-none">
+  //             {focusContent}
+  //           </heroui.PopoverContent>
+  //         </heroui.Popover>
+  //       </>
+  //     );
+  //   case "windows":
+  //     return (
+  //       <>
+  //         {bar}
+  //         <CursorTracker platform={appMeta.platform}>
   //           {focusContent}
-  //         </heroui.PopoverContent>
-  //       </heroui.Popover>
-  //     </>
-  //   );
-  // case "windows":
-  //   return (
-  //     <>
-  //       {bar}
-  //       <CursorTracker platform={appMeta.platform}>
-  //         {focusContent}
-  //         <div className={cn(paddingClass, "relative bottom-0 max-h-10 min-h-10 w-full")}></div>
-  //       </CursorTracker>
-  //     </>
-  //   );
-  // default:
-  return bar;
+  //           <div className={cn(paddingClass, "relative bottom-0 max-h-10 min-h-10 w-full")}></div>
+  //         </CursorTracker>
+  //       </>
+  //     );
+  //   default:
+  //     return bar;
   // }
 }
 
-function formatExpAnimationSpan(
-  textClassValue: ClassValue,
-  number: Option<number>,
-): React.ReactElement<"span"> {
-  if (number) {
-    const pointSign = Math.sign(number);
+type PercentChangeItem = { id: number; value: number };
 
-    return (
-      <span
-        className={cn(
-          textClassValue,
-          clsx(pointSign === 1 && "text-green-400", pointSign === -1 && "text-red-400"),
-        )}
-      >
-        {pointSign === 1 && "+"}
-        {number}
-        {"%"}
-      </span>
-    );
-  }
+function PercentChangeToast(props: {
+  item: PercentChangeItem;
+  onDismiss: (id: number) => void;
+  textClass: ClassValue;
+}): React.ReactElement {
+  const { item, onDismiss, textClass } = props;
 
-  return <span></span>;
+  React.useEffect(() => {
+    const timer = setTimeout(() => onDismiss(item.id), 3000);
+    return () => clearTimeout(timer);
+  }, [item.id, onDismiss]);
+
+  const pointSign = Math.sign(item.value);
+
+  return (
+    <motion.span
+      key={item.id}
+      layout
+      animate={{ opacity: 1, y: 0 }}
+      className={cn(
+        textClass,
+        clsx(pointSign === 1 && "text-green-400", pointSign === -1 && "text-red-400"),
+      )}
+      exit={{ opacity: 0, y: -18 }}
+      initial={{ opacity: 0, y: 18 }}
+      transition={{ duration: 0.25, ease: "easeInOut" }}
+    >
+      {pointSign === 1 && "+"}
+      {item.value}
+      {"%"}
+    </motion.span>
+  );
 }

@@ -108,7 +108,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
       );
       setTotalPoints(totalPoints as number);
     }
-  }, [user, countRefreshDailies, dailies, date]);
+  }, [user, dailies, date]);
 
   ReactUse.useOnceEffect(() => {
     const weights: Readonly<Option<number>>[] = dailies
@@ -120,19 +120,11 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
       );
       setTotalWeight(totalWeight as number);
     }
-  }, [user, countRefreshDailies, dailies, date]);
+  }, [user, dailies, date]);
 
-  const debouncedRefreshRef = React.useRef<ReturnType<typeof setTimeout>>(undefined);
-  const triggerRefreshDailies = React.useCallback(() => {
-    clearTimeout(debouncedRefreshRef.current);
-    debouncedRefreshRef.current = setTimeout(() => {
-      setCountRefreshDailies(c => c + 1);
-    }, 300);
-  }, []);
-
-  React.useEffect(() => {
-    return () => clearTimeout(debouncedRefreshRef.current);
-  }, []);
+  const { run: triggerRefreshDailies } = ReactUse.useDebounceFn(() => {
+    setCountRefreshDailies(c => c + 1);
+  }, 1000);
 
   const triggerRefreshQuestChains = React.useCallback(
     () => setCountRefreshQuestChains(c => c + 1),
@@ -141,7 +133,23 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
 
   const updateDaily = React.useCallback(
     (pointId: string, patch: Partial<Daily>) => {
-      setDailies(prev => prev.map(d => (d.pointId === pointId ? { ...d, ...patch } : d)));
+      setDailies(prev =>
+        prev.map(d => {
+          if (d.pointId !== pointId) return d;
+          const updated = { ...d, ...patch };
+          if ("points" in patch || "weight" in patch) {
+            if (updated.points !== null) {
+              const complete = updated.points / updated.total;
+              updated.complete = complete;
+              updated.pointsWeighted = complete * updated.weight;
+            } else {
+              updated.complete = null;
+              updated.pointsWeighted = null;
+            }
+          }
+          return updated;
+        }),
+      );
 
       const patchKeys = Object.keys(patch);
       if (patchKeys.filter(k => ["points", "weight", "archived"].includes(k)).length > 0) {

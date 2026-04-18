@@ -17,7 +17,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Full screen width exp bar.
+- Full screen width exp bar & updated animations.
 
 ### Fixed
 
