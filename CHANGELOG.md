@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Add exit option to speed dial.
+- Retry logic to UserProvider.
 
 ### Changed
 
