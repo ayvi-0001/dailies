@@ -56,9 +56,8 @@ export default function App(): React.ReactElement {
     <Speeddial
       actionButtons={actionButtons}
       buttonIcon={<BoxIcon size={16} stroke="#f0f0ff" />}
-      buttonProps={{ className: "border-none order-last" }}
       direction={SpeeddialDirection.up}
-      divProps={{ className: "dark z-999 absolute left-0 bottom-0 mb-6 ml-6 bg-transparent" }}
+      divProps={{ className: "dark z-999 absolute left-0 bottom-0 mb-6 ml-6" }}
     />
   );
 }

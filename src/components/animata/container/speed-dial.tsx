@@ -16,7 +16,6 @@ interface SpeedialProps {
     buttonAction: (event: React.MouseEvent<HTMLButtonElement>) => void;
   }>;
   buttonIcon: React.ReactElement;
-  buttonProps?: React.ComponentProps<"button">;
   direction: SpeeddialDirection;
   divProps?: React.ComponentProps<"div">;
 }
@@ -34,11 +33,8 @@ interface TooltipProps {
   direction: SpeeddialDirection;
 }
 
-const GLASSY_CLASSES: ClassValue = cn(
-  "backdrop-filter backdrop-blur-xl bg-transparent ",
-  "border border-white rounded-xl",
-  "shadow-lg transition-all duration-300",
-);
+const GLASSY_CLASSES: ClassValue =
+  "backdrop-filter backdrop-blur-xl bg-transparent rounded-xl shadow-lg transition-all duration-100";
 
 const Tooltip: React.FC<TooltipProps> = ({ text, children, direction }): React.ReactElement => {
   const ref = React.useRef<Option<HTMLDivElement>>(null);
@@ -78,8 +74,6 @@ export default function Speeddial(props: SpeedialProps): React.ReactElement {
         return "origin-right order-0";
       case SpeeddialDirection.right:
         return "origin-left order-2";
-      default:
-        return "";
     }
   };
 
@@ -90,7 +84,7 @@ export default function Speeddial(props: SpeedialProps): React.ReactElement {
       {...props.divProps}
       ref={ref}
       className={cn(
-        "relative mb-3 flex w-fit items-center gap-3",
+        "flex items-center gap-3",
         clsx(
           [SpeeddialDirection.up, SpeeddialDirection.down].includes(props.direction)
             ? "flex-col"
@@ -104,8 +98,7 @@ export default function Speeddial(props: SpeedialProps): React.ReactElement {
       <button
         className={cn(
           GLASSY_CLASSES,
-          "order-0 flex items-center p-3 text-gray-800 transition-all duration-300",
-          props.buttonProps?.className,
+          "order-last flex items-center border-none p-3 text-gray-800 transition-all duration-100",
         )}
       >
         {props.buttonIcon}
@@ -114,7 +107,7 @@ export default function Speeddial(props: SpeedialProps): React.ReactElement {
       <div
         className={cn(
           clsx(hovered ? "scale-100 opacity-100" : "scale-0 opacity-0"),
-          "flex items-center gap-3 transition-all duration-500 ease-in-out",
+          "flex items-center gap-3 transition-all duration-100 ease-in-out",
           getAnimation(),
         )}
       >
@@ -123,9 +116,8 @@ export default function Speeddial(props: SpeedialProps): React.ReactElement {
             <button
               key={index}
               className={cn(
+                "order-last flex items-center border-none p-3 text-gray-800 transition-all duration-100",
                 GLASSY_CLASSES,
-                "flex items-center p-3 text-gray-800 transition-all duration-300",
-                props.buttonProps?.className,
               )}
               onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
                 action.buttonAction(event)
