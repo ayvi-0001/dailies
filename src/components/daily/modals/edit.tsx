@@ -1,13 +1,10 @@
 import * as React from "react";
 
 import * as heroui from "@heroui/react";
-import * as log from "@tauri-apps/plugin-log";
 import clsx from "clsx";
 
 import editQuest, { EditQuestState } from "@/actions/edit-quest";
 import { User } from "@/app/providers/user";
-import { camelCaseToSnakeCase } from "@/lib/string";
-import { invoke } from "@/lib/tauri";
 import type { Option } from "@/types/option";
 
 import { DailiesState, Daily, useDailies } from "../../daily";
@@ -16,16 +13,21 @@ import { QuestType, useQuestTypes } from "../providers/quest-types";
 
 type EditModalProps = {
   daily: Daily;
+  disclosure: {
+    isOpen: boolean;
+    onOpen: () => void;
+    onClose: () => void;
+    onOpenChange: () => void;
+    isControlled: boolean;
+  };
   historic?: boolean;
-  isOpen: boolean;
-  onOpenChange: () => void;
   setIsLoadingAction: React.Dispatch<React.SetStateAction<boolean>>;
   title: string;
   user: User;
 };
 
 export default function EditModal(props: EditModalProps): React.ReactNode {
-  const { daily, historic, isOpen, onOpenChange, setIsLoadingAction, title, user } = props;
+  const { daily, historic, disclosure, setIsLoadingAction, title, user } = props;
 
   const dailiesState: DailiesState = useDailies();
   const questTypes: QuestType[] = useQuestTypes();
@@ -39,35 +41,38 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
     isDisabled: false,
   });
 
-  const [_, dispatch, isPending] = React.useActionState(
+  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+
+  const [_state, action, pending] = React.useActionState(
     async (state: EditQuestState, payload: FormData): Promise<EditQuestState> => {
       setIsLoadingAction(true);
 
-      const diff = (await editQuest(state, payload, daily, questTypes, historic)) as Partial<Daily>;
-      log.debug(`${daily.pointId} Edit patch: ${JSON.stringify(diff)}`);
+      const diff = (await editQuest(
+        state,
+        payload,
+        daily,
+        questTypes,
+        user.id,
+        historic,
+      )) as Partial<Daily>;
 
-      if (Object.hasOwn(diff, "errors")) return;
-
-      for (const entry of Object.entries(diff)) {
-        let key = entry[0];
-
-        const value = entry[1];
-        const sendValue = typeof value === "boolean" ? !!value : value;
-
-        if (key == "typeId") key = "type";
-
-        await invoke(`update_${camelCaseToSnakeCase(key)}`, {
-          user_id: user.id,
-          quest_id: daily.questId,
-          point_id: daily.pointId,
-          value: sendValue,
-        });
+      if (!Object.hasOwn(diff, "errors")) {
+        dailiesState.updateDaily(daily.pointId, diff);
       }
 
-      dailiesState.updateDaily(daily.pointId, diff);
+      setIsOpen(true);
+
+      return;
     },
     undefined,
   );
+
+  React.useEffect(() => {
+    if (isOpen === true) {
+      disclosure.onClose();
+      setIsOpen(false);
+    }
+  }, [isOpen, disclosure]);
 
   return (
     <>
@@ -80,7 +85,7 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
         backdrop="transparent"
         className="dark w-9/10 text-white select-none"
         isDismissable={false}
-        isOpen={isOpen}
+        isOpen={disclosure.isOpen}
         motionProps={{
           variants: {
             enter: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" } },
@@ -91,7 +96,7 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
         radius="none"
         shadow="lg"
         size="sm"
-        onOpenChange={onOpenChange}
+        onOpenChange={disclosure.onOpenChange}
       >
         <heroui.ModalContent className="flex border-1 border-gray-600 bg-black/95">
           {onClose => (
@@ -109,22 +114,21 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
                   offset={100}
                 >
                   <EditDailyForm
+                    action={action}
                     daily={daily}
-                    dispatch={dispatch}
                     formRef={formRef}
                     historic={historic}
-                    onSubmit={onClose}
                   />
                 </heroui.ScrollShadow>
               </heroui.ModalBody>
-              <heroui.ModalFooter className="mt-4 mb-3 flex justify-center gap-2 leading-none font-medium select-none">
+              <heroui.ModalFooter className="my-4 flex justify-center gap-2 leading-none font-medium select-none">
                 <heroui.Button color="danger" size="sm" variant="light" onPress={onClose}>
                   close
                 </heroui.Button>
                 <heroui.Button
                   color="primary"
-                  disabled={isPending}
-                  isLoading={isPending}
+                  disabled={pending}
+                  isLoading={pending}
                   size="sm"
                   type="submit"
                   onPress={() => formRef?.current?.requestSubmit()}

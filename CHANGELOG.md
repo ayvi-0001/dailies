@@ -27,11 +27,16 @@ All notable changes to this project will be documented in this file.
 - Midnight refresh not updating the date parameter or list view.
 - Issue where switching dates would display point change animation on exp bar.
 - Issue where stale pool connections could cause app to panic after a long background period.
+- Edit modal waits for backend function to complete before closing.
 
 ### Improved
 
 - Throttle total points update on exp bar for smoother animations.
 - Sqlx performance & pool health checks.
+
+### Known Issues
+
+- Updating note on a history card not immediately reflected on front-end.
 
 ## [v0.2.2]
 

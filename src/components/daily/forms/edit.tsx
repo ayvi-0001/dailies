@@ -12,13 +12,12 @@ import { QuestType, useQuestTypes } from "../providers/quest-types";
 type EditDailyFormProps = {
   daily: Daily;
   formRef: React.RefObject<Option<HTMLFormElement>>;
-  dispatch: (payload: FormData) => void;
+  action: (payload: FormData) => void;
   historic?: boolean;
-  onSubmit: () => void;
 };
 
 export default function EditDailyForm(props: EditDailyFormProps): React.ReactElement {
-  const { daily, formRef, dispatch, historic, onSubmit } = props;
+  const { daily, formRef, action, historic } = props;
 
   const dailiesState: DailiesState = useDailies();
   const questTypes: QuestType[] = useQuestTypes();
@@ -54,24 +53,23 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
   const [days, setDays] = React.useState<string[]>([]);
 
   React.useEffect(() => {
-    setName(daily?.name || "");
-    setDays(daily?.days?.map(v => `${v}`) || []);
-    // setArchivedDate(daily?.archived ? parseDateTime(daily.archived.toString()) : null);
-    setQuestType(daily?.type);
-    setTotal(daily?.total);
-    setDefaultPoints(daily?.defaultPoints);
-    setTimeStart(daily?.timeStart ? parseTime(daily!.timeStart) : null);
-    setTimeEnd(daily?.timeEnd ? parseTime(daily!.timeEnd) : null);
+    setName(daily.name);
+    setDays(daily.days?.map(v => `${v}`) || []);
+    // setArchivedDate(daily.archived ? parseDateTime(daily.archived.toString()) : null);
+    setQuestType(daily.type);
+    setTotal(daily.total);
+    setDefaultPoints(daily.defaultPoints);
+    setTimeStart(daily.timeStart ? parseTime(daily.timeStart) : null);
+    setTimeEnd(daily.timeEnd ? parseTime(daily.timeEnd) : null);
   }, [daily]);
 
   return (
     <heroui.Form
       ref={formRef}
-      action={dispatch}
+      action={action}
       autoCapitalize="off"
       autoComplete="off"
       validationBehavior="native"
-      onSubmit={onSubmit}
     >
       {!historic && (
         <DailyForm.NameField name={name} nameErrors={nameErrors} setNameAction={setName} />

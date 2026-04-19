@@ -6,6 +6,8 @@ import * as utils from "@/lib/utils";
 import { Daily, Quest } from "@/components/daily";
 import { QuestType } from "@/components/daily/providers/quest-types";
 import { formatDateTimeISO8601 } from "@/lib/dates";
+import { camelCaseToSnakeCase } from "@/lib/string";
+import { invoke } from "@/lib/tauri";
 
 export type EditQuestErrors = {
   errors?: {
@@ -34,6 +36,7 @@ export default async function editQuest(
   formData: FormData,
   originalValues: Daily,
   questTypes: QuestType[],
+  userId: number,
   historic?: boolean,
 ): Promise<EditQuestErrors | Partial<Daily>> {
   const validatedFields = Quest.EditQuestFormSchema.safeParse({
@@ -119,6 +122,30 @@ export default async function editQuest(
     weight: originalValues.weight,
   };
 
-  // @ts-expect-error: 2345, validatedFields.data as Daily
-  return utils.getObjectDifferences<Daily>(originalEditableValues, validatedFields.data);
+  const diff: Partial<Daily> = utils.getObjectDifferences<Daily>(
+    originalEditableValues as unknown as Daily,
+    validatedFields.data as unknown as Daily,
+  );
+
+  if (Object.hasOwn(diff, "errors")) return {};
+
+  log.debug(`${originalValues.pointId} Edit patch: ${JSON.stringify(diff)}`);
+
+  for (const entry of Object.entries(diff)) {
+    let key = entry[0];
+
+    const value = entry[1];
+    const sendValue = typeof value === "boolean" ? !!value : value;
+
+    if (key == "typeId") key = "type";
+
+    await invoke(`update_${camelCaseToSnakeCase(key)}`, {
+      user_id: userId,
+      quest_id: originalValues.questId,
+      point_id: originalValues.pointId,
+      value: sendValue,
+    });
+  }
+
+  return diff;
 }

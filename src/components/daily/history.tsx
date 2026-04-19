@@ -163,21 +163,31 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
     query_dailies();
   }, [daily, user, countRefreshDailies, dateRange]);
 
-  const debouncedRefreshRef = React.useRef<ReturnType<typeof setTimeout>>(undefined);
-  const triggerRefreshDailies = React.useCallback(() => {
-    clearTimeout(debouncedRefreshRef.current);
-    debouncedRefreshRef.current = setTimeout(() => {
-      setCountRefreshDailies(c => c + 1);
-    }, 300);
-  }, []);
+  const { run: triggerRefreshDailies } = ReactUse.useDebounceFn(() => {
+    setCountRefreshDailies(c => c + 1);
+  }, 1000);
 
-  React.useEffect(() => {
-    return () => clearTimeout(debouncedRefreshRef.current);
-  }, []);
-
+  // TODO(ayvi): fix: updating note on a history card not immediately reflected on front-end
+  // http://ayvi:3000/ayvi/dailies/issues/208
   const updateDaily = React.useCallback(
     (pointId: string, patch: Partial<Daily>) => {
-      setDailies(prev => prev.map(d => (d.pointId === pointId ? { ...d, ...patch } : d)));
+      setDailies(prev =>
+        prev.map(d => {
+          if (d.pointId !== pointId) return d;
+          const updated = { ...d, ...patch };
+          if ("points" in patch || "weight" in patch) {
+            if (updated.points !== null) {
+              const complete = updated.points / updated.total;
+              updated.complete = complete;
+              updated.pointsWeighted = complete * updated.weight;
+            } else {
+              updated.complete = null;
+              updated.pointsWeighted = null;
+            }
+          }
+          return updated;
+        }),
+      );
 
       const patchKeys = Object.keys(patch);
       if (patchKeys.filter(k => ["points", "weight"].includes(k)).length > 0) {
@@ -241,7 +251,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
   const [points, setPoints] = React.useState<Option<string>>(
     daily.points !== null ? `${daily.points}` : null,
   );
-  const { isOpen, onOpen, onOpenChange } = heroui.useDisclosure();
+  const editDisclosure = ReactUse.useDisclosure();
   const { value: contextMenuOpen, toggle: toggleContextMenu } = ReactUse.useBoolean();
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
@@ -291,7 +301,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
             {contextMenuOpen && (
               <ContextMenuContent
                 daily={daily}
-                editOnOpenAction={onOpen}
+                editOnOpenAction={editDisclosure.onOpen}
                 setPointsAction={setPoints}
                 updateDailyAction={updateDailyAction}
                 user_id={user.id}
@@ -300,16 +310,17 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
           </AnimatePresence>
         </RadixContextMenu.Portal>
       </RadixContextMenu.Root>
-      <EditModal
-        key={`${daily.pointId}-${index}`}
-        historic
-        daily={daily}
-        isOpen={isOpen}
-        setIsLoadingAction={setIsLoading}
-        title={`${daily.name} (${daily.date})`}
-        user={user}
-        onOpenChange={onOpenChange}
-      />
+      {editDisclosure.isOpen && (
+        <EditModal
+          key={`${daily.pointId}-${index}`}
+          historic
+          daily={daily}
+          disclosure={editDisclosure}
+          setIsLoadingAction={setIsLoading}
+          title={`${daily.name} (${daily.date})`}
+          user={user}
+        />
+      )}
     </>
   );
 }

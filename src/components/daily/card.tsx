@@ -2,7 +2,6 @@
 
 import * as React from "react";
 
-import * as heroui from "@heroui/react";
 import * as RadixContextMenu from "@radix-ui/react-context-menu";
 import * as ReactUse from "@reactuses/core";
 import { AnimatePresence, motion } from "framer-motion";
@@ -52,7 +51,7 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
   const { value: historyIsOpen, toggle: toggleHistory } = ReactUse.useBoolean();
   const { value: contextMenuOpen, toggle: toggleContextMenu } = ReactUse.useBoolean();
 
-  const editDisclosure = heroui.useDisclosure();
+  const editDisclosure = ReactUse.useDisclosure();
 
   const questTypes: QuestType[] = useQuestTypes();
   const questType: Option<QuestType> =
@@ -115,22 +114,25 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
           </AnimatePresence>
         </RadixContextMenu.Portal>
       </RadixContextMenu.Root>
-      <EditModal
-        daily={daily}
-        isOpen={editDisclosure.isOpen}
-        setIsLoadingAction={setIsLoading}
-        title={daily.name}
-        user={user}
-        onOpenChange={editDisclosure.onOpenChange}
-      />
-      <HistoryDrawer
-        daily={daily}
-        isOpen={historyIsOpen}
-        minutelyRefresh={minutelyRefresh}
-        setHistoryIsOpenAction={toggleHistory}
-        totalWeight={totalWeight}
-        user={user}
-      />
+      {editDisclosure.isOpen && (
+        <EditModal
+          daily={daily}
+          disclosure={editDisclosure}
+          setIsLoadingAction={setIsLoading}
+          title={daily.name}
+          user={user}
+        />
+      )}
+      {historyIsOpen && (
+        <HistoryDrawer
+          daily={daily}
+          isOpen={historyIsOpen}
+          minutelyRefresh={minutelyRefresh}
+          setHistoryIsOpenAction={toggleHistory}
+          totalWeight={totalWeight}
+          user={user}
+        />
+      )}
     </>
   );
 }
