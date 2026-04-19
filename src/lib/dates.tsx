@@ -1,7 +1,7 @@
 import { CalendarDate, getLocalTimeZone, now, parseDate } from "@internationalized/date";
 
 import { isNumeric } from "./number";
-import { identicalArrays } from "./utils";
+import Utils from "./utils";
 
 export const LOCAL_TZ = getLocalTimeZone();
 
@@ -28,15 +28,18 @@ const getDaysOfWeek = (e: typeof WeekDays | typeof WeekEnds): number[] => {
 };
 
 export const isWeekend = (days: number[]): boolean => {
-  return identicalArrays<number>([...getDaysOfWeek(WeekEnds)], days);
+  return Utils.identicalArrays<number>([...getDaysOfWeek(WeekEnds)], days);
 };
 
 export const isWeekDay = (days: number[]): boolean => {
-  return identicalArrays<number>([...getDaysOfWeek(WeekDays)], days);
+  return Utils.identicalArrays<number>([...getDaysOfWeek(WeekDays)], days);
 };
 
 export const isEveryDay = (days: number[]): boolean => {
-  return identicalArrays<number>([...getDaysOfWeek(WeekDays), ...getDaysOfWeek(WeekEnds)], days);
+  return Utils.identicalArrays<number>(
+    [...getDaysOfWeek(WeekDays), ...getDaysOfWeek(WeekEnds)],
+    days,
+  );
 };
 
 export function formatDateTimeISO8601(date: Date, tzOffset: boolean = false): string {

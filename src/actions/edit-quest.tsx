@@ -2,12 +2,12 @@ import * as log from "@tauri-apps/plugin-log";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import * as utils from "@/lib/utils";
 import { Daily, Quest } from "@/components/daily";
 import { QuestType } from "@/components/daily/providers/quest-types";
 import { formatDateTimeISO8601 } from "@/lib/dates";
 import { camelCaseToSnakeCase } from "@/lib/string";
 import { invoke } from "@/lib/tauri";
+import Utils from "@/lib/utils";
 
 export type EditQuestErrors = {
   errors?: {
@@ -77,12 +77,12 @@ export default async function editQuest(
     }
   }
 
-  log.debug(`validatedFields: ${JSON.stringify(validatedFields.data)}`);
-  log.debug(`originalValues: ${JSON.stringify(originalValues)}`);
+  log.debug(`validatedFields: ${JSON.stringify(validatedFields.data, Utils.sortKeysReplacer, 2)}`);
+  log.debug(`originalValues: ${JSON.stringify(originalValues, Utils.sortKeysReplacer, 2)}`);
 
   if (!validatedFields.success) {
     const errTree = z.treeifyError(validatedFields.error);
-    log.debug(`errors: ${JSON.stringify(validatedFields.error)}`);
+    log.debug(`errors: ${JSON.stringify(validatedFields.error, Utils.sortKeysReplacer, 2)}`);
     toast.error(JSON.stringify(validatedFields.error));
 
     return {
@@ -122,14 +122,16 @@ export default async function editQuest(
     weight: originalValues.weight,
   };
 
-  const diff: Partial<Daily> = utils.getObjectDifferences<Daily>(
+  const diff: Partial<Daily> = Utils.getObjectDifferences<Daily>(
     originalEditableValues as unknown as Daily,
     validatedFields.data as unknown as Daily,
   );
 
   if (Object.hasOwn(diff, "errors")) return {};
 
-  log.debug(`${originalValues.pointId} Edit patch: ${JSON.stringify(diff)}`);
+  log.debug(
+    `${originalValues.pointId} Edit patch: ${JSON.stringify(diff, Utils.sortKeysReplacer, 2)}`,
+  );
 
   for (const entry of Object.entries(diff)) {
     let key = entry[0];
