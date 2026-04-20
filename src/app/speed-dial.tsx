@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { exit } from "@tauri-apps/plugin-process";
-import { BookPlusIcon, BoxIcon, ChartAreaIcon, CircleXIcon, LogOutIcon } from "lucide-react";
+import { BookPlusIcon, BoxIcon, CircleXIcon, LogOutIcon } from "lucide-react";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
 
@@ -35,13 +35,6 @@ export default function App(): React.ReactElement {
         await truncate_sessions();
         router.push("/login");
       },
-    },
-    {
-      icon: <ChartAreaIcon size={16} stroke="#f0f0ff" />,
-      label: <p className="text-xs">Stats</p>,
-      key: "stats",
-      buttonAction: () =>
-        updateParam(router, searchParams, [{ key: "modal", value: ModalParam.Stats }]),
     },
     {
       icon: <BookPlusIcon size={14} stroke="#f0f0ff" />,

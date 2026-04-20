@@ -48,9 +48,14 @@ export default function App() {
       position="sticky"
     >
       <heroui.NavbarContent className="" id="navbar-content" justify="center">
-        <heroui.NavbarItem isActive={pathname === "/"}>
+        <heroui.NavbarItem isActive={pathname === "/" && [...searchParams.keys()].length === 1}>
           <heroui.Link color="foreground" href={getNewPath("/")}>
             <span className="text-xs text-white">Quests</span>
+          </heroui.Link>
+        </heroui.NavbarItem>
+        <heroui.NavbarItem isActive={/modal=stats/.test(searchParams.toString())}>
+          <heroui.Link aria-current="page" href={getPathWithStatsParam()}>
+            <span className="text-xs text-white">Stats</span>
           </heroui.Link>
         </heroui.NavbarItem>
       </heroui.NavbarContent>
