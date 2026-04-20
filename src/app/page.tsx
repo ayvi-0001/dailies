@@ -2,6 +2,7 @@ import * as React from "react";
 
 import type { Metadata, ResolvingMetadata } from "next";
 
+import NavBar from "@/app/navbar";
 import { QuestList } from "@/components/daily";
 import DailiesProvider from "@/components/daily/providers/dailies";
 import ExpBar from "@/components/exp/exp-bar";
@@ -36,6 +37,7 @@ export default async function Page(_: PageProps): Promise<React.ReactElement> {
       </React.Suspense>
       <React.Suspense>
         <Speeddial />
+        <NavBar />
       </React.Suspense>
     </>
   );
