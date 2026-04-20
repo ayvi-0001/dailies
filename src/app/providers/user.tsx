@@ -70,7 +70,7 @@ export default function UserProvider({
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
+      <div className="absolute flex h-screen w-full items-center justify-center">
         <span className="pr-2 text-xs text-[#f0f0ff]">Logging in</span>
         <heroui.Spinner className="dark" size="sm" variant="spinner" />
       </div>
