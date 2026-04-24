@@ -49,8 +49,7 @@ pub fn run() {
                 .build(),
         )
         .setup(move |app: &mut tauri::App| {
-            let _ = state::APP_HANDLE
-                .set(app.app_handle().to_owned());
+            let _ = state::APP_HANDLE.set(app.app_handle().to_owned());
 
             let app_dir: PathBuf = app
                 .path()
@@ -120,7 +119,9 @@ pub fn run() {
             dailies::insert_dailies,
             dailies::insert_quest,
             dailies::query_dailies,
+            dailies::query_dailies_complete,
             dailies::query_quest_chains,
+            dailies::query_quest_chains_complete,
             dailies::set_quest_chain_collapsed,
             dailies::update_archived,
             dailies::update_chain,

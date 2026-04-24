@@ -5,10 +5,6 @@ import * as React from "react";
 import * as heroui from "@heroui/react";
 import { ReadonlyURLSearchParams, usePathname, useSearchParams } from "next/navigation";
 
-import { createQueryString } from "@/lib/params";
-
-import { ModalParam } from "./@modals/params";
-
 export default function App() {
   const pathname: string = usePathname();
   const searchParams: ReadonlyURLSearchParams = useSearchParams();
@@ -16,12 +12,6 @@ export default function App() {
   const getNewPath = React.useCallback(
     (newPathname: string): string => `${newPathname}?${searchParams.toString()}`,
     [searchParams],
-  );
-
-  const getPathWithStatsParam = React.useCallback(
-    (): string =>
-      `${pathname}?${createQueryString(searchParams, [{ key: "modal", value: ModalParam.Stats }]).toString()}`,
-    [searchParams, pathname],
   );
 
   return (
@@ -53,8 +43,8 @@ export default function App() {
             <span className="text-xs text-white">Quests</span>
           </heroui.Link>
         </heroui.NavbarItem>
-        <heroui.NavbarItem isActive={/modal=stats/.test(searchParams.toString())}>
-          <heroui.Link aria-current="page" href={getPathWithStatsParam()}>
+        <heroui.NavbarItem isActive={pathname === "/stats"}>
+          <heroui.Link aria-current="page" href={getNewPath("/stats")}>
             <span className="text-xs text-white">Stats</span>
           </heroui.Link>
         </heroui.NavbarItem>

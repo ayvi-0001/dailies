@@ -1,9 +1,10 @@
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 
 use anyhow::Result;
 use chrono::{DateTime, Duration, Local, NaiveDate, NaiveDateTime, NaiveTime};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use serde_with::serde_as;
 use sqlx::{Acquire, Sqlite, SqliteConnection, Transaction, pool::PoolConnection, types::Json};
 use tauri::Manager;
 use tokio::sync::{Mutex, MutexGuard};
@@ -1192,6 +1193,7 @@ pub async fn get_dailies_graph_data(
     //     .chunks_exact(7)
     //     .map(|s| s.to_vec())
     //     .collect();
+
     let chunks: Vec<&[Option<f64>]> = values.chunks(7).collect();
 
     for (column_idx, chunk) in chunks.iter().enumerate() {
@@ -1205,6 +1207,119 @@ pub async fn get_dailies_graph_data(
     }
 
     Ok(matrix)
+}
+
+#[derive(
+    Debug, Default, Clone, Serialize, Deserialize, sqlx::Decode, sqlx::Encode, sqlx::FromRow,
+)]
+#[serde_as]
+pub struct QuestChainsCompleteDataPoint {
+    pub date: NaiveDate,
+    pub chain: String,
+    pub value: f64,
+}
+
+#[tauri::command(async, rename_all = "snake_case")]
+pub async fn query_quest_chains_complete(
+    state: tauri::State<'_, Mutex<state::AppState>>,
+    user: &str,
+    start_date: &str,
+    end_date: &str,
+) -> Result<HashMap<String, Vec<QuestChainsCompleteDataPoint>>, crate::errors::Error> {
+    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+    let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
+    let conn: &mut SqliteConnection = pool.acquire().await?;
+
+    let start_date = NaiveDate::from_str(start_date)?;
+    let end_date = NaiveDate::from_str(end_date)?;
+
+    let rows: Vec<QuestChainsCompleteDataPoint> = sqlx::query_as!(
+        QuestChainsCompleteDataPoint,
+        r#"
+            SELECT
+                date,
+                chain,
+                SUM(points_weighted) / SUM(weight) AS "value!: f64"
+            FROM
+                "dailies_weighted"
+            WHERE
+                user = $1
+                AND points IS NOT NULL
+                AND date >= $2
+                AND date <= $3
+            GROUP BY
+                date,
+                chain
+            ORDER BY
+                date DESC;
+        "#,
+        user,
+        start_date,
+        end_date
+    )
+    .fetch_all(&mut *conn)
+    .await?;
+
+    let grouped: HashMap<String, Vec<QuestChainsCompleteDataPoint>> =
+        rows.iter().fold(HashMap::new(), |mut acc, e| {
+            acc.entry(e.chain.to_owned())
+                .or_insert(Vec::new());
+            acc.entry(e.chain.to_owned())
+                .or_insert(Vec::new())
+                .push(e.to_owned());
+            acc
+        });
+
+    Ok(grouped)
+}
+
+#[derive(Default, Serialize, Deserialize, sqlx::Decode, sqlx::Encode, sqlx::FromRow)]
+#[serde_as]
+pub struct DailiesCompleteDataPoint {
+    pub date: NaiveDate,
+    pub value: f64,
+}
+
+#[tauri::command(async, rename_all = "snake_case")]
+pub async fn query_dailies_complete(
+    state: tauri::State<'_, Mutex<state::AppState>>,
+    user: &str,
+    start_date: &str,
+    end_date: &str,
+) -> Result<Vec<DailiesCompleteDataPoint>, crate::errors::Error> {
+    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+    let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
+    let conn: &mut SqliteConnection = pool.acquire().await?;
+
+    let start_date = NaiveDate::from_str(start_date)?;
+    let end_date = NaiveDate::from_str(end_date)?;
+
+    let rows: Result<Vec<DailiesCompleteDataPoint>, sqlx::Error> = sqlx::query_as!(
+        DailiesCompleteDataPoint,
+        r#"
+            SELECT
+                date,
+                SUM(points_weighted) / SUM(weight) AS "value!: f64"
+            FROM
+                "dailies_weighted"
+            WHERE
+                user = $1
+                AND points IS NOT NULL
+                AND date >= $2
+                AND date <= $3
+            GROUP BY
+                date
+            ORDER BY
+                date DESC;
+        "#,
+        user,
+        start_date,
+        end_date
+    )
+    .fetch_all(&mut *conn)
+    .await;
+
+    Ok(rows?)
 }
 
 #[tauri::command(async, rename_all = "snake_case")]

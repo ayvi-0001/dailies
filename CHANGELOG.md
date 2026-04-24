@@ -16,10 +16,12 @@ All notable changes to this project will be documented in this file.
 - Exit option to speed dial.
 - Retry logic to UserProvider.
 - Navbar to main page.
+- Heat map & line chart visualizations using reaviz.
 
 ### Changed
 
 - Full screen width exp bar & updated animations.
+- Moved stats from modal to separate page.
 
 ### Fixed
 
