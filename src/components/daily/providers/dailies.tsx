@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import * as ReactUse from "@reactuses/core";
+import * as log from "@tauri-apps/plugin-log";
 import { CalendarDate, parseDate, today } from "@internationalized/date";
 import ok from "assert";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
@@ -122,21 +123,24 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
     }
   }, [user, dailies, date]);
 
-  const { run: triggerRefreshDailies } = ReactUse.useDebounceFn(() => {
+  const { run: triggerRefreshDailies } = ReactUse.useDebounceFn((ctx?: string) => {
+    log.info(`trigger daily list refresh${ctx ? `: ${ctx}` : "."}`);
     setCountRefreshDailies(c => c + 1);
   }, 1000);
 
-  const triggerRefreshQuestChains = React.useCallback(
-    () => setCountRefreshQuestChains(c => c + 1),
-    [],
-  );
+  const triggerRefreshQuestChains = React.useCallback(() => {
+    log.info(`trigger quest chains refresh.`);
+    setCountRefreshQuestChains(c => c + 1);
+  }, []);
 
   const updateDaily = React.useCallback(
     (pointId: string, patch: Partial<Daily>) => {
       setDailies(prev =>
         prev.map(d => {
           if (d.pointId !== pointId) return d;
+
           const updated = { ...d, ...patch };
+
           if ("points" in patch || "weight" in patch) {
             if (updated.points !== null) {
               const complete = updated.points / updated.total;
@@ -151,11 +155,12 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
         }),
       );
 
-      const patchKeys = Object.keys(patch);
-      if (patchKeys.filter(k => ["points", "weight", "archived"].includes(k)).length > 0) {
-        triggerRefreshDailies();
-      } else if (patchKeys.includes("chain")) {
-        triggerRefreshQuestChains();
+      for (const key of Object.keys(patch)) {
+        if (["points", "weight", "archived", "name"].includes(key)) {
+          triggerRefreshDailies(`updated key ${key}`);
+        } else if (key === "chain") {
+          triggerRefreshQuestChains();
+        }
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

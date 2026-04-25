@@ -5,13 +5,13 @@ use chrono::{DateTime, Duration, Local, NaiveDate, NaiveDateTime, NaiveTime};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_with::serde_as;
-use sqlx::{Acquire, Sqlite, SqliteConnection, Transaction, pool::PoolConnection, types::Json};
+use sqlx::{Acquire, Sqlite, SqliteConnection, Transaction, pool::PoolConnection, sqlite::SqliteQueryResult, types::Json};
 use tauri::Manager;
 use tokio::sync::{Mutex, MutexGuard};
 
 crate::mod_flat!(daily, enums, quest, points);
 
-use crate::{dailies::{daily::Daily, enums::SortDirection, points::TotalPointEval, quest::{Quest, QuestChain, QuestSequence, QuestType, QuestTypeRecord, QuestTypeStyles, WeeklyQuestStats}}, db::User, state, state::app_handle};
+use crate::{dailies::{daily::Daily, enums::SortDirection, points::TotalPointEval, quest::{Quest, QuestChain, QuestSequence, QuestType, QuestTypeRecord, QuestTypeStyles, WeeklyQuestStats}}, db::User, state, state::app_handle, utils};
 
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn query_dailies(
@@ -366,18 +366,66 @@ pub async fn update_name(
     point_id: String,
     value: String,
 ) -> Result<(), crate::errors::Error> {
-    let state: MutexGuard<'_, state::AppState> = state.lock().await;
-    let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
+    let guard: MutexGuard<'_, state::AppState> = state.lock().await;
+    let mut pool: PoolConnection<Sqlite> = guard.db.pool.acquire().await?;
+    let conn: &mut SqliteConnection = pool.acquire().await?;
 
-    sqlx::query!(
-        r#"UPDATE "quests" SET name = $1 WHERE id = $2;"#,
-        value,
-        quest_id,
+    guard
+        .db
+        .register_sqlite_sha1_functions(conn)
+        .await?;
+
+    let mut tx: Transaction<'_, Sqlite> = conn.begin().await?;
+
+    let temp_table_name = format!("target_points_{}", utils::generate_random_string(16, None));
+
+    let result: Result<SqliteQueryResult, sqlx::Error> = sqlx::query(
+        &format!(
+            r#"
+                UPDATE "quests" SET name = $1 WHERE id = $2;
+
+                CREATE TEMP TABLE
+                    "{temp_table_name}" AS
+                SELECT id
+                FROM
+                    "points"
+                WHERE
+                    quest_id = $2;
+
+                UPDATE
+                    "quests" AS q
+                SET
+                    id = LOWER(SHA1_HEX((SELECT name FROM "users" AS u WHERE u.id = q.user_id) || "_" || q.chain || "_" || q.name))
+                WHERE
+                    id = $2;
+
+                UPDATE
+                    "points"
+                SET
+                    id = LOWER(SHA1_HEX(quest_id || date))
+                WHERE
+                    id IN (SELECT id FROM "{temp_table_name}");
+            "#,
+        )
     )
-    .execute(pool)
-    .await?;
+    .bind(value)
+    .bind(quest_id)
+    .execute(&mut *tx)
+    .await;
 
-    Ok(())
+    match result {
+        Ok(_) => {
+            tx.commit().await?;
+            std::mem::drop(guard);
+            Ok(())
+        }
+        Err(e) => {
+            tx.rollback().await?;
+            std::mem::drop(guard);
+            log::error!("{:?}", e);
+            Err(crate::errors::Error::Sqlx(e))
+        }
+    }
 }
 
 #[allow(unused_variables)]

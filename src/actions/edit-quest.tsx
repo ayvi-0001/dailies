@@ -8,6 +8,7 @@ import { formatDateTimeISO8601 } from "@/lib/dates";
 import { camelCaseToSnakeCase } from "@/lib/string";
 import { invoke } from "@/lib/tauri";
 import Utils from "@/lib/utils";
+import type { AppError } from "@/types/errors";
 
 export type EditQuestErrors = {
   errors?: {
@@ -133,7 +134,15 @@ export default async function editQuest(
     `${originalValues.pointId} Edit patch: ${JSON.stringify(diff, Utils.sortKeysReplacer, 2)}`,
   );
 
-  for (const entry of Object.entries(diff)) {
+  const diffEntries: [string, unknown][] = Object.entries(diff);
+  const diffKeys = diffEntries.map(v => v[0]);
+
+  // Make sure if `name` is updated to run it last due to id updates
+  if (diffKeys.includes("name")) {
+    diffEntries.push(diffEntries.splice(diffKeys.indexOf("name"), 1)[0]);
+  }
+
+  for (const entry of diffEntries) {
     let key = entry[0];
 
     const value = entry[1];
@@ -146,6 +155,11 @@ export default async function editQuest(
       quest_id: originalValues.questId,
       point_id: originalValues.pointId,
       value: sendValue,
+    }).catch((_: AppError) => {
+      if (key === "name") {
+        toast.error(`A quest with the same name and quest chain already exists.`);
+        delete diff.name;
+      }
     });
   }
 

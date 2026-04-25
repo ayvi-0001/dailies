@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file.
 - Issue where switching dates would display point change animation on exp bar.
 - Issue where stale pool connections could cause app to panic after a long background period.
 - Edit modal waits for backend function to complete before closing.
+- Quest name updates propagate id changes.
 
 ### Improved
 

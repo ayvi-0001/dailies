@@ -4,7 +4,7 @@ use tauri::Manager;
 use tokio::sync::Mutex;
 
 pub(crate) mod macros;
-crate::mod_flat!(config, dailies, state, db, errors, build_info);
+crate::mod_flat!(config, dailies, state, db, errors, build_info, utils);
 
 #[cfg(target_os = "android")]
 mod android;
