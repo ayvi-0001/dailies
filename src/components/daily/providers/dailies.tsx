@@ -141,6 +141,10 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
 
           const updated = { ...d, ...patch };
 
+          // Do not updated weighted points on dailies with a streak target.
+          // weighted points will be calculated with streak in dailies view.
+          if (d.streakTarget !== null) return updated;
+
           if ("points" in patch || "weight" in patch) {
             if (updated.points !== null) {
               const complete = updated.points / updated.total;
@@ -151,12 +155,20 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
               updated.pointsWeighted = null;
             }
           }
+
           return updated;
         }),
       );
 
       for (const key of Object.keys(patch)) {
-        if (["points", "weight", "archived", "name"].includes(key)) {
+        if (
+          [
+            "points", // recalculate streaks
+            "weight", // recalculate weighted points/total weight
+            "archived", // recalculate total weight
+            "name", // updated ids
+          ].includes(key)
+        ) {
           triggerRefreshDailies(`updated key ${key}`);
         } else if (key === "chain") {
           triggerRefreshQuestChains();
