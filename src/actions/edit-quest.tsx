@@ -78,12 +78,22 @@ export default async function editQuest(
     }
   }
 
-  log.debug(`validatedFields: ${JSON.stringify(validatedFields.data, Utils.sortKeysReplacer, 2)}`);
-  log.debug(`originalValues: ${JSON.stringify(originalValues, Utils.sortKeysReplacer, 2)}`);
+  await log.debug(
+    Array.from([
+      `validatedFields: `,
+      JSON.stringify(validatedFields.data, Utils.sortKeysReplacer, 2),
+    ]).join(""),
+  );
+  await log.debug(
+    Array.from([
+      `originalValues: `,
+      JSON.stringify(originalValues, Utils.sortKeysReplacer, 2),
+    ]).join(""),
+  );
 
   if (!validatedFields.success) {
     const errTree = z.treeifyError(validatedFields.error);
-    log.debug(`errors: ${JSON.stringify(validatedFields.error, Utils.sortKeysReplacer, 2)}`);
+    await log.debug(`errors: ${JSON.stringify(validatedFields.error, Utils.sortKeysReplacer, 2)}`);
     toast.error(JSON.stringify(validatedFields.error));
 
     return {
@@ -130,10 +140,6 @@ export default async function editQuest(
 
   if (Object.hasOwn(diff, "errors")) return {};
 
-  log.debug(
-    `${originalValues.pointId} Edit patch: ${JSON.stringify(diff, Utils.sortKeysReplacer, 2)}`,
-  );
-
   const diffEntries: [string, unknown][] = Object.entries(diff);
   const diffKeys = diffEntries.map(v => v[0]);
 
@@ -143,18 +149,14 @@ export default async function editQuest(
   }
 
   for (const entry of diffEntries) {
-    let key = entry[0];
-
+    const key = entry[0];
     const value = entry[1];
-    const sendValue = typeof value === "boolean" ? !!value : value;
-
-    if (key == "typeId") key = "type";
 
     await invoke(`update_${camelCaseToSnakeCase(key)}`, {
       user_id: userId,
       quest_id: originalValues.questId,
       point_id: originalValues.pointId,
-      value: sendValue,
+      value: typeof value === "boolean" ? !!value : value,
     }).catch((_: AppError) => {
       if (key === "name") {
         toast.error(`A quest with the same name and quest chain already exists.`);
@@ -162,6 +164,19 @@ export default async function editQuest(
       }
     });
   }
+
+  await log.debug(
+    Array.from([
+      originalValues.pointId,
+      `Edit patch:`,
+      JSON.stringify(diff, Utils.sortKeysReplacer, 2),
+    ]).join(" "),
+  );
+
+  // @ts-expect-error: Updating `typeId` to `type` so changes apply in DailiesProvider setDailies
+  diff.type = diff?.typeId;
+  // @ts-expect-error: ^^^
+  delete diff.typeId;
 
   return diff;
 }

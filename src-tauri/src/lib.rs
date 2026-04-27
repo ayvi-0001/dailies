@@ -136,7 +136,7 @@ pub fn run() {
             dailies::update_time_end,
             dailies::update_time_start,
             dailies::update_total,
-            dailies::update_type,
+            dailies::update_type_id,
             dailies::update_weight,
             db::create_user,
             db::delete_session,

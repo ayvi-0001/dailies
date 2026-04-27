@@ -430,7 +430,7 @@ pub async fn update_name(
 
 #[allow(unused_variables)]
 #[tauri::command(async, rename_all = "snake_case")]
-pub async fn update_type(
+pub async fn update_type_id(
     state: tauri::State<'_, Mutex<state::AppState>>,
     user_id: i64,
     quest_id: String,
