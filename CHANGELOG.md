@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file.
 
 - Full screen width exp bar & updated animations.
 - Moved stats from modal to separate page.
+- Replaced command dialog for dev commands with dev console.
 
 ### Fixed
 
@@ -32,6 +33,7 @@ All notable changes to this project will be documented in this file.
 - Issue where stale pool connections could cause app to panic after a long background period.
 - Edit modal waits for backend function to complete before closing.
 - Quest name updates propagate id changes.
+- Incorrect weighted points calculated on optimistic updates for quests with a streak target.
 
 ### Improved
 

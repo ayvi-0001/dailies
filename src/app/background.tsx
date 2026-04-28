@@ -9,8 +9,6 @@ import { cn } from "@/lib/utils";
 
 import { AppMetaState, useAppMetaState } from "./providers/app-meta";
 
-/* eslint-disable @typescript-eslint/no-unused-expressions */
-
 type BackgroundProps = {
   src: string;
   alt?: string;
@@ -30,10 +28,12 @@ export default function BackgroundImage(background_props: BackgroundProps): Reac
       const handleWindowDrag = async (event: MouseEvent): Promise<void> => {
         const appWindow: Window = getCurrentWindow();
         if (event.buttons === 1) {
-          event.detail === 2 ? appWindow.toggleMaximize() : appWindow.startDragging();
+          // // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+          // event.detail === 2 ? appWindow.toggleMaximize() : appWindow.startDragging();
+          appWindow.startDragging();
         }
       };
-      const backgroundElement: HTMLElement | null = document.getElementById("app-build-info");
+      const backgroundElement: HTMLElement | null = document.getElementById("background");
       backgroundElement?.addEventListener("mousedown", handleWindowDrag);
       return () => backgroundElement?.removeEventListener("mousedown", handleWindowDrag);
     }

@@ -3,11 +3,11 @@ import * as React from "react";
 import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
 
+import AppBuildInfo from "@/components/header/build-info";
+
 import "./globals.css";
 
 import BackgroundImage from "./background";
-import AppBuildInfo from "./build-info";
-import CommandDialog from "./command-dialog";
 import Toaster from "./listener";
 import Providers from "./providers";
 
@@ -46,9 +46,6 @@ export default function RootLayout(pages: Pages): React.ReactNode {
           <AppBuildInfo as="header" />
           <Toaster />
           <div className="fixed z-1 flex h-screen w-screen bg-transparent py-15" id="layout">
-            <React.Suspense>
-              {process.env.NODE_ENV === "development" && <CommandDialog />}
-            </React.Suspense>
             {modals}
             {children}
           </div>
