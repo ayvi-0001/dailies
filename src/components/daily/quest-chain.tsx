@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import * as heroui from "@heroui/react";
+import * as ReactUse from "@reactuses/core";
 import {
   DndContext,
   DragEndEvent,
@@ -188,19 +189,14 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
         chain: chain,
       }).then(result => {
         setIsQuestChainCollapsed(result);
-        if (result) {
-          setSelectedKeys(new Set([]));
-        } else {
-          setSelectedKeys(new Set([chain]));
-        }
+        if (result) setSelectedKeys(new Set([]));
+        else setSelectedKeys(new Set([chain]));
       });
     };
 
     if (isAllQuestChainsCollapsed) setSelectedKeys(new Set([]));
     else get_collapsed();
   }, [isAllQuestChainsCollapsed, user.id, chain, isQuestChainCollapsed]);
-
-  const filteredDailies = dailies.filter(daily => isDailyFilteredAction(daily));
 
   // let questChainCompletion: Option<number> =
   //   filteredDailies.map(d => d.points || 0).reduce((sum, current) => sum + current, 0) /
@@ -241,11 +237,13 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
         indicator={({ isOpen }) =>
           isOpen ? (
             <ArrowBigLeftDash
+              className="z-11"
               fill={clsx(!isQuestChainCollapsed && isAllQuestChainsCollapsed && "#005f5a")}
               size={20}
             />
           ) : (
             <ArrowBigUpDash
+              className="z-11"
               fill={clsx(
                 isQuestChainCollapsed && isAllQuestChainsCollapsed && "#372aac",
                 isQuestChainCollapsed && !isAllQuestChainsCollapsed && "#372aac",
@@ -266,7 +264,7 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
             </span> */}
           </div>
         }
-        textValue={chain ?? ""}
+        textValue={chain}
       >
         <div className="flex flex-col items-center justify-center gap-4">
           <DndContext
@@ -279,25 +277,26 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
             )}
           >
             <SortableContext
-              items={dailies.map(d => d.sequence) || []}
+              items={dailies.map(d => d.sequence)}
               strategy={verticalListSortingStrategy}
             >
-              {filteredDailies.map(daily => (
-                <SortableItem
-                  key={`${daily.pointId}-${daily.sequence}`}
-                  className="max-w-full min-w-full flex-shrink-0"
-                  // @ts-expect-error: overwrite assigning number to id
-                  id={daily.sequence}
-                >
-                  <DailyCard
-                    daily={daily}
-                    minutelyRefresh={minutelyRefresh}
-                    totalWeight={totalWeight}
-                    updateDaily={updateDaily}
-                    user={user}
-                  />
-                </SortableItem>
-              ))}
+              {dailies
+                .filter(daily => isDailyFilteredAction(daily))
+                .map(daily => (
+                  <SortableItem
+                    key={`${daily.pointId}-${daily.sequence}`}
+                    className="max-w-full min-w-full flex-shrink-0"
+                    id={`${daily.name}-${daily.sequence}`}
+                  >
+                    <DailyCard
+                      daily={daily}
+                      minutelyRefresh={minutelyRefresh}
+                      totalWeight={totalWeight}
+                      updateDaily={updateDaily}
+                      user={user}
+                    />
+                  </SortableItem>
+                ))}
             </SortableContext>
           </DndContext>
         </div>
@@ -406,6 +405,13 @@ function QuestListDatePicker(props: QuestListDatePickerProps): React.ReactElemen
   const { listDate, setListDateAction } = props;
   const currentDate = today(LOCAL_TZ);
 
+  const [pickerDate, setPickerDate] = React.useState<DateValue>(listDate);
+  const debouncedPickerDate: DateValue = ReactUse.useDebounce(pickerDate, 1500);
+
+  ReactUse.useOnceEffect(() => {
+    setListDateAction(debouncedPickerDate as CalendarDate);
+  }, [debouncedPickerDate]);
+
   return (
     <heroui.DatePicker
       aria-label="quest list date picker"
@@ -433,10 +439,10 @@ function QuestListDatePicker(props: QuestListDatePickerProps): React.ReactElemen
         />
       }
       size="sm"
-      value={listDate}
+      value={pickerDate}
       variant="flat"
       onChange={(value: CalendarDate | CalendarDateTime | ZonedDateTime | null) =>
-        value && setListDateAction(value as CalendarDate)
+        value && setPickerDate(value as CalendarDate)
       }
     />
   );
