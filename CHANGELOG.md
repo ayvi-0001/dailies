@@ -23,6 +23,7 @@ All notable changes to this project will be documented in this file.
 - Full screen width exp bar & updated animations.
 - Moved stats from modal to separate page.
 - Replaced command dialog for dev commands with dev console.
+- Hide system bars on android build.
 
 ### Fixed
 
