@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Space_Mono } from "next/font/google";
 
 import AppBuildInfo from "@/components/header/build-info";
@@ -24,6 +24,17 @@ type Pages = Readonly<{
   children: React.ReactNode;
 }>;
 
+export const viewport: Viewport = {
+  width: "device-width",
+  height: "device-height",
+  initialScale: 1.0,
+  maximumScale: 1.0,
+  minimumScale: 1.0,
+  userScalable: false,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
+};
+
 export default function RootLayout(pages: Pages): React.ReactNode {
   const { children } = pages;
 
@@ -35,10 +46,6 @@ export default function RootLayout(pages: Pages): React.ReactNode {
           // eslint-disable-next-line @next/next/no-sync-scripts
           <script src="http://localhost:8097"></script>
         ) */}
-        <meta
-          content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content"
-          name="viewport"
-        />
       </head>
       <body className="touch-none overflow-hidden select-none">
         <Providers>
