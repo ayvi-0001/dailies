@@ -5,13 +5,14 @@ import * as React from "react";
 import { today } from "@internationalized/date";
 import { exit, relaunch } from "@tauri-apps/plugin-process";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { truncate_sessions } from "@/actions/logout";
 import { getSession } from "@/actions/session";
 import { AppMetaState, useAppMetaState } from "@/app/providers/app-meta";
-import Terminal, { TerminalCommand } from "@/components/ui/terminal";
+import Terminal from "@/components/ui/terminal";
+import type { TerminalCommand, TerminalContext } from "@/components/ui/terminal";
 import { LOCAL_TZ } from "@/lib/dates";
 import { formatDateTimeISO8601 } from "@/lib/dates";
 
@@ -23,7 +24,6 @@ export default function DevConsole({
   toggleOpenAction: () => void;
 }): React.ReactElement {
   const router: AppRouterInstance = useRouter();
-  const searchParams: ReadonlyURLSearchParams = useSearchParams();
   const appMeta: AppMetaState = useAppMetaState();
 
   const commands: TerminalCommand[] = [
@@ -45,19 +45,8 @@ export default function DevConsole({
       description: "relaunch app.",
     },
     {
-      name: "goto-root",
-      run: async () => router.push(`/?date=${searchParams.get("date") ?? today(LOCAL_TZ)}`),
-      description: "push router to `/?date=$DATE`",
-    },
-    {
-      name: "goto-login",
-      run: async () => router.push("/login"),
-      description: "push router to `/login`",
-    },
-    {
-      name: "goto-signup",
-      run: async () => router.push("/signup"),
-      description: "push router to `/signup`",
+      name: "route",
+      run: (ctx: TerminalContext) => router.replace(ctx.args.join(" ")),
     },
     {
       name: "platform",
