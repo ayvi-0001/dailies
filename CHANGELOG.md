@@ -11,6 +11,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Numpad Popover component for updating daily card points.
+  - Long press feature to quickly set points to total.
+
+### Known Issues
+
+- Card context menu can pop-up when quick toggling total points with long press.
+
 ## [v0.2.4]
 
 ### Added
