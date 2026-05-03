@@ -21,6 +21,7 @@ const MAX_POINTS_LENGTH = 6;
 type NumpadPopoverProps = {
   children: React.ReactNode;
   daily: Daily;
+  disabled?: boolean;
   open: boolean;
   points: Option<string>;
   setOpenAction: (value: boolean) => void;
@@ -29,8 +30,16 @@ type NumpadPopoverProps = {
 };
 
 export function NumpadPopover(props: NumpadPopoverProps): React.ReactElement {
-  const { children, daily, open, points, setOpenAction, setPointsAction, updateDailyAction } =
-    props;
+  const {
+    children,
+    daily,
+    disabled,
+    open,
+    points,
+    setOpenAction,
+    setPointsAction,
+    updateDailyAction,
+  } = props;
 
   const appMeta = useAppMetaState();
   const hotkeysEnabled = appMeta.platform !== "android";
@@ -79,6 +88,10 @@ export function NumpadPopover(props: NumpadPopoverProps): React.ReactElement {
   };
 
   const handleOpenChange = (next: boolean): void => {
+    if (next && disabled) {
+      setOpenAction(false);
+      return;
+    }
     if (next) {
       restorePointsRef.current = pointsRef.current;
       replaceOnNextRef.current = true;
@@ -302,6 +315,7 @@ function NumpadKey({
 type NumpadInputCellProps = {
   borderClassValue: ClassValue;
   daily: Daily;
+  disabled?: boolean;
   points: Option<string>;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
   textClassValue: ClassValue;
@@ -309,8 +323,15 @@ type NumpadInputCellProps = {
 };
 
 export function NumpadInputCell(props: NumpadInputCellProps): React.ReactElement {
-  const { borderClassValue, daily, points, setPointsAction, textClassValue, updateDailyAction } =
-    props;
+  const {
+    borderClassValue,
+    daily,
+    disabled,
+    points,
+    setPointsAction,
+    textClassValue,
+    updateDailyAction,
+  } = props;
 
   const { value: numpadOpen, setValue: setNumpadOpen } = ReactUse.useBoolean(false);
   const { value: longPressed, toggle: toggleLongPressed } = ReactUse.useBoolean(false);
@@ -324,6 +345,7 @@ export function NumpadInputCell(props: NumpadInputCellProps): React.ReactElement
   );
 
   const onLongPress = async (): Promise<void> => {
+    if (disabled) return;
     if (daily.points === daily.total) return;
 
     toggleLongPressed();
@@ -342,6 +364,7 @@ export function NumpadInputCell(props: NumpadInputCellProps): React.ReactElement
   return (
     <NumpadPopover
       daily={daily}
+      disabled={disabled}
       open={longPressed ? false : numpadOpen}
       points={points}
       setOpenAction={setNumpadOpen}
@@ -349,14 +372,15 @@ export function NumpadInputCell(props: NumpadInputCellProps): React.ReactElement
       updateDailyAction={updateDailyAction}
     >
       <div
-        {...longPressEvent}
+        {...(disabled ? {} : longPressEvent)}
+        aria-disabled={disabled || undefined}
         className={cn(
           borderClassValue,
           "max-w-[6rem] min-w-[6rem] touch-manipulation",
-          "hover:outline-2 hover:outline-offset-2 hover:outline-dashed",
+          !disabled && "hover:outline-2 hover:outline-offset-2 hover:outline-dashed",
         )}
-        role="button"
-        tabIndex={0}
+        role={disabled ? undefined : "button"}
+        tabIndex={disabled ? -1 : 0}
       >
         <div className="flex place-content-center items-center justify-self-center-safe">
           <span className={cn(textClassValue, "min-w-[1ch] text-center tabular-nums")}>

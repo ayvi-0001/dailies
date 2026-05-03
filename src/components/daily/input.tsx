@@ -15,13 +15,14 @@ import type { Daily } from "./types";
 
 type PointsInputProps = {
   daily: Daily;
+  disabled?: boolean;
   points: Option<string>;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
   updateDailyAction: (pointId: string, patch: Partial<Daily>) => void;
 };
 
 export default function PointsInput(props: PointsInputProps): React.ReactNode {
-  const { daily, points, setPointsAction, updateDailyAction } = props;
+  const { daily, disabled, points, setPointsAction, updateDailyAction } = props;
 
   const appMeta: AppMetaState = useAppMetaState();
 
@@ -53,6 +54,7 @@ export default function PointsInput(props: PointsInputProps): React.ReactNode {
         <NumpadInputCell
           borderClassValue={borderClassValue}
           daily={daily}
+          disabled={disabled}
           points={points}
           setPointsAction={setPointsAction}
           textClassValue={textClassValue}
@@ -66,6 +68,7 @@ export default function PointsInput(props: PointsInputProps): React.ReactNode {
           <NumpadInputCell
             borderClassValue={borderClassValue}
             daily={daily}
+            disabled={disabled}
             points={points}
             setPointsAction={setPointsAction}
             textClassValue={textClassValue}

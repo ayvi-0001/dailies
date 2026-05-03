@@ -1,28 +1,18 @@
 import * as React from "react";
 
 import * as motion from "motion/react-client";
-import {
-  CalendarDate,
-  CalendarDateTime,
-  Time,
-  getDayOfWeek,
-  parseDate,
-  parseDateTime,
-  parseTime,
-  toTime,
-} from "@internationalized/date";
 import clsx, { ClassValue } from "clsx";
 
-import { formatDateTimeISO8601 } from "@/lib/dates";
 import { cn } from "@/lib/utils";
-import { Option } from "@/types/option";
 
-import { Daily, Quest } from "./types";
+import { RaidStatus, WeeklyStatus, getRaidStatus, getWeeklyStatus } from "./editability";
+import { Daily } from "./types";
 
 type CardBorderProps = Readonly<{
   children: React.ReactNode;
   daily: Daily;
   divProps: React.ComponentProps<"div">;
+  isEditable: boolean;
   minutelyRefresh: Date;
 }>;
 
@@ -31,208 +21,74 @@ export default MemoizedCardBorder;
 
 // TODO(ayvi): display days or hours until quest available http://ayvi:3000/ayvi/dailies/issues/159
 function CardBorder(props: CardBorderProps): React.ReactElement {
-  const { children, divProps, daily, minutelyRefresh } = props;
+  const { children, divProps, daily, isEditable, minutelyRefresh } = props;
 
-  const cardWeekDay: number = getDayOfWeek(parseDate(daily.date), "mon");
-
-  const [raidStatus, setRaidStatus] = React.useState<Option<RaidStatus>>(null);
-  React.useEffect(() => {
-    setRaidStatus(getRaidStatus(daily, cardWeekDay));
-  }, [daily, cardWeekDay, minutelyRefresh]);
-
-  const [weeklyStatus, setWeeklyStatus] = React.useState<Option<WeeklyStatus>>(null);
-  React.useEffect(() => {
-    setWeeklyStatus(getWeeklyStatus(daily, cardWeekDay));
-  }, [daily, cardWeekDay]);
-
-  const [isNotEditable, setIsNotEditable] = React.useState<boolean>(false);
-  React.useEffect(() => {
-    if (!!daily.archived) {
-      setIsNotEditable(true);
-    }
-    if (
-      raidStatus?.isRaid &&
-      [!raidStatus.isOpen, raidStatus.isUpcoming, raidStatus.isOver].some(Boolean)
-    ) {
-      setIsNotEditable(true);
-    }
-    if (weeklyStatus?.isWeekly && !weeklyStatus?.isAvailable) {
-      setIsNotEditable(true);
-    }
-  }, [daily, raidStatus, weeklyStatus]);
-
-  return (
-    <>
-      <motion.div
-        layout
-        className={cn(
-          "relative z-90 max-h-[88] min-h-[88] max-w-full min-w-full border-3 bg-white/70",
-          divProps.className,
-          raidStatus?.borderClassValue,
-          weeklyStatus?.borderClassValue,
-          clsx([!!daily.archived && "border-black"]),
-        )}
-        id={`daily-${daily.name}`}
-        whileFocus={{ scale: 1.03 }}
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 1.03 }}
-      >
-        {isNotEditable ? (
-          <div
-            className={cn(
-              "absolute z-90 size-full",
-              raidStatus?.bgClassValue,
-              weeklyStatus?.bgClassValue,
-              clsx([!!daily.archived && "bg-black/70"]),
-            )}
-            id="uneditable-card-cover"
-          />
-        ) : (
-          <></>
-        )}
-        <div className={cn("flex size-full")}>{children}</div>
-      </motion.div>
-    </>
+  const raidStatus: RaidStatus = React.useMemo(
+    () => getRaidStatus(daily, minutelyRefresh),
+    [daily, minutelyRefresh],
   );
-}
+  const weeklyStatus: WeeklyStatus = React.useMemo(
+    () => getWeeklyStatus(daily, minutelyRefresh),
+    [daily, minutelyRefresh],
+  );
 
-type RaidStatus = {
-  isDaysFinished: boolean;
-  isDaysRemaining: boolean;
-  isOpen: boolean;
-  isOver: boolean;
-  isRaid: boolean;
-  isToday: boolean;
-  isUpcoming: boolean;
-  borderClassValue: ClassValue;
-  bgClassValue: ClassValue;
-};
+  const raidLocked = raidStatus.isRaid && !raidStatus.isOpen;
+  const weeklyLocked = weeklyStatus.isWeekly && !weeklyStatus.isAvailable;
 
-function getRaidStatus(daily: Daily, cardWeekDay: number): RaidStatus {
-  const now: CalendarDateTime = parseDateTime(formatDateTimeISO8601(new Date()));
-
-  const raidStatus: RaidStatus = {
-    isDaysFinished: false,
-    isDaysRemaining: false,
-    isOpen: false,
-    isOver: false,
-    isRaid: [Quest.Type.QR].includes(daily.type),
-    isToday: false,
-    isUpcoming: false,
-    borderClassValue: null,
-    bgClassValue: null,
-  };
-
-  if (raidStatus.isRaid && daily.days) {
-    const cardDate: CalendarDate = parseDate(daily.date);
-    const currentDayOfWeek: number = getDayOfWeek(now, "mon");
-
-    if (cardDate.compare(now) < 0) {
-      raidStatus.isOver = true;
-    } else {
-      const currentTime: Time = toTime(now);
-
-      const latestAvailableDayOfWeek = Math.max(...daily.days);
-      raidStatus.isDaysFinished = latestAvailableDayOfWeek < cardWeekDay;
-      raidStatus.isToday = cardDate.compare(parseDate(now.toString().substring(0, 10))) === 0;
-      raidStatus.isDaysRemaining = latestAvailableDayOfWeek >= currentDayOfWeek;
-
-      if (raidStatus.isDaysFinished) {
-        raidStatus.isOver = true;
-      } else if (daily.timeStart && daily.timeEnd) {
-        const dailyTimeStart = parseTime(daily.timeStart);
-        const nowRelativeToStart = Math.sign(currentTime.compare(dailyTimeStart)) as -1 | 0 | 1;
-        const dailyTimeEnd = parseTime(daily.timeEnd);
-        const nowRelativeToEnd = Math.sign(currentTime.compare(dailyTimeEnd)) as -1 | 0 | 1;
-
-        if (cardWeekDay < currentDayOfWeek) {
-          raidStatus.isOver = true;
-        } else if (raidStatus.isToday && nowRelativeToStart >= 0 && nowRelativeToEnd < 0) {
-          raidStatus.isOpen = true;
-        } else if (!(`${daily.days}`.indexOf(`${cardWeekDay}`) > 0) && raidStatus.isDaysRemaining) {
-          raidStatus.isUpcoming = true;
-        } else if (raidStatus.isToday && nowRelativeToEnd === 1) {
-          raidStatus.isOver = true;
-        } else if (raidStatus.isToday && nowRelativeToStart === -1) {
-          raidStatus.isUpcoming = true;
-        }
-      }
-    }
-  }
-
-  raidStatus.borderClassValue = clsx([
+  const raidBorderClass: ClassValue = clsx([
     raidStatus.isOver && "border-slate-950/90",
     raidStatus.isOver && daily.complete !== 1 && "border-red-950/90",
     raidStatus.isOver && daily.complete === 1 && "border-green-950/90",
-    raidStatus.isDaysFinished && "border-slate-950/90",
     raidStatus.isUpcoming && "border-slate-950/90",
   ]);
 
-  raidStatus.bgClassValue = clsx([
+  const raidBgClass: ClassValue = clsx([
     raidStatus.isOver && "bg-slate-950/60",
     raidStatus.isOver && daily.complete !== 1 && "bg-red-600/20",
     raidStatus.isOver && daily.complete === 1 && "bg-green-600/20",
-    raidStatus.isDaysFinished && "bg-slate-950/60",
     raidStatus.isUpcoming && "bg-slate-700/40",
   ]);
 
-  return raidStatus;
-}
-
-type WeeklyStatus = {
-  isWeekly: boolean;
-  isAvailable: boolean;
-  borderClassValue: ClassValue;
-  bgClassValue: ClassValue;
-};
-
-function getWeeklyStatus(daily: Daily, cardWeekDay: number): WeeklyStatus {
-  const weeklyStatus: WeeklyStatus = {
-    isWeekly: [Quest.Type.QW].includes(daily.type),
-    isAvailable: false,
-    borderClassValue: null,
-    bgClassValue: null,
-  };
-
-  if (
-    weeklyStatus.isWeekly &&
-    daily.days &&
-    daily.days.length > 0 &&
-    daily.days.includes(cardWeekDay)
-  ) {
-    weeklyStatus.isAvailable = true;
-  }
-
-  weeklyStatus.borderClassValue = clsx([
-    weeklyStatus.isWeekly && !weeklyStatus.isAvailable && "border-slate-950/90",
-    weeklyStatus.isWeekly &&
-      !weeklyStatus.isAvailable &&
-      daily.complete === 1 &&
-      "border-green-950/90",
-    weeklyStatus.isWeekly &&
-      !weeklyStatus.isAvailable &&
-      daily.complete !== 1 &&
-      "border-red-950/90",
-    weeklyStatus.isWeekly &&
-      !weeklyStatus.isAvailable &&
-      daily.complete === null &&
-      "border-slate-950/90",
+  const weeklyBorderClass: ClassValue = clsx([
+    weeklyLocked && "border-slate-950/90",
+    weeklyLocked && daily.complete === 1 && "border-green-950/90",
+    weeklyLocked && daily.complete !== 1 && daily.complete !== null && "border-red-950/90",
   ]);
 
-  weeklyStatus.bgClassValue = clsx([
-    weeklyStatus.isWeekly && !weeklyStatus.isAvailable && "border-slate-950/90",
-    weeklyStatus.isWeekly && !weeklyStatus.isAvailable && daily.complete === 1 && "bg-green-600/20",
-    weeklyStatus.isWeekly && !weeklyStatus.isAvailable && daily.complete !== 1 && "bg-red-600/20",
-    weeklyStatus.isWeekly &&
-      !weeklyStatus.isAvailable &&
-      daily.complete &&
-      daily.complete > 0 &&
-      "",
-    weeklyStatus.isWeekly &&
-      !weeklyStatus.isAvailable &&
-      daily.complete === null &&
-      "bg-slate-950/60",
+  const weeklyBgClass: ClassValue = clsx([
+    weeklyLocked && daily.complete === null && "bg-slate-950/60",
+    weeklyLocked && daily.complete === 1 && "bg-green-600/20",
+    weeklyLocked && daily.complete !== 1 && daily.complete !== null && "bg-red-600/20",
   ]);
 
-  return weeklyStatus;
+  return (
+    <motion.div
+      layout
+      className={cn(
+        "relative z-90 max-h-[88] min-h-[88] max-w-full min-w-full border-3 bg-white/70",
+        divProps.className,
+        raidBorderClass,
+        weeklyBorderClass,
+        clsx([!!daily.archived && "border-black"]),
+      )}
+      id={`daily-${daily.name}`}
+      whileFocus={{ scale: 1.03 }}
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 1.03 }}
+    >
+      {!isEditable && (raidLocked || weeklyLocked || !!daily.archived) && (
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute z-90 size-full",
+            raidBgClass,
+            weeklyBgClass,
+            clsx([!!daily.archived && "bg-black/70"]),
+          )}
+          id="uneditable-card-cover"
+        />
+      )}
+      <div className={cn("flex size-full")}>{children}</div>
+    </motion.div>
+  );
 }

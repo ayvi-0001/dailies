@@ -18,6 +18,7 @@ import {
   RestoreDailyMenuOption,
 } from "./context-menu/items";
 import Details from "./details";
+import { isDailyEditable } from "./editability";
 import HistoryDrawer from "./history";
 import PointsInput from "./input";
 import EditModal from "./modals/edit";
@@ -61,6 +62,11 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   React.useEffect(() => setIsLoading(false), [daily]);
 
+  const isEditable: boolean = React.useMemo(
+    () => isDailyEditable(daily, minutelyRefresh),
+    [daily, minutelyRefresh],
+  );
+
   return (
     <>
       <RadixContextMenu.Root modal onOpenChange={toggleContextMenu}>
@@ -68,6 +74,7 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
           <CardBorder
             daily={daily}
             divProps={{ className: questTypeStyles.borderClass as string }}
+            isEditable={isEditable}
             minutelyRefresh={minutelyRefresh}
           >
             <AnimatePresence>
@@ -90,6 +97,7 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
                 />
                 <CardStats
                   daily={daily}
+                  disabled={!isEditable}
                   points={points}
                   setPointsAction={setPoints}
                   totalWeight={totalWeight}
@@ -175,6 +183,7 @@ export function QuestName({ name }: { name: string }): React.ReactElement {
 
 type CardStatsProps = {
   daily: Daily;
+  disabled?: boolean;
   points: Option<string>;
   totalWeight: number;
   updateDailyAction: (pointId: string, patch: Partial<Daily>) => void;
@@ -182,7 +191,7 @@ type CardStatsProps = {
 };
 
 export function CardStats(props: CardStatsProps): React.ReactElement {
-  const { daily, points, totalWeight, updateDailyAction, setPointsAction } = props;
+  const { daily, disabled, points, totalWeight, updateDailyAction, setPointsAction } = props;
 
   return (
     <div className="flex flex-none flex-col justify-between gap-1">
@@ -192,6 +201,7 @@ export function CardStats(props: CardStatsProps): React.ReactElement {
       <div className="place-items-end justify-self-end-safe">
         <PointsInput
           daily={daily}
+          disabled={disabled}
           points={points}
           setPointsAction={setPointsAction}
           updateDailyAction={updateDailyAction}

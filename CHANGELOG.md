@@ -16,6 +16,10 @@ All notable changes to this project will be documented in this file.
 - Numpad Popover component for updating daily card points.
   - Long press feature to quickly set points to total.
 
+### Fixed
+
+- Known issues where weekly/raid type quests appeared as unavailable/over when they shouldn't have.
+
 ### Known Issues
 
 - Card context menu can pop-up when quick toggling total points with long press.

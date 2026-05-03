@@ -15,6 +15,7 @@ import type { Option } from "@/types/option";
 
 import CardBorder from "./border";
 import { CardContent, CardStats, ContextMenuContent } from "./card";
+import { isDailyEditable } from "./editability";
 import EditModal from "./modals/edit";
 import {
   DEFAULT_QUEST_TYPE_STYLES,
@@ -257,6 +258,11 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   React.useEffect(() => setIsLoading(false), [daily]);
 
+  const isEditable: boolean = React.useMemo(
+    () => isDailyEditable(daily, minutelyRefresh),
+    [daily, minutelyRefresh],
+  );
+
   return (
     <>
       <RadixContextMenu.Root modal onOpenChange={toggleContextMenu}>
@@ -264,6 +270,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
           <CardBorder
             daily={daily}
             divProps={{ className: questTypeStyles.borderClass as string }}
+            isEditable={isEditable}
             minutelyRefresh={minutelyRefresh}
           >
             <AnimatePresence>
@@ -287,6 +294,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
                 />
                 <CardStats
                   daily={daily}
+                  disabled={!isEditable}
                   points={points}
                   setPointsAction={setPoints}
                   totalWeight={totalWeight}
