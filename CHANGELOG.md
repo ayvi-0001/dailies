@@ -11,6 +11,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v0.2.4]
+
 ### Added
 
 - Loading indicator in top-right corner when patching dailies list.
