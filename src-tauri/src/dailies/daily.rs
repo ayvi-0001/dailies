@@ -1,12 +1,11 @@
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use serde_with::serde_as;
 use sqlx::types::Json;
 
-use crate::dailies::quest::QuestType;
+use crate::dailies::{quest::QuestType, requirements::Requirements};
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Decode, sqlx::Encode)]
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Decode, sqlx::Encode, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 #[serde_as]
 pub struct Daily {
@@ -25,8 +24,7 @@ pub struct Daily {
     pub weight: f64,
     #[serde_as(as = "Option<i64>")]
     pub streak_target: Option<i64>,
-    #[serde_as(as = "Option<Json<Value>>")]
-    pub requirements: Option<Json<Value>>,
+    pub requirements: Option<Requirements>,
     #[serde_as(as = "Option<NaiveTime>")]
     pub time_start: Option<NaiveTime>,
     #[serde_as(as = "Option<NaiveTime>")]

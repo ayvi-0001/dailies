@@ -15,6 +15,8 @@ pub(crate) enum Error {
     Argon2(#[from] argon2::password_hash::Error),
     #[error("{0}")]
     User(#[from] self::UserError),
+    #[error("{0}")]
+    DataImport(#[from] self::DataImportError),
     #[error("tauri error: {0}")]
     Tauri(#[from] tauri::Error),
 }
@@ -36,6 +38,7 @@ impl serde::Serialize for Error {
             Self::Sqlx(_) => ErrorKind::Sqlx(error_message),
             Self::Argon2(_) => ErrorKind::Argon2(error_message),
             Self::User(_) => ErrorKind::User(error_message),
+            Self::DataImport(_) => ErrorKind::DataImport(error_message),
             Self::Tauri(_) => ErrorKind::Tauri(error_message),
         };
         error_kind.serialize(serializer)
@@ -51,6 +54,7 @@ enum ErrorKind {
     Sqlx(String),
     Argon2(String),
     User(String),
+    DataImport(String),
     Tauri(String),
 }
 
@@ -60,6 +64,16 @@ pub(crate) enum UserError {
     InvalidPassword,
     #[error("Username not found")]
     UnknownUser,
+}
+
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum DataImportError {
+    #[error("Data export app version `{0}` is incompatible with current app version `{1}`")]
+    IncompatibleAppVersion(semver::Version, semver::Version),
+    #[error(
+        "Data export sqlite user_version `{0}` is incompatible with current database version `{1}`"
+    )]
+    IncompatibleSqliteUserVersion(i64, i64),
 }
 
 #[derive(Clone, serde::Serialize)]

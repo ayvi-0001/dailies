@@ -42,8 +42,8 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
 
   useHotkeys("F1", () => toggleOpen(), { preventDefault: true }, []);
 
-  const COUNT_TRIGGER_DEV_TERMINAL = 5;
-  const TIMEOUT_MS_TRIGGER_DEV_TERMINAL = 1000;
+  const COUNT_TRIGGER_DEV_TERMINAL = 7;
+  const TIMEOUT_MS_TRIGGER_DEV_TERMINAL = 1500;
   const [count, set, inc, _, resetCount] = ReactUse.useCounter(0, COUNT_TRIGGER_DEV_TERMINAL, 0);
   const [lastClickTime, setLastClickTime] = React.useState(0);
 

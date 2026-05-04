@@ -9,9 +9,9 @@ use sqlx::{Acquire, Sqlite, SqliteConnection, Transaction, pool::PoolConnection,
 use tauri::Manager;
 use tokio::sync::{Mutex, MutexGuard};
 
-crate::mod_flat!(daily, enums, quest, points);
+crate::mod_pub!(daily, enums, quest, point, requirements);
 
-use crate::{dailies::{daily::Daily, enums::SortDirection, points::TotalPointEval, quest::{Quest, QuestChain, QuestSequence, QuestType, QuestTypeRecord, QuestTypeStyles, WeeklyQuestStats}}, db::User, state, state::app_handle, utils};
+use crate::{dailies::{daily::Daily, enums::SortDirection, point::TotalPointEval, quest::{Quest, QuestChain, QuestSequence, QuestType, QuestTypeRecord, QuestTypeStyles, WeeklyQuestStats}, requirements::Requirements}, db::user::User, state, state::app_handle, utils};
 
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn query_dailies(
@@ -45,7 +45,7 @@ pub async fn query_dailies(
                 total AS "total!: f64",
                 weight AS "weight!: f64",
                 streak_target AS "streak_target: i64",
-                requirements AS "requirements: Json<Value>",
+                requirements AS "requirements: Requirements",
                 time_start AS "time_start: NaiveTime",
                 time_end AS "time_end: NaiveTime",
                 accepted AS "accepted!: NaiveDateTime",
@@ -1066,7 +1066,7 @@ pub async fn backfill_dailies(app_handle: tauri::AppHandle) -> Result<(), crate:
 
     std::mem::drop(guard);
 
-    let current_datetime: DateTime<Local> = chrono::Local::now();
+    let current_datetime: DateTime<Local> = Local::now();
     let current_date = current_datetime.date_naive();
 
     for user in users {

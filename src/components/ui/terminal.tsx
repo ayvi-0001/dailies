@@ -24,7 +24,9 @@ export type TerminalCommand = {
   name: string;
   description?: string;
   aliases?: string[];
-  run: (ctx: TerminalContext) => void | string | Promise<void | string>;
+  run: (
+    ctx: TerminalContext,
+  ) => void | string | React.ReactElement | Promise<void | string | React.ReactElement>;
 };
 
 export type TerminalProps = {
@@ -99,19 +101,19 @@ export default function Terminal(props: TerminalProps) {
   const builtins = React.useMemo<TerminalCommand[]>(
     () => [
       {
-        description: "clear the terminal.",
+        description: "clear the terminal",
         name: "clear",
         run: ({ clear: c }) => c(),
       },
       {
-        description: "list available commands.",
+        description: "list available commands",
         name: "help",
         run: ({ print: p }) => {
           const all = [
             ...commands,
-            { description: "clear the terminal.", name: "clear" },
+            { description: "clear the terminal", name: "clear" },
             {
-              description: "list available commands.",
+              description: "list available commands",
               name: "help",
             },
           ];
@@ -158,14 +160,14 @@ export default function Terminal(props: TerminalProps) {
 
       if (!cmd) {
         const result = onUnknownCommand?.(name, ctx);
-        if (typeof result === "string") print(result, "error");
+        if (React.isValidElement(result) || typeof result === "string") print(result, "error");
         else if (result === undefined) print(`command not found: ${name}`, "error");
         return;
       }
 
       try {
         const result = await cmd.run(ctx);
-        if (typeof result === "string") print(result, "output");
+        if (React.isValidElement(result) || typeof result === "string") print(result, "output");
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         print(msg, "error");
@@ -207,6 +209,16 @@ export default function Terminal(props: TerminalProps) {
     } else if (e.key === "l" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       clear();
+    } else if (e.key === "u" && e.ctrlKey) {
+      e.preventDefault();
+      setValue("");
+    } else if (e.key === "w" && e.ctrlKey) {
+      e.preventDefault();
+      setValue(value => {
+        value = value.trimEnd().split(" ").slice(0, -1).join(" ");
+        if (value.length > 0) value = value.concat(" ");
+        return value;
+      });
     }
   };
 
@@ -221,7 +233,7 @@ export default function Terminal(props: TerminalProps) {
     >
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-3 [&>*]:break-words [&>*]:whitespace-pre-wrap"
+        className="scrollbar-hide flex-1 overflow-y-auto p-3 [&>*]:break-words [&>*]:whitespace-pre-wrap"
         data-slot="terminal-output"
       >
         {welcome != null && <div className="text-muted-foreground mb-2">{welcome}</div>}
@@ -239,7 +251,7 @@ export default function Terminal(props: TerminalProps) {
           </div>
         ))}
         <form action="#" className="flex items-center gap-2" onSubmit={onSubmit}>
-          <span className={cn("text-white select-none", promptClassName)}>{prompt}</span>
+          <span className={cn("text-white", promptClassName)}>{prompt}</span>
           <input
             ref={inputRef}
             autoCapitalize="off"

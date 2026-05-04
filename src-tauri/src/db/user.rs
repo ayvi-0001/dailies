@@ -5,6 +5,7 @@ use argon2::{Argon2, password_hash::{PasswordHash, PasswordHasher, PasswordVerif
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use sqlx::{Acquire, Sqlite, SqliteConnection, pool::PoolConnection, sqlite::SqliteQueryResult};
+use tauri::Manager;
 use tokio::sync::{Mutex, MutexGuard};
 
 use crate::{errors::{Error, UserError}, state};
@@ -59,21 +60,35 @@ pub async fn create_user<'a>(
 }
 
 #[tauri::command(async, rename_all = "snake_case")]
-pub async fn get_user<'a>(
-    state: tauri::State<'a, Mutex<state::AppState>>,
-    username: Option<&'a str>,
+pub async fn get_user(
+    app_handle: tauri::AppHandle,
+    name: Option<&str>,
+    id: Option<i64>,
 ) -> Result<Option<User>, crate::errors::Error> {
-    let state: MutexGuard<'_, state::AppState> = state.lock().await;
-    let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
+    let state = app_handle.state::<Mutex<state::AppState>>();
+    let guard: MutexGuard<'_, state::AppState> = state.lock().await;
+    let mut pool: PoolConnection<Sqlite> = guard.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
 
-    let user: Option<User> = sqlx::query_as!(
-        User,
-        r#"SELECT id, name, created, updated FROM "users" WHERE name = $1 LIMIT 1;"#,
-        username
-    )
-    .fetch_optional(conn)
-    .await?;
+    let user: Option<User> = if let Some(name) = name {
+        sqlx::query_as!(
+            User,
+            r#"SELECT id, name, created, updated FROM "users" WHERE name = $1 LIMIT 1;"#,
+            name
+        )
+        .fetch_optional(conn)
+        .await?
+    } else if let Some(id) = id {
+        sqlx::query_as!(
+            User,
+            r#"SELECT id, name, created, updated FROM "users" WHERE id = $1 LIMIT 1;"#,
+            id
+        )
+        .fetch_optional(conn)
+        .await?
+    } else {
+        None
+    };
 
     Ok(user)
 }

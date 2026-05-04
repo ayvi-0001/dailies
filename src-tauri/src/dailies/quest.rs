@@ -1,13 +1,12 @@
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use serde_with::serde_as;
 use sqlx::types::Json;
 use strum::{AsRefStr, EnumIter};
 
-use crate::dailies::enums::EnumMatch;
+use crate::dailies::{enums::EnumMatch, requirements::Requirements};
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Decode, sqlx::Encode)]
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Decode, sqlx::Encode, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 #[serde_as]
 pub struct Quest {
@@ -24,13 +23,13 @@ pub struct Quest {
     pub weight: f64,
     pub total: f64,
     pub default_points: f64,
+    #[serde_as(as = "NaiveDateTime")]
     pub accepted: NaiveDateTime,
     #[serde_as(as = "Option<NaiveDateTime>")]
     pub archived: Option<NaiveDateTime>,
     #[serde_as(as = "Option<i64>")]
     pub streak_target: Option<i64>,
-    #[serde_as(as = "Option<Json<Value>>")]
-    pub requirements: Option<Json<Value>>,
+    pub requirements: Option<Requirements>,
     #[serde_as(as = "Option<NaiveTime>")]
     pub time_start: Option<NaiveTime>,
     #[serde_as(as = "Option<NaiveTime>")]
@@ -126,8 +125,8 @@ pub struct QuestChain {
 }
 
 #[derive(Default, Serialize, Deserialize, sqlx::Decode, sqlx::Encode, sqlx::FromRow)]
-#[serde_as]
 #[serde(rename_all = "camelCase")]
+#[serde_as]
 pub struct WeeklyQuestStats {
     pub date: NaiveDate,
     pub quest_id: String,

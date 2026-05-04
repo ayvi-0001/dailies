@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 
 - Numpad Popover component for updating daily card points.
   - Long press feature to quickly set points to total.
+- New platform dependent data import/export functions with native file dialogs.
 
 ### Fixed
 

@@ -11,7 +11,7 @@ export async function getSession(): Promise<Option<User>> {
   try {
     const session = await invoke<Option<string>>("get_session");
     const token = await decrypt<DecodedToken>(session);
-    const payload = { username: token?.userName };
+    const payload = { name: token?.userName, id: null };
     user = await invoke<User>("get_user", payload);
   } catch (err: unknown) {
     throw err;

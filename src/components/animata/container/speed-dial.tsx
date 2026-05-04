@@ -13,6 +13,7 @@ interface SpeedialProps {
     icon: React.ReactNode;
     label: React.ReactNode;
     key: string;
+    hidden?: boolean;
     buttonAction: (event: React.MouseEvent<HTMLButtonElement>) => void;
   }>;
   buttonIcon: React.ReactElement;
@@ -111,22 +112,24 @@ export default function Speeddial(props: SpeedialProps): React.ReactElement {
           getAnimation(),
         )}
       >
-        {(props.actionButtons || []).map((action, index) => (
-          <Tooltip key={index} direction={props.direction} text={action.label}>
-            <button
-              key={index}
-              className={cn(
-                "order-last flex items-center border-none p-3 text-gray-800 transition-all duration-100",
-                GLASSY_CLASSES,
-              )}
-              onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
-                action.buttonAction(event)
-              }
-            >
-              {action.icon}
-            </button>
-          </Tooltip>
-        ))}
+        {props.actionButtons
+          ?.filter(b => !b?.hidden)
+          .map((action, index) => (
+            <Tooltip key={index} direction={props.direction} text={action.label}>
+              <button
+                key={index}
+                className={cn(
+                  "order-last flex items-center border-none p-3 text-gray-800 transition-all duration-100",
+                  GLASSY_CLASSES,
+                )}
+                onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
+                  action.buttonAction(event)
+                }
+              >
+                {action.icon}
+              </button>
+            </Tooltip>
+          ))}
       </div>
     </div>
   );

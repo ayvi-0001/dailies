@@ -4,10 +4,7 @@ use tauri::Manager;
 use tokio::sync::Mutex;
 
 pub(crate) mod macros;
-crate::mod_flat!(config, dailies, state, db, errors, build_info, utils);
-
-#[cfg(target_os = "android")]
-mod android;
+crate::mod_flat!(build_info, config, dailies, data, db, errors, state, utils);
 
 lazy_static::lazy_static! {
     pub static ref JWT_SECRET: &'static str = env!("JWT_SECRET");
@@ -31,6 +28,11 @@ pub fn run() {
     #[cfg(target_os = "android")]
     {
         builder = builder.plugin(tauri_plugin_android_fs::init());
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        builder = builder.plugin(tauri_plugin_dialog::init());
     }
 
     builder
@@ -88,10 +90,6 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            #[cfg(target_os = "android")]
-            android::export_db,
-            #[cfg(target_os = "android")]
-            android::import_db,
             build_info::vergen_build_date,
             build_info::vergen_build_timestamp,
             build_info::vergen_cargo_target_triple,
@@ -138,6 +136,8 @@ pub fn run() {
             dailies::update_total,
             dailies::update_type_id,
             dailies::update_weight,
+            data::export::export_user_data,
+            data::import::import_user_data,
             db::session::delete_session,
             db::session::get_session,
             db::session::save_session,
