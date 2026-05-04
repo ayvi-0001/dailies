@@ -34,6 +34,20 @@ run-android-dev-android-studio:
 
 build:
 	npm run tauri build
+	DIST=dist/windows
+	mkdir -p "$$DIST"
+	cp src-tauri/target/release/dailies.exe "$$DIST/"
+	ARCHITECTURE=x86_64-pc-windows-msvc
+	DIRTY_SUFFIX=-dev
+	APK_DESCRIBE=$$(git describe --always --long  --first-parent --abbrev=7 --dirty=$$DIRTY_SUFFIX --tags)
+	if rg -q -- $$DIRTY_SUFFIX <<< $$APK_DESCRIBE; then
+		GIT_INSERTIONS=$$(git diff --shortstat | rg -o '(\d+)\sinsertions' -r '$$1')
+		GIT_DELETIONS=$$(git diff --shortstat | rg -o '(\d+)\sdeletions' -r '$$1')
+		GIT_SHORTSTAT="-$$GIT_INSERTIONS-$$GIT_DELETIONS"
+	fi
+	cd "$$DIST"
+	mv dailies.exe "dailies-$$ARCHITECTURE-$$APK_DESCRIBE$$GIT_SHORTSTAT.exe"
+	# TODO(ayvi): move nsis/msi bundle
 
 build-android-apk-debug:
 	npm run tauri android build -- --debug --apk true
@@ -43,16 +57,19 @@ build-android-apk-universal-release:
 
 build-android-apk-aarch64-release:
 	npm run tauri android build -- --apk true --target aarch64
-	mkdir -p dist/
-	cp src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk dist/
+	DIST=dist/android
+	mkdir -p "$$DIST"
+	cp src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk "$$DIST/"
+	ARCHITECTURE=aarch64-linux-android
 	DIRTY_SUFFIX=-dev
-	APK_DESCRIBE=$$(git describe --always --long  --first-parent --abbrev=7 --dirty=$$DIRTY_SUFFIX)
+	APK_DESCRIBE=$$(git describe --always --long  --first-parent --abbrev=7 --dirty=$$DIRTY_SUFFIX --tags)
 	if rg -q -- $$DIRTY_SUFFIX <<< $$APK_DESCRIBE; then
 		GIT_INSERTIONS=$$(git diff --shortstat | rg -o '(\d+)\sinsertions' -r '$$1')
 		GIT_DELETIONS=$$(git diff --shortstat | rg -o '(\d+)\sdeletions' -r '$$1')
 		GIT_SHORTSTAT="-$$GIT_INSERTIONS-$$GIT_DELETIONS"
 	fi
-	mv dist/app-universal-release.apk "dist/dailies-aarch64-linux-android-$$APK_DESCRIBE$$GIT_SHORTSTAT.apk"
+	cd "$$DIST"
+	mv app-universal-release.apk "dailies-$$ARCHITECTURE-$$APK_DESCRIBE$$GIT_SHORTSTAT.apk"
 
 .PHONY: \
 	android-init \
