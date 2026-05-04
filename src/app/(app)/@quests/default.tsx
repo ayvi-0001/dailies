@@ -3,7 +3,7 @@ import * as React from "react";
 import { QuestList } from "@/components/daily";
 import ExpBar from "@/components/exp/exp-bar";
 
-import Speeddial from "../../speed-dial";
+import Speeddial from "./speed-dial";
 
 export default function Default(): React.ReactElement {
   return (

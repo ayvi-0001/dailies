@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import UserProvider from "@/app/providers/user";
 import DailiesProvider from "@/components/daily/providers/dailies";
 
-import NavBar from "../navbar";
+import NavBar from "./navbar";
 
 type AppLayoutProps = Readonly<{
   children: React.ReactNode;
