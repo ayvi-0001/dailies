@@ -182,7 +182,7 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
     [chain, user],
   );
 
-  React.useEffect(() => {
+  ReactUse.useOnceEffect(() => {
     const get_collapsed = async () => {
       await invoke<boolean>("get_quest_chain_collapsed", {
         user_id: user.id,

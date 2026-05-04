@@ -8,10 +8,9 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
 
 import { truncate_sessions } from "@/actions/logout";
+import { ModalParam } from "@/app/(app)/@modals/params";
 import Speeddial, { SpeeddialDirection } from "@/components/animata/container/speed-dial";
 import { updateParam } from "@/lib/params";
-
-import { ModalParam } from "./@modals/params";
 
 export default function App(): React.ReactElement {
   const router: AppRouterInstance = useRouter();
@@ -50,7 +49,7 @@ export default function App(): React.ReactElement {
       actionButtons={actionButtons}
       buttonIcon={<BoxIcon size={16} stroke="#f0f0ff" />}
       direction={SpeeddialDirection.up}
-      divProps={{ className: "dark z-999 absolute left-0 bottom-0 mb-6 ml-6" }}
+      divProps={{ className: "dark z-999 absolute left-6 bottom-6" }}
     />
   );
 }

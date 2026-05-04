@@ -61,11 +61,10 @@ export default function ExpBar(): React.ReactNode {
   }, []);
 
   const textClass: ClassValue = "text-xs font-bold text-[#f0f0ff]";
-  const paddingClass: ClassValue = "px-5 ml-1";
 
   return (
     <>
-      <div className={cn(paddingClass, "absolute z-400 flex w-full flex-col-reverse items-end")}>
+      <div className="absolute z-400 flex w-full flex-col-reverse items-end pr-10">
         <div className="absolute flex h-fit flex-col items-start justify-items-end overflow-hidden">
           <AnimatePresence mode="popLayout">
             {percentChanges.map(item => (
@@ -79,13 +78,14 @@ export default function ExpBar(): React.ReactNode {
           </AnimatePresence>
         </div>
       </div>
-      <div
-        className={cn(paddingClass, "flex max-h-10 min-h-10 items-center gap-3 rounded")}
-        id="exp-bar"
-      >
-        {!dailiesState.isLoading ? (
+      {dailiesState.isLoading ? (
+        <div className="flex h-full max-h-10 min-h-10 w-full cursor-wait place-items-center pr-2 pl-2 opacity-40">
+          <heroui.Skeleton className="dark size-full rounded-sm" id="exp-bar-skeleton" />
+        </div>
+      ) : (
+        <div className="flex max-h-10 min-h-10 items-center gap-3 rounded pr-1 pl-2" id="exp-bar">
           <div className="flex w-full flex-col">
-            <div className="grow">
+            <div className="w-full grow">
               <Progress<number>
                 deps={[dailiesState.totalPoints, dailiesState.totalWeight]}
                 progress={percentValue ?? 0}
@@ -93,12 +93,16 @@ export default function ExpBar(): React.ReactNode {
             </div>
             <div className="mt-1 flex w-full grow flex-row justify-end">
               <span className={cn(textClass, "opacity-80")}>[</span>
-              <Counter
-                className={cn(textClass, "opacity-80")}
-                direction="up"
-                format={(value: number): string => `${value.toFixed(2)}`}
-                targetValue={dailiesState.totalPoints}
-              />
+              {dailiesState.totalPoints > 0 ? (
+                <Counter
+                  className={cn(textClass, "opacity-80")}
+                  direction="up"
+                  format={(value: number): string => `${value.toFixed(2)}`}
+                  targetValue={dailiesState.totalPoints}
+                />
+              ) : (
+                <span className={cn(textClass, "opacity-80")}>0</span>
+              )}
               <span className={cn(textClass, "opacity-80")}>{`/${dailiesState.totalWeight}]`}</span>
               <Counter
                 className={cn(textClass, "px-1")}
@@ -109,17 +113,8 @@ export default function ExpBar(): React.ReactNode {
               />
             </div>
           </div>
-        ) : (
-          <div className="flex h-full w-full flex-col">
-            <heroui.Spinner
-              as={"div"}
-              className="dark z-1000"
-              classNames={{ label: "text-foreground mt-4" }}
-              variant="dots"
-            />
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 

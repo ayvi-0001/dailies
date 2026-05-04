@@ -3,9 +3,11 @@
 import * as React from "react";
 
 import * as heroui from "@heroui/react";
-import { ReadonlyURLSearchParams, usePathname, useSearchParams } from "next/navigation";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export default function App() {
+  const router: AppRouterInstance = useRouter();
   const pathname: string = usePathname();
   const searchParams: ReadonlyURLSearchParams = useSearchParams();
 
@@ -39,12 +41,18 @@ export default function App() {
     >
       <heroui.NavbarContent className="" id="navbar-content" justify="center">
         <heroui.NavbarItem isActive={pathname === "/" && [...searchParams.keys()].length === 1}>
-          <heroui.Link color="foreground" href={getNewPath("/")}>
+          <heroui.Link
+            color="foreground"
+            onClick={() => router.push(getNewPath("/"), { scroll: false })}
+          >
             <span className="text-xs text-white">Quests</span>
           </heroui.Link>
         </heroui.NavbarItem>
         <heroui.NavbarItem isActive={pathname === "/stats"}>
-          <heroui.Link aria-current="page" href={getNewPath("/stats")}>
+          <heroui.Link
+            aria-current="page"
+            onClick={() => router.push(getNewPath("/stats"), { scroll: false })}
+          >
             <span className="text-xs text-white">Stats</span>
           </heroui.Link>
         </heroui.NavbarItem>

@@ -11,6 +11,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Loading indicator in top-right corner when patching dailies list.
+
+### Changed
+
+- Refactored pages into route group with parallel slots & hoist providers.
+  - Keeps pages mounted to preserve state between switches.
+- Loading animations for quest list.
+
+### Fixed
+
+- Removed forced page refresh when adding new quest.
+
 ## [v0.2.3]
 
 ### Added

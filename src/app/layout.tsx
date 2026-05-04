@@ -21,12 +21,11 @@ const spaceMono = Space_Mono({
 export const metadata: Metadata = { title: "Dailies" };
 
 type Pages = Readonly<{
-  modals: React.ReactNode;
   children: React.ReactNode;
 }>;
 
 export default function RootLayout(pages: Pages): React.ReactNode {
-  const { modals, children } = pages;
+  const { children } = pages;
 
   return (
     <html suppressHydrationWarning className={`${spaceMono.className} antialiased`} lang="en">
@@ -46,7 +45,6 @@ export default function RootLayout(pages: Pages): React.ReactNode {
           <AppBuildInfo as="header" />
           <Toaster />
           <div className="fixed z-1 flex h-screen w-screen bg-transparent py-15" id="layout">
-            {modals}
             {children}
           </div>
           <BackgroundImage src="/images/background.png" />

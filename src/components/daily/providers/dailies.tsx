@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import * as heroui from "@heroui/react";
 import * as ReactUse from "@reactuses/core";
 import * as log from "@tauri-apps/plugin-log";
 import { CalendarDate, parseDate, today } from "@internationalized/date";
@@ -51,6 +52,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
   const [countRefreshQuestChains, setCountRefreshQuestChains] = React.useState<number>(0);
 
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
+  const [isPatching, setIsPatching] = React.useState<boolean>(false);
 
   const router: AppRouterInstance = useRouter();
   const searchParams: ReadonlyURLSearchParams = useSearchParams();
@@ -74,6 +76,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
   }, [date]);
 
   ReactUse.useOnceEffect(() => {
+    setIsPatching(true);
     const query_dailies = async (): Promise<void> => {
       await invoke<Daily[]>("query_dailies", {
         user: user.name,
@@ -84,6 +87,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
         .then(result => {
           setDailies(result);
           setIsLoading(false);
+          setIsPatching(false);
         })
         .catch(console.error);
     };
@@ -248,6 +252,11 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
       <QuestTypesProvider>
         <DailiesContext.Provider value={value}>{props.children}</DailiesContext.Provider>
       </QuestTypesProvider>
+      {isPatching && (
+        <div className="absolute top-6 left-6">
+          <heroui.Spinner as={"div"} className="dark z-9999" size="sm" variant="spinner" />
+        </div>
+      )}
     </>
   );
 }

@@ -41,9 +41,8 @@ export default function Modal(): React.ReactElement {
 
       const result = (await addQuest(state, payload)) as AddQuestErrors;
 
-      // TODO(ayvi): fix daily list refresh after add quest http://ayvi:3000/ayvi/dailies/issues/155
       dailiesState.triggerRefreshDailies();
-      window.location.replace(getReturnPathname());
+      router.replace(getReturnPathname(), { scroll: false });
 
       return result;
     },

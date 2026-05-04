@@ -12,9 +12,7 @@ export default function App(): React.ReactElement {
   return (
     <div className="flex h-full flex-col items-center justify-center">
       <div className="h-80 w-screen">{<DailiesHeatmap user={user} />}</div>
-      <div className="h-3" />
-      <div className="shrink" />
-      <div className="h-3" />
+      <div className="max-h-20 w-full grow" />
       <div className="h-80 w-screen">{<DailiesLineChart user={user} />}</div>
     </div>
   );

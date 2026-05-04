@@ -1,6 +1,5 @@
 import { today } from "@internationalized/date";
 import { invoke } from "@tauri-apps/api/core";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import { Quest } from "@/components/daily";
@@ -77,7 +76,5 @@ export default async function addQuest(
 
   await invoke<Option<AppError>>("insert_quest", {
     quest: validatedFields.data,
-  }).catch((err: AppError) => {
-    toast.error(`${JSON.stringify(err)}`);
-  });
+  }).catch((err: AppError) => console.error(err));
 }

@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import * as heroui from "@heroui/react";
-import { ScrollShadow } from "@heroui/react";
+import * as ReactUse from "@reactuses/core";
 
 import { User, UserState, useState as useUserState } from "@/app/providers/user";
 import { invoke } from "@/lib/tauri";
@@ -80,15 +80,11 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
         title={title}
       />
       {dailiesState.isLoading ? (
-        <div className="flex h-full w-full flex-col">
-          <heroui.Spinner
-            className="dark z-1000"
-            classNames={{ label: "text-foreground mt-4" }}
-            variant="dots"
-          />
+        <div className="flex size-full cursor-wait place-items-center opacity-40">
+          <heroui.Skeleton className="dark rounded-medium mx-2 mt-3 size-full" />
         </div>
       ) : (
-        <ScrollShadow
+        <heroui.ScrollShadow
           hideScrollBar
           className="h-[calc(100vh-20vh)]"
           offset={40}
@@ -110,7 +106,7 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
               user={userState.user}
             />
           ))}
-        </ScrollShadow>
+        </heroui.ScrollShadow>
       )}
     </div>
   );
@@ -135,43 +131,43 @@ function useQuestListConfig(user: User): {
   const [isAllQuestChainsCollapsed, setIsAllQuestChainCollapsed] = React.useState(false);
   const [questNameFilterText, setQuestNameFilterText] = React.useState("");
 
-  React.useEffect(() => {
+  ReactUse.useOnceEffect(() => {
     const get_config_is_archived_quests_filtered = async () => {
       await invoke<boolean>("get_key_as_bool", {
         user_id: user.id,
         key: "quest-list--is-archived-quests-filtered",
-      }).then(result => setArchivedQuestsFiltered(result || false));
+      })
+        .then(result => setArchivedQuestsFiltered(result || false))
+        .catch(console.error);
     };
-    get_config_is_archived_quests_filtered();
-  }, [user.id]);
-
-  React.useEffect(() => {
     const get_config_is_completed_quests_filtered = async () => {
       await invoke<boolean>("get_key_as_bool", {
         user_id: user.id,
         key: "quest-list--is-completed-quests-filtered",
-      }).then(result => setCompletedQuestsFiltered(result || false));
+      })
+        .then(result => setCompletedQuestsFiltered(result || false))
+        .catch(console.error);
     };
-    get_config_is_completed_quests_filtered();
-  }, [user.id]);
-
-  React.useEffect(() => {
     const get_config_is_optional_quests_filtered = async () => {
       await invoke<boolean>("get_key_as_bool", {
         user_id: user.id,
         key: "quest-list--is-optional-quests-filtered",
-      }).then(result => setOptionalQuestsFiltered(result || false));
+      })
+        .then(result => setOptionalQuestsFiltered(result || false))
+        .catch(console.error);
     };
-    get_config_is_optional_quests_filtered();
-  }, [user.id]);
-
-  React.useEffect(() => {
     const get_config_is_quest_chains_collapsed = async () => {
       await invoke<boolean>("get_key_as_bool", {
         user_id: user.id,
         key: "quest-list--is-quest-chains-collapsed",
-      }).then(result => setIsAllQuestChainCollapsed(result || false));
+      })
+        .then(result => setIsAllQuestChainCollapsed(result || false))
+        .catch(console.error);
     };
+
+    get_config_is_archived_quests_filtered();
+    get_config_is_completed_quests_filtered();
+    get_config_is_optional_quests_filtered();
     get_config_is_quest_chains_collapsed();
   }, [user.id]);
 
