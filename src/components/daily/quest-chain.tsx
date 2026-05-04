@@ -286,7 +286,8 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
                   <SortableItem
                     key={`${daily.pointId}-${daily.sequence}`}
                     className="max-w-full min-w-full flex-shrink-0"
-                    id={`${daily.name}-${daily.sequence}`}
+                    // @ts-expect-error: overwrite assigning number to id - req for onDragEnd
+                    id={daily.sequence}
                   >
                     <DailyCard
                       daily={daily}
@@ -310,6 +311,14 @@ enum SortDirection {
   Down = "down",
 }
 
+type UpdateSequenceArgs = {
+  user_id: number;
+  chain: string;
+  quest_id: string;
+  sequence: number;
+  sort_direction: "up" | "down";
+};
+
 function handleDragEnd(
   event: DragEndEvent,
   userId: number,
@@ -319,22 +328,30 @@ function handleDragEnd(
 ) {
   const { active, over } = event;
   const activeId: number = +`${active.id}`;
-  const overId: number = +`${over!.id}`;
-  const activeQuest = dailies.find(d => d.chain == chain && d.sequence == activeId)!;
 
-  const activeIndex = +`${active?.data.current!.sortable.index}`;
-  const overIndex = +`${over?.data.current!.sortable.index}`;
+  const activeQuest: Option<Daily> =
+    dailies.find(d => d.chain == chain && d.sequence == activeId) ?? null;
+  if (!activeQuest) return;
+
+  if (!over) return;
+  const overId: number = +`${over.id}`;
+
+  if (!active.data.current || !over.data.current) return;
+
+  const activeIndex = +`${active.data.current.sortable.index}`;
+  const overIndex = +`${over.data.current.sortable.index}`;
   const shiftDirection =
     Math.sign(activeIndex - overIndex) == 1 ? SortDirection.Up : SortDirection.Down;
 
   if (active.id !== over?.id) {
-    invoke("update_sequence", {
+    const updateSequenceArgs: UpdateSequenceArgs = {
       user_id: userId,
       chain: chain,
       quest_id: activeQuest.questId,
-      sequence: +`${over!.id}`,
+      sequence: overId,
       sort_direction: shiftDirection,
-    });
+    };
+    invoke("update_sequence", updateSequenceArgs);
 
     setDailies(items => {
       items = arrayMove(
