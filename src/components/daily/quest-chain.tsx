@@ -405,13 +405,6 @@ function QuestListDatePicker(props: QuestListDatePickerProps): React.ReactElemen
   const { listDate, setListDateAction } = props;
   const currentDate = today(LOCAL_TZ);
 
-  const [pickerDate, setPickerDate] = React.useState<DateValue>(listDate);
-  const debouncedPickerDate: DateValue = ReactUse.useDebounce(pickerDate, 1500);
-
-  ReactUse.useOnceEffect(() => {
-    setListDateAction(debouncedPickerDate as CalendarDate);
-  }, [debouncedPickerDate]);
-
   return (
     <heroui.DatePicker
       aria-label="quest list date picker"
@@ -439,10 +432,10 @@ function QuestListDatePicker(props: QuestListDatePickerProps): React.ReactElemen
         />
       }
       size="sm"
-      value={pickerDate}
+      value={listDate}
       variant="flat"
       onChange={(value: CalendarDate | CalendarDateTime | ZonedDateTime | null) =>
-        value && setPickerDate(value as CalendarDate)
+        value && setListDateAction(value as CalendarDate)
       }
     />
   );
