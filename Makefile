@@ -2,6 +2,8 @@
 .SHELLFLAGS += -euo pipefail
 SHELL=/usr/bin/bash
 
+.SILENT:
+
 GIT_ROOT_DIR := $(shell eval git rev-parse --show-toplevel)
 
 android-init:
