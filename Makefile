@@ -12,6 +12,9 @@ android-init:
 run-desktop-dev:
 	npm run tauri dev
 
+run-desktop-release:
+	npm run tauri dev -- --release
+
 run-desktop-react-devtools:
 	react-devtools &
 	trap 'kill $$(jobs -p)' EXIT
@@ -52,11 +55,12 @@ build-android-apk-aarch64-release:
 	mv dist/app-universal-release.apk "dist/dailies-aarch64-linux-android-$$APK_DESCRIBE$$GIT_SHORTSTAT.apk"
 
 .PHONY: \
+	android-init \
+	build \
+	build-android-apk-aarch64-release \
+	build-android-apk-universal-release \
+	run-android-dev-android-studio \
+	run-android-dev-connected-device \
 	run-desktop-dev \
 	run-desktop-react-devtools \
-	run-android-dev-connected-device \
-	run-android-dev-android-studio \
-	build \
-	android-init \
-	build-android-apk-universal-release \
-	build-android-apk-aarch64-release
+	run-desktop-release
