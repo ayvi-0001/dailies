@@ -5,7 +5,7 @@ import { CalendarDate, DateValue, Time, today } from "@internationalized/date";
 import type { ValidationResult } from "@react-types/shared/src/inputs";
 import { X } from "lucide-react";
 
-import { Daily } from "@/components/daily";
+import { Daily, Quest } from "@/components/daily";
 import { DaysOfWeek, LOCAL_TZ } from "@/lib/dates";
 import type { Option } from "@/types/option";
 
@@ -294,7 +294,14 @@ export function NoteField({ daily }: { daily?: Daily }): React.ReactElement {
   );
 }
 
-export function RequirementsField({ daily }: { daily?: Daily }): React.ReactElement {
+export function RequirementsField({
+  daily,
+  questType,
+}: {
+  daily?: Daily;
+  questType?: string;
+}): React.ReactElement {
+  console.log(questType == `${Quest.Type.QWS}`);
   return (
     <heroui.Input
       isRequired
@@ -306,9 +313,14 @@ export function RequirementsField({ daily }: { daily?: Daily }): React.ReactElem
       }}
       defaultValue={daily?.requirements ? `${daily?.requirements}` : undefined}
       label="Requirements"
+      max={questType == `${Quest.Type.QWS}` ? 6 : undefined}
       name="requirements"
       radius="none"
-      type="text"
+      type={
+        questType && [`${Quest.Type.QWM}`, `${Quest.Type.QWS}`].includes(questType)
+          ? "number"
+          : "text"
+      }
       variant="bordered"
     />
   );

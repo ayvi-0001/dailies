@@ -95,7 +95,7 @@ export default function AddQuestForm(props: AddQuestFormProps): React.ReactEleme
         )}
       </div>
       {questType && [`${Quest.Type.QWM}`, `${Quest.Type.QWS}`].includes(questType) && (
-        <DailyForm.RequirementsField />
+        <DailyForm.RequirementsField questType={questType} />
       )}
       {questType && [`${Quest.Type.QW}`, `${Quest.Type.QR}`].includes(questType) && (
         <DailyForm.DaysField days={days} setDaysAction={setDays} />
