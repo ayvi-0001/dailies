@@ -11,6 +11,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Previously uncaught issue where sorting cards in Quest list was broken.
+- Issue where streaks wouldn't continue if points were greater than total or 1 >= `complete` > 0.
+
+## [v.0.2.5]
+
 ### Added
 
 - Numpad Popover component for updating daily card points.
