@@ -257,7 +257,7 @@ export function DescriptionField({ daily }: { daily?: Daily }): React.ReactEleme
     <heroui.Textarea
       disableAutosize
       isClearable
-      className="-mt-1 text-sm text-white"
+      className="text-sm text-white"
       classNames={{
         base: "text-sm",
         innerWrapper: "text-xs",
@@ -278,7 +278,7 @@ export function NoteField({ daily }: { daily?: Daily }): React.ReactElement {
     <heroui.Textarea
       disableAutosize
       isClearable
-      className="-mt-1 text-sm text-white"
+      className="text-sm text-white"
       classNames={{
         base: "text-sm",
         innerWrapper: "text-xs",

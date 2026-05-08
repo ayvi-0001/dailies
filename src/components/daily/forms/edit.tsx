@@ -71,6 +71,7 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
       action={action}
       autoCapitalize="off"
       autoComplete="off"
+      className="flex flex-col gap-2"
       validationBehavior="native"
     >
       {!historic && (
@@ -85,7 +86,7 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
         />
       )}
       {!historic && <DailyForm.ChainField daily={daily} questChains={dailiesState.questChains} />}
-      <div className="flex w-full flex-row gap-3">
+      <div className="flex w-full flex-row gap-2">
         <DailyForm.TotalField setTotalAction={setTotal} total={total} />
         {!historic && (
           <DailyForm.DefaultPointsField
@@ -95,26 +96,30 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
           />
         )}
       </div>
-      <div className="flex w-full flex-row gap-3">
+      <div className="flex w-full flex-row gap-2">
         <DailyForm.WeightField daily={daily} />
-        <DailyForm.StreakTargetField daily={daily} />
+        {questType ? (
+          ![`${Quest.Type.QWM}`, `${Quest.Type.QWS}`].includes(questType) && (
+            <DailyForm.StreakTargetField daily={daily} />
+          )
+        ) : (
+          <DailyForm.StreakTargetField daily={daily} />
+        )}
       </div>
-      <div className="flex w-full flex-row gap-3">
-        {questType == Quest.Type.QR && (
+      {questType == Quest.Type.QR && (
+        <div className="flex w-full flex-row gap-2">
           <DailyForm.TimeStartField
             setTimeStartAction={setTimeStart}
             timeStart={timeStart}
             timeStartErrors={timeStartErrors}
           />
-        )}
-        {questType == Quest.Type.QR && (
           <DailyForm.TimeEndField
             setTimeEndAction={setTimeEnd}
             timeEnd={timeEnd}
             timeEndErrors={timeEndErrors}
           />
-        )}
-      </div>
+        </div>
+      )}
       {questType && [`${Quest.Type.QWM}`, `${Quest.Type.QWS}`].includes(questType) && (
         <DailyForm.RequirementsField daily={daily} questType={questType} />
       )}
