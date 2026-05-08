@@ -48,6 +48,8 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
   if (total && defaultPoints && defaultPoints > total)
     defaultPointsErrors.push("Default points cannot be greater than total points.");
 
+  // TODO(ayvi): feat: add live validation/error msgs on RequirementsField http://ayvi:3000/ayvi/dailies/issues/230
+
   // const [archivedDate, setArchivedDate] = React.useState<Option<DateValue>>(null);
 
   const [days, setDays] = React.useState<string[]>([]);
@@ -114,7 +116,7 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
         )}
       </div>
       {questType && [`${Quest.Type.QWM}`, `${Quest.Type.QWS}`].includes(questType) && (
-        <DailyForm.RequirementsField daily={daily} />
+        <DailyForm.RequirementsField daily={daily} questType={questType} />
       )}
       {!historic && questType && [`${Quest.Type.QW}`, `${Quest.Type.QR}`].includes(questType) && (
         <DailyForm.DaysField days={days} setDaysAction={setDays} />

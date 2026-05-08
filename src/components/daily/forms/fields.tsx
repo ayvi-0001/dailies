@@ -301,7 +301,6 @@ export function RequirementsField({
   daily?: Daily;
   questType?: string;
 }): React.ReactElement {
-  console.log(questType == `${Quest.Type.QWS}`);
   return (
     <heroui.Input
       isRequired
