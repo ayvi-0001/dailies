@@ -33,7 +33,7 @@ export type DailiesState = {
   setTotalWeight: React.Dispatch<React.SetStateAction<number>>;
   triggerRefreshDailies: () => void;
   isLoading: boolean;
-  updateDaily: (pointId: string, patch: Partial<Daily>) => void;
+  updateDaily: (daily: Daily, patch: Partial<Daily>) => void;
 };
 
 export const DailiesContext = React.createContext<Option<DailiesState>>(null);
@@ -84,12 +84,12 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
         start_date: date.toString(),
         end_date: date.toString(),
       })
-        .then(result => {
-          setDailies(result);
+        .then(result => setDailies(result))
+        .catch(console.error)
+        .finally(() => {
           setIsLoading(false);
           setIsPatching(false);
-        })
-        .catch(console.error);
+        });
     };
     query_dailies();
   }, [user, countRefreshDailies, date]);
@@ -104,83 +104,51 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
   }, [user, countRefreshQuestChains]);
 
   ReactUse.useOnceEffect(() => {
-    const points: Readonly<Option<number>>[] = dailies
-      ?.filter(d => d.points !== null)
-      ?.map(d => d.pointsWeighted);
-    if (points.length > 0) {
-      const totalPoints = points.reduce(
-        (acc: Readonly<Option<number>>, n: Readonly<Option<number>>) => acc! + n!,
-      );
-      setTotalPoints(totalPoints as number);
-    }
+    setTotalPoints(
+      dailies
+        ?.filter(d => d.points !== null)
+        ?.map(d => d.pointsWeighted ?? 0)
+        ?.reduce<number>((acc, n) => acc + n, 0),
+    );
+    setTotalWeight(
+      dailies
+        ?.filter(d => d.points !== null)
+        ?.map(d => d.weight)
+        ?.reduce<number>((acc, n) => acc + n, 0),
+    );
   }, [user, dailies, date]);
 
-  ReactUse.useOnceEffect(() => {
-    const weights: Readonly<Option<number>>[] = dailies
-      ?.filter(d => d.points !== null)
-      ?.map(d => d.weight);
-    if (weights.length > 0) {
-      const totalWeight = weights.reduce(
-        (acc: Readonly<Option<number>>, n: Readonly<Option<number>>) => acc! + n!,
-      );
-      setTotalWeight(totalWeight as number);
-    }
-  }, [user, dailies, date]);
-
-  const { run: triggerRefreshDailies } = ReactUse.useDebounceFn((ctx?: string) => {
-    log.info(`trigger daily list refresh${ctx ? `: ${ctx}` : "."}`);
+  const { run: triggerRefreshDailies } = ReactUse.useThrottleFn(async (...args: unknown[]) => {
+    log.info(`trigger daily list refresh${args.length > 0 ? `: ${args[0]}` : "."}`);
     setCountRefreshDailies(c => c + 1);
-  }, 1000);
+  }, 2000);
 
-  const triggerRefreshQuestChains = React.useCallback(() => {
+  const triggerRefreshQuestChains = React.useCallback(async () => {
     log.info(`trigger quest chains refresh.`);
     setCountRefreshQuestChains(c => c + 1);
   }, []);
 
   const updateDaily = React.useCallback(
-    (pointId: string, patch: Partial<Daily>) => {
-      setDailies(prev =>
-        prev.map(d => {
-          if (d.pointId !== pointId) return d;
-
-          const updated = { ...d, ...patch };
-
-          // Do not updated weighted points on dailies with a streak target.
-          // weighted points will be calculated with streak in dailies view.
-          if (d.streakTarget !== null) return updated;
-
-          if ("points" in patch || "weight" in patch) {
-            if (updated.points !== null) {
-              const complete = updated.points / updated.total;
-              updated.complete = complete;
-              updated.pointsWeighted = complete * updated.weight;
-            } else {
-              updated.complete = null;
-              updated.pointsWeighted = null;
-            }
-          }
-
-          return updated;
-        }),
-      );
-
-      for (const key of Object.keys(patch)) {
-        if (
-          [
-            "points", // recalculate streaks
-            "weight", // recalculate weighted points/total weight
-            "archived", // recalculate total weight
-            "name", // updated ids
-          ].includes(key)
-        ) {
-          triggerRefreshDailies(`updated key ${key}`);
-        } else if (key === "chain") {
-          triggerRefreshQuestChains();
-        }
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    async (daily: Daily, patch: Partial<Daily>) =>
+      updateDailyCallback(
+        user,
+        date,
+        daily,
+        patch,
+        setDailies,
+        new Set([
+          "points", // recalculate streaks
+          "name", // updated ids
+        ]),
+        new Set([
+          "weight", // recalculate weighted points/total weight
+          "archived", // recalculate total weight
+        ]),
+        triggerRefreshDailies,
+        triggerRefreshQuestChains,
+        setIsPatching,
+      ),
+    [user, date, triggerRefreshDailies, triggerRefreshQuestChains],
   );
 
   React.useEffect(() => {
@@ -266,3 +234,78 @@ export function useDailies(): DailiesState {
   ok(context, new Error("useDailies was used outside of its Provider"));
   return context;
 }
+
+const updateDailyCallback = async (
+  user: User,
+  date: CalendarDate,
+  daily: Daily,
+  patch: Partial<Daily>,
+  setDailies: React.Dispatch<React.SetStateAction<Daily[]>>,
+  dailyRefreshKeys?: Option<Set<string>>,
+  fullRefreshKeys?: Option<Set<string>>,
+  triggerRefreshDailies: (this: unknown, ...args: unknown[]) => unknown = (..._: unknown[]) => {},
+  triggerRefreshQuestChains: () => Promise<void> = async () => {},
+  setIsPatching: React.Dispatch<React.SetStateAction<boolean>> = <T,>(value: T): T => value,
+  isDailiesRefreshPending: Option<boolean> = false,
+) => {
+  setDailies(prev =>
+    prev.map(d => {
+      if (d.pointId !== daily.pointId) return d;
+
+      const updated = { ...d, ...patch };
+
+      // Do not updated weighted points on dailies with a streak target.
+      // weighted points will be calculated with streak in dailies view.
+      if (d.streakTarget !== null) return updated;
+
+      if ("points" in patch || "weight" in patch) {
+        if (updated.points !== null) {
+          const complete = updated.points / updated.total;
+          updated.complete = complete;
+          updated.pointsWeighted = complete * updated.weight;
+        } else {
+          updated.complete = null;
+          updated.pointsWeighted = null;
+        }
+      }
+
+      return updated;
+    }),
+  );
+
+  const patchKeys = Object.keys(patch);
+
+  if (patchKeys.includes("chain")) triggerRefreshQuestChains();
+
+  if (dailyRefreshKeys) {
+    // If any of the following keys are updated, pull just this daily.
+    const triggerKeys: string[] = patchKeys.filter(item => dailyRefreshKeys.has(item));
+    if (triggerKeys.length > 0) {
+      setIsPatching(true);
+      const query_dailies = async (): Promise<void> => {
+        await invoke<Daily[]>("query_dailies", {
+          user: user.name,
+          quest_id: daily.questId,
+          start_date: date.toString(),
+          end_date: date.toString(),
+        })
+          .then(result =>
+            setDailies(prev => prev.map(d => (d.pointId === daily.pointId ? result[0] : d))),
+          )
+          .catch(console.error)
+          .finally(() => setIsPatching(false));
+      };
+      query_dailies();
+    }
+  }
+
+  if (fullRefreshKeys) {
+    // If any of the following keys are updated, pull all dailies.
+    const triggerKeysFull: string[] = patchKeys.filter(item => fullRefreshKeys.has(item));
+    if (triggerKeysFull.length > 0 && !isDailiesRefreshPending) {
+      triggerRefreshDailies(`updated key(s): ${triggerKeysFull.join(", ")}`);
+    }
+  }
+};
+
+export { updateDailyCallback };

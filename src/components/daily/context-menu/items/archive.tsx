@@ -13,7 +13,7 @@ type MenuOptionProps = {
   daily: Daily;
   menuTitle?: string;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
-  updateDaily: (pointId: string, patch: Partial<Daily>) => void;
+  updateDaily: (daily: Daily, patch: Partial<Daily>) => void;
   user_id: number;
 };
 
@@ -36,17 +36,15 @@ export default function ArchiveDailyMenuOption(props: MenuOptionProps) {
 async function setDailyArchived(
   daily: Daily,
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>,
-  updateDaily: (pointId: string, patch: Partial<Daily>) => void,
+  updateDaily: (daily: Daily, patch: Partial<Daily>) => void,
   user_id: number,
 ): Promise<void> {
   const now: CalendarDate = today(LOCAL_TZ);
 
   const archivedDate: string = formatDateTimeISO8601(now.toDate(LOCAL_TZ));
-  const patch = { points: null, archived: archivedDate };
+  const patch: Partial<Daily> = { points: null, archived: archivedDate };
 
-  daily = { ...daily, ...patch };
-
-  await invoke("handle_point_change", { daily: daily });
+  await invoke("handle_point_change", { daily: { ...daily, ...patch } });
   await invoke(`update_archived`, {
     user_id: user_id,
     quest_id: daily.questId,
@@ -55,5 +53,5 @@ async function setDailyArchived(
   });
 
   setPointsAction(null);
-  updateDaily(daily.pointId, patch);
+  updateDaily(daily, patch);
 }

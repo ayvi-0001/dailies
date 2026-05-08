@@ -17,6 +17,7 @@ import CardBorder from "./border";
 import { CardContent, CardStats, ContextMenuContent } from "./card";
 import { isDailyEditable } from "./editability";
 import EditModal from "./modals/edit";
+import { updateDailyCallback } from "./providers/dailies";
 import {
   DEFAULT_QUEST_TYPE_STYLES,
   QuestType,
@@ -150,53 +151,38 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
 
   ReactUse.useOnceEffect(() => setIsLoading(true), [dateRange]);
 
-  React.useEffect(() => {
+  ReactUse.useOnceEffect(() => {
     const query_dailies = async (): Promise<void> => {
-      const dailies = await cachedQueryQuestHistory(
-        user.name,
-        daily.questId,
-        dateRange!.start,
-        dateRange!.end,
-      );
-      setDailies(dailies);
-      setIsLoading(false);
+      await cachedQueryQuestHistory(user.name, daily.questId, dateRange!.start, dateRange!.end)
+        .then(result => setDailies(result))
+        .finally(() => setIsLoading(false));
     };
     query_dailies();
-  }, [daily, user, countRefreshDailies, dateRange]);
+  }, [user, countRefreshDailies, dateRange]);
 
-  const { run: triggerRefreshDailies } = ReactUse.useDebounceFn(() => {
+  const triggerRefreshDailies = React.useCallback(async () => {
     setCountRefreshDailies(c => c + 1);
-  }, 1000);
+  }, []);
 
   // TODO(ayvi): fix: updating note on a history card not immediately reflected on front-end
   // http://ayvi:3000/ayvi/dailies/issues/208
   const updateDaily = React.useCallback(
-    (pointId: string, patch: Partial<Daily>) => {
-      setDailies(prev =>
-        prev.map(d => {
-          if (d.pointId !== pointId) return d;
-          const updated = { ...d, ...patch };
-          if ("points" in patch || "weight" in patch) {
-            if (updated.points !== null) {
-              const complete = updated.points / updated.total;
-              updated.complete = complete;
-              updated.pointsWeighted = complete * updated.weight;
-            } else {
-              updated.complete = null;
-              updated.pointsWeighted = null;
-            }
-          }
-          return updated;
-        }),
-      );
-
-      const patchKeys = Object.keys(patch);
-      if (patchKeys.filter(k => ["points", "weight"].includes(k)).length > 0) {
-        triggerRefreshDailies();
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    (daily: Daily, patch: Partial<Daily>) =>
+      updateDailyCallback(
+        user,
+        parseDate(daily.date),
+        daily,
+        patch,
+        setDailies,
+        null,
+        new Set([
+          "points", // recalculate weighted points/total weight
+          "weight", // recalculate weighted points/total weight
+          "archived", // recalculate total weight
+        ]),
+        triggerRefreshDailies,
+      ),
+    [user, triggerRefreshDailies],
   );
 
   return (
@@ -238,7 +224,7 @@ type HistoryDailyCardProps = {
   minutelyRefresh: Date;
   questTypes: QuestType[];
   totalWeight: number;
-  updateDailyAction: (pointId: string, patch: Partial<Daily>) => void;
+  updateDailyAction: (daily: Daily, patch: Partial<Daily>) => void;
   user: User;
 };
 
@@ -326,6 +312,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
           disclosure={editDisclosure}
           setIsLoadingAction={setIsLoading}
           title={`${daily.name} (${daily.date})`}
+          updateDailyAction={updateDailyAction}
           user={user}
         />
       )}

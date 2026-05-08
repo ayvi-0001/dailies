@@ -69,7 +69,7 @@ export default async function editQuest(
 
   if (validatedFields.data?.typeId) {
     if (
-      [Quest.Type.QR, Quest.Type.QW].includes(originalValues.type) &&
+      [`${Quest.Type.QR}`, `${Quest.Type.QW}`].includes(originalValues.type) &&
       ![`${Quest.Type.QR}`, `${Quest.Type.QW}`].includes(validatedFields.data?.typeId)
     ) {
       validatedFields.data.days = originalValues.days;
@@ -172,11 +172,6 @@ export default async function editQuest(
       JSON.stringify(diff, Utils.sortKeysReplacer, 2),
     ]).join(" "),
   );
-
-  // @ts-expect-error: Updating `typeId` to `type` so changes apply in DailiesProvider setDailies
-  diff.type = diff?.typeId;
-  // @ts-expect-error: ^^^
-  delete diff.typeId;
 
   return diff;
 }

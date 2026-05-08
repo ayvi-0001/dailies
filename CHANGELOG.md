@@ -11,11 +11,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Improved
+
+- Refresh dailies logic. Pull full list only when necessary, pull individual quest updates where possible.
+
 ### Fixed
 
 - Previously uncaught issue where sorting cards in Quest list was broken.
 - Issue where streaks wouldn't continue if points were greater than total or 1 >= `complete` > 0.
 - Set max requirements for quest type `q-w-s` to 6.
+- Issue where updating too many points in a short time triggered inconsistent toasts in exp-bar.
+- Issue where updating cards in history didn't reflect changes until refresh.
+- Issue where editing cards visually removed the quest `type` field.
 
 ## [v.0.2.5]
 

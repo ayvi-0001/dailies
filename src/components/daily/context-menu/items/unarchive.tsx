@@ -11,7 +11,7 @@ type MenuOptionProps = {
   daily: Daily;
   menuTitle?: string;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
-  updateDaily: (pointId: string, patch: Partial<Daily>) => void;
+  updateDaily: (daily: Daily, patch: Partial<Daily>) => void;
   user_id: number;
 };
 
@@ -34,14 +34,12 @@ export default function RestoreDailyMenuOption(props: MenuOptionProps) {
 async function setDailyRestored(
   daily: Daily,
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>,
-  updateDaily: (pointId: string, patch: Partial<Daily>) => void,
+  updateDaily: (daily: Daily, patch: Partial<Daily>) => void,
   user_id: number,
 ): Promise<void> {
-  const patch = { points: daily.defaultPoints, archived: null };
+  const patch: Partial<Daily> = { points: daily.defaultPoints, archived: null };
 
-  daily = { ...daily, ...patch };
-
-  await invoke("handle_point_change", { daily: daily });
+  await invoke("handle_point_change", { daily: { ...daily, ...patch } });
   await invoke(`update_archived`, {
     user_id: user_id,
     quest_id: daily.questId,
@@ -50,5 +48,5 @@ async function setDailyRestored(
   });
 
   setPointsAction(`${daily.defaultPoints}`);
-  updateDaily(daily.pointId, patch);
+  updateDaily(daily, patch);
 }

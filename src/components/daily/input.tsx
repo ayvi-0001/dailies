@@ -18,7 +18,7 @@ type PointsInputProps = {
   disabled?: boolean;
   points: Option<string>;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
-  updateDailyAction: (pointId: string, patch: Partial<Daily>) => void;
+  updateDailyAction: (daily: Daily, patch: Partial<Daily>) => void;
 };
 
 export default function PointsInput(props: PointsInputProps): React.ReactNode {

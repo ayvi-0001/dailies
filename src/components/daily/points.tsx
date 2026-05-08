@@ -32,11 +32,7 @@ export default function PointsDisplay(props: PointsDisplayProps): React.ReactNod
 
   const elements: React.ReactElement[] = [];
 
-  if (
-    (daily.streak && daily.streak > 0) ||
-    daily.streakTarget ||
-    (daily.previousStreak && daily.previousStreak > 0)
-  )
+  if (+`${daily.streak}` > 0 || daily.streakTarget || +`${daily.previousStreak}` > 0)
     elements.push(<Streak daily={daily} textClassValue={textClassValue} />);
 
   elements.push(
@@ -182,8 +178,7 @@ const Streak = ({
   daily: Daily;
   textClassValue?: ClassValue;
 }): React.ReactElement => {
-  const continueStreak: boolean =
-    daily.streak === 0 && !!(daily.previousStreak && daily.previousStreak > 0);
+  const continueStreak: boolean = daily.streak === 0 && !!(+`${daily.previousStreak}` > 0);
 
   return (
     <Tooltip content="Streak">
@@ -191,7 +186,7 @@ const Streak = ({
         <p className={cn(textClassValue, "italic", clsx(continueStreak && "opacity-50"))}>
           {daily.streak || daily.previousStreak ? (
             <span>
-              {daily.streak && daily.streak > 0
+              {+`${daily.streak}` > 0
                 ? daily.streak
                 : daily.previousStreak
                   ? daily.previousStreak + 1

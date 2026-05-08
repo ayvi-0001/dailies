@@ -7,7 +7,7 @@ import editQuest, { EditQuestState } from "@/actions/edit-quest";
 import { User } from "@/app/providers/user";
 import type { Option } from "@/types/option";
 
-import { DailiesState, Daily, useDailies } from "../../daily";
+import type { Daily } from "../../daily";
 import EditDailyForm from "../forms/edit";
 import { QuestType, useQuestTypes } from "../providers/quest-types";
 
@@ -23,13 +23,13 @@ type EditModalProps = {
   historic?: boolean;
   setIsLoadingAction: React.Dispatch<React.SetStateAction<boolean>>;
   title: string;
+  updateDailyAction: (daily: Daily, patch: Partial<Daily>) => void;
   user: User;
 };
 
 export default function EditModal(props: EditModalProps): React.ReactNode {
-  const { daily, historic, disclosure, setIsLoadingAction, title, user } = props;
+  const { daily, historic, disclosure, setIsLoadingAction, title, updateDailyAction, user } = props;
 
-  const dailiesState: DailiesState = useDailies();
   const questTypes: QuestType[] = useQuestTypes();
 
   const formRef: React.RefObject<Option<HTMLFormElement>> = React.useRef(null);
@@ -47,7 +47,7 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
     async (state: EditQuestState, payload: FormData): Promise<EditQuestState> => {
       setIsLoadingAction(true);
 
-      const diff = (await editQuest(
+      const diff: Partial<Daily> = (await editQuest(
         state,
         payload,
         daily,
@@ -57,7 +57,7 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
       )) as Partial<Daily>;
 
       if (!Object.hasOwn(diff, "errors")) {
-        dailiesState.updateDaily(daily.pointId, diff);
+        updateDailyAction(daily, diff);
       }
 
       setIsOpen(true);

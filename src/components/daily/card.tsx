@@ -35,7 +35,7 @@ type DailyCardProps = {
   daily: Daily;
   minutelyRefresh: Date;
   totalWeight: number;
-  updateDaily: (pointId: string, patch: Partial<Daily>) => void;
+  updateDaily: (daily: Daily, patch: Partial<Daily>) => void;
   user: User;
 };
 
@@ -128,6 +128,7 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
           disclosure={editDisclosure}
           setIsLoadingAction={setIsLoading}
           title={daily.name}
+          updateDailyAction={updateDaily}
           user={user}
         />
       )}
@@ -186,7 +187,7 @@ type CardStatsProps = {
   disabled?: boolean;
   points: Option<string>;
   totalWeight: number;
-  updateDailyAction: (pointId: string, patch: Partial<Daily>) => void;
+  updateDailyAction: (daily: Daily, patch: Partial<Daily>) => void;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
 };
 
@@ -216,7 +217,7 @@ type ContextMenuContentProps = {
   editOnOpenAction: () => void;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
   toggleHistoryAction?: () => void;
-  updateDailyAction: (pointId: string, patch: Partial<Daily>) => void;
+  updateDailyAction: (daily: Daily, patch: Partial<Daily>) => void;
   user_id: number;
 };
 

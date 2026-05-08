@@ -120,7 +120,7 @@ export type QuestChainProps = {
   minutelyRefresh: Date;
   setDailiesAction: React.Dispatch<React.SetStateAction<Daily[]>>;
   totalWeight: number;
-  updateDaily: (pointId: string, patch: Partial<Daily>) => void;
+  updateDaily: (daily: Daily, patch: Partial<Daily>) => void;
   user: User;
 };
 

@@ -11,7 +11,7 @@ type MenuOptionProps = {
   menuTitle?: string;
   daily: Daily;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
-  updateDaily: (pointId: string, patch: Partial<Daily>) => void;
+  updateDaily: (daily: Daily, patch: Partial<Daily>) => void;
 };
 
 export default function AbandonDailyMenuOption(props: MenuOptionProps) {
@@ -33,10 +33,10 @@ export default function AbandonDailyMenuOption(props: MenuOptionProps) {
 async function setDailyPointsNull(
   daily: Daily,
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>,
-  updateDaily: (pointId: string, patch: Partial<Daily>) => void,
+  updateDaily: (daily: Daily, patch: Partial<Daily>) => void,
 ): Promise<void> {
-  daily.points = null;
+  const patch: Partial<Daily> = { points: null };
+  await invoke("handle_point_change", { daily: { ...daily, ...patch } });
   setPointsAction(null);
-  updateDaily(daily.pointId, { points: null });
-  await invoke("handle_point_change", { daily: daily });
+  updateDaily(daily, patch);
 }

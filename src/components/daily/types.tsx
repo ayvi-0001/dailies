@@ -30,10 +30,10 @@ export type Daily = {
   days: Option<number[]>;
   description: Option<string>;
   note: Option<string>;
-  streak: Readonly<Option<number>>;
-  previousStreak: Readonly<Option<number>>;
-  complete: Readonly<Option<number>>;
-  pointsWeighted: Readonly<Option<number>>;
+  streak: Option<number>;
+  previousStreak: Option<number>;
+  complete: Option<number>;
+  pointsWeighted: Option<number>;
 };
 
 export type Quest = {
@@ -53,7 +53,6 @@ export type Quest = {
   archived: Option<string>;
   days: Option<number[]>;
   description: Option<string>;
-  streak: Readonly<Option<number>>;
 };
 
 export type QuestChain = {

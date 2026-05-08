@@ -26,7 +26,7 @@ type NumpadPopoverProps = {
   points: Option<string>;
   setOpenAction: (value: boolean) => void;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
-  updateDailyAction: (pointId: string, patch: Partial<Daily>) => void;
+  updateDailyAction: (daily: Daily, patch: Partial<Daily>) => void;
 };
 
 export function NumpadPopover(props: NumpadPopoverProps): React.ReactElement {
@@ -55,36 +55,35 @@ export function NumpadPopover(props: NumpadPopoverProps): React.ReactElement {
   React.useEffect(() => void (pointsRef.current = points), [points]);
 
   const commit = async (): Promise<void> => {
-    const next = pointsRef.current;
-    const restore = restorePointsRef.current;
+    const next: Option<string> = pointsRef.current;
+    const restore: Option<string> = restorePointsRef.current;
 
     if (next === restore) return;
 
     if (next === null) {
+      const patch: Partial<Daily> = { points: null };
+      await invoke<Daily[]>("handle_point_change", { daily: { ...daily, ...patch } });
       setPointsAction(null);
-      updateDailyAction(daily.pointId, { points: null });
-      daily.points = null;
-      await invoke<Daily[]>("handle_point_change", { daily });
+      updateDailyAction(daily, patch);
       return;
     } else if (`${next}`.trim() === "") {
+      const patch: Partial<Daily> = { points: 0 };
+      await invoke<Daily[]>("handle_point_change", { daily: { ...daily, ...patch } });
       setPointsAction(`${0}`);
-      updateDailyAction(daily.pointId, { points: 0 });
-      daily.points = 0;
-      await invoke<Daily[]>("handle_point_change", { daily });
+      updateDailyAction(daily, patch);
       return;
     }
 
-    const pointsEval = +`${next}`;
+    const pointsEval: number = +`${next}`;
     if (Number.isNaN(pointsEval)) {
       toast.error("Invalid value", { description: `${next} not a valid numeric value.` });
       setPointsAction(restore);
       return;
     }
-
+    const patch: Partial<Daily> = { points: pointsEval };
+    await invoke<Daily[]>("handle_point_change", { daily: { ...daily, ...patch } });
     setPointsAction(pointsEval.toString());
-    daily.points = pointsEval;
-    updateDailyAction(daily.pointId, { points: pointsEval });
-    await invoke<Daily[]>("handle_point_change", { daily });
+    updateDailyAction(daily, patch);
   };
 
   const handleOpenChange = (next: boolean): void => {
@@ -319,7 +318,7 @@ type NumpadInputCellProps = {
   points: Option<string>;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
   textClassValue: ClassValue;
-  updateDailyAction: (pointId: string, patch: Partial<Daily>) => void;
+  updateDailyAction: (daily: Daily, patch: Partial<Daily>) => void;
 };
 
 export function NumpadInputCell(props: NumpadInputCellProps): React.ReactElement {
@@ -340,7 +339,7 @@ export function NumpadInputCell(props: NumpadInputCellProps): React.ReactElement
       setNumpadOpen(false);
       toggleLongPressed();
     },
-    1000,
+    2000,
     { immediate: false },
   );
 
@@ -350,7 +349,7 @@ export function NumpadInputCell(props: NumpadInputCellProps): React.ReactElement
 
     toggleLongPressed();
     setPointsAction(`${daily.total}`);
-    updateDailyAction(daily.pointId, { points: daily.total });
+    updateDailyAction(daily, { points: daily.total });
     daily.points = daily.total;
     await invoke<Daily[]>("handle_point_change", { daily });
     if (!isPending) resetLongPressed();
