@@ -1449,7 +1449,7 @@ pub async fn get_weekly_sum_type_stats(
                 SELECT
                   point_id,
                   date,
-                  SUM(CASE WHEN points IS NOT NULL THEN points ELSE 0 END) OVER(ORDER BY date ROWS BETWEEN 7 PRECEDING AND CURRENT ROW) AS weekly_sum_rolling
+                  SUM(CASE WHEN points IS NOT NULL THEN points ELSE 0 END) OVER(ORDER BY date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS weekly_sum_rolling
                 FROM
                   "dailies"
                 WHERE
