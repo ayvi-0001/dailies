@@ -10,6 +10,38 @@ use crate::dailies::{enums::EnumMatch, requirements::Requirements};
 #[serde(rename_all = "camelCase")]
 #[serde_as]
 pub struct Quest {
+    pub id: String,
+    pub user_id: i64,
+    pub sequence: i64,
+    pub chain: String,
+    pub name: String,
+    pub r#type_id: QuestType,
+    pub weight: f64,
+    pub total: f64,
+    pub default_points: f64,
+    #[serde_as(as = "NaiveDateTime")]
+    pub accepted: NaiveDateTime,
+    #[serde_as(as = "Option<NaiveDateTime>")]
+    pub archived: Option<NaiveDateTime>,
+    #[serde_as(as = "Option<i64>")]
+    pub streak_target: Option<i64>,
+    pub requirements: Option<Requirements>,
+    #[serde_as(as = "Option<NaiveTime>")]
+    pub time_start: Option<NaiveTime>,
+    #[serde_as(as = "Option<NaiveTime>")]
+    pub time_end: Option<NaiveTime>,
+    #[serde_as(as = "Option<Json<Vec<i64>>>")]
+    pub days: Option<Json<Vec<i64>>>,
+    #[serde_as(as = "Option<String>")]
+    pub description: Option<String>,
+    #[serde(default = "chrono::offset::Local::now")]
+    pub updated: DateTime<Local>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Decode, sqlx::Encode, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+#[serde_as]
+pub struct NewQuest {
     /// Id can be null when sent from front-end on new quest.
     #[serde(skip_deserializing)]
     pub id: String,

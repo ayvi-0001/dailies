@@ -11,7 +11,7 @@ use tokio::sync::{Mutex, MutexGuard};
 
 crate::mod_pub!(daily, enums, quest, point, requirements);
 
-use crate::{dailies::{daily::Daily, enums::SortDirection, point::TotalPointEval, quest::{Quest, QuestChain, QuestSequence, QuestType, QuestTypeRecord, QuestTypeStyles, WeeklyQuestStats}, requirements::Requirements}, db::user::User, state, state::app_handle, utils};
+use crate::{dailies::{daily::Daily, enums::SortDirection, point::TotalPointEval, quest::{NewQuest, QuestChain, QuestSequence, QuestType, QuestTypeRecord, QuestTypeStyles, WeeklyQuestStats}, requirements::Requirements}, db::user::User, state, state::app_handle, utils};
 
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn query_dailies(
@@ -219,7 +219,7 @@ pub async fn delete_daily(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn insert_quest(
     state: tauri::State<'_, Mutex<state::AppState>>,
-    quest: Quest,
+    quest: NewQuest,
 ) -> Result<(), crate::errors::Error> {
     let guard: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = guard.db.pool.acquire().await?;
