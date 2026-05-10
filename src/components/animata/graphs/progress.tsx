@@ -49,7 +49,7 @@ export default function Progress<T>(props: ProgressProps<T>): React.ReactElement
                 !highlight,
             })}
             style={{
-              transitionDelay: highlight ? `${index * 5}ms` : "0ms",
+              transitionDelay: highlight ? `${index * 50}ms` : "0ms",
             }}
           />
         );
