@@ -92,11 +92,11 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
           size={40}
           visibility="auto"
         >
-          {dailiesState.questChains?.map((chain, idx) => (
+          {dailiesState.questChains?.map((value, idx) => (
             <QuestChain
               key={idx}
-              chain={chain}
-              dailies={groupedDailies[chain] ?? []}
+              chain={value.chain}
+              dailies={groupedDailies[value.chain] ?? []}
               isAllQuestChainsCollapsed={isAllQuestChainsCollapsed}
               isDailyFilteredAction={isDailyFilteredAction}
               minutelyRefresh={minutelyRefresh}

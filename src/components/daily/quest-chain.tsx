@@ -184,10 +184,11 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
 
   ReactUse.useOnceEffect(() => {
     const get_collapsed = async () => {
-      await invoke<boolean>("get_quest_chain_collapsed", {
+      const args: getQuestChainCollapsedInvokeArgs = {
         user_id: user.id,
         chain: chain,
-      }).then(result => {
+      };
+      await invoke<boolean>("get_quest_chain_collapsed", args).then(result => {
         setIsQuestChainCollapsed(result);
         if (result) setSelectedKeys(new Set([]));
         else setSelectedKeys(new Set([chain]));
@@ -306,12 +307,12 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
   );
 }
 
-enum SortDirection {
+export enum SortDirection {
   Up = "up",
   Down = "down",
 }
 
-type UpdateSequenceArgs = {
+type UpdateQuestSequenceInvokeArgs = {
   user_id: number;
   chain: string;
   quest_id: string;
@@ -344,14 +345,14 @@ function handleDragEnd(
     Math.sign(activeIndex - overIndex) == 1 ? SortDirection.Up : SortDirection.Down;
 
   if (active.id !== over?.id) {
-    const updateSequenceArgs: UpdateSequenceArgs = {
+    const args: UpdateQuestSequenceInvokeArgs = {
       user_id: userId,
       chain: chain,
       quest_id: activeQuest.questId,
       sequence: overId,
       sort_direction: shiftDirection,
     };
-    invoke("update_sequence", updateSequenceArgs);
+    invoke("update_quest_sequence", args);
 
     setDailies(items => {
       items = arrayMove(
@@ -623,3 +624,8 @@ function QuestsFilterMenu(props: QuestsFilterProps): React.ReactElement {
     </heroui.Dropdown>
   );
 }
+
+type getQuestChainCollapsedInvokeArgs = {
+  user_id: number;
+  chain: string;
+};

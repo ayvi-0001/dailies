@@ -85,7 +85,12 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
           setQuestTypesAction={setQuestType}
         />
       )}
-      {!historic && <DailyForm.ChainField daily={daily} questChains={dailiesState.questChains} />}
+      {!historic && (
+        <DailyForm.ChainField
+          daily={daily}
+          questChains={dailiesState.questChains.map(v => v.chain)}
+        />
+      )}
       <div className="flex w-full flex-row gap-2">
         <DailyForm.TotalField setTotalAction={setTotal} total={total} />
         {!historic && (

@@ -18,11 +18,17 @@ export default function App(): React.ReactElement {
       );
       return <Modal />;
     }
-    case ModalParam.Stats: {
+    case ModalParam.QuestChains: {
       const Modal: React.ComponentType = dynamic(
-        () => import(`./stats`).then(mod => mod.default),
+        () => import(`./quest-chains`).then(mod => mod.default),
         { ssr: false },
       );
+      return <Modal />;
+    }
+    case ModalParam.Stats: {
+      const Modal: React.ComponentType = dynamic(() => import(`./stats`).then(mod => mod.default), {
+        ssr: false,
+      });
       return <Modal />;
     }
     default: {

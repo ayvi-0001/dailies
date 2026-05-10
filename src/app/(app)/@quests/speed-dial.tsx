@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { exit } from "@tauri-apps/plugin-process";
 import {
+  BookMarkedIcon,
   BookPlusIcon,
   BoxIcon,
   CircleXIcon,
@@ -28,6 +29,13 @@ export default function App(): React.ReactElement {
 
   // TODO(ayvi): unhide export/import functions
   const actionButtons = [
+    {
+      icon: <BookMarkedIcon size={14} stroke="#f0f0ff" />,
+      label: <p className="text-xs">Quest Chains</p>,
+      key: "add",
+      buttonAction: () =>
+        updateParam(router, searchParams, [{ key: "modal", value: ModalParam.QuestChains }]),
+    },
     {
       icon: <BookPlusIcon size={14} stroke="#f0f0ff" />,
       label: <p className="text-xs">Add Quest</p>,

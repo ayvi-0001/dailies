@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Quest chain sorting menu.
+
 ### Improved
 
 - Refresh dailies logic. Pull full list only when necessary, pull individual quest updates where possible.

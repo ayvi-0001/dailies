@@ -100,9 +100,8 @@ pub async fn query_quest_chains(
             WHERE
               user_id = $1
             ORDER BY
-              chain;
+              sequence;
         "#,
-        // TODO(ayvi): add sorting to quest chains
         user_id,
     )
     .fetch_all(&state.db.pool)
@@ -777,7 +776,7 @@ pub async fn update_archived(
 }
 
 #[tauri::command(async, rename_all = "snake_case")]
-pub async fn update_sequence(
+pub async fn update_quest_sequence(
     state: tauri::State<'_, Mutex<state::AppState>>,
     user_id: i64,
     chain: String,
@@ -788,11 +787,6 @@ pub async fn update_sequence(
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
-
-    state
-        .db
-        .register_sqlite_sha1_functions(conn)
-        .await?;
 
     let mut tx: Transaction<'_, Sqlite> = conn.begin().await?;
 
@@ -882,6 +876,36 @@ pub async fn update_sequence(
     tx.commit().await?;
 
     Ok(rows?)
+}
+
+#[tauri::command(async, rename_all = "snake_case")]
+pub async fn update_quest_chain_sequence(
+    state: tauri::State<'_, Mutex<state::AppState>>,
+    quest_chains: Vec<QuestChain>,
+) -> Result<(), crate::errors::Error> {
+    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+    let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
+    let conn: &mut SqliteConnection = pool.acquire().await?;
+
+    let mut tx: Transaction<'_, Sqlite> = conn.begin().await?;
+
+    for chain in quest_chains {
+        sqlx::query!(
+            r#"
+                UPDATE "quest_chains"
+                SET sequence = $1
+                WHERE id = $2;
+            "#,
+            chain.sequence,
+            chain.id,
+        )
+        .execute(&mut *tx)
+        .await?;
+    }
+
+    tx.commit().await?;
+
+    Ok(())
 }
 
 #[tauri::command(async)]

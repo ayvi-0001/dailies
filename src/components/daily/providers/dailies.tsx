@@ -26,12 +26,14 @@ export type DailiesState = {
   setDate: React.Dispatch<React.SetStateAction<CalendarDate>>;
   dailies: Daily[];
   setDailies: React.Dispatch<React.SetStateAction<Daily[]>>;
-  questChains: string[];
+  questChains: QuestChain[];
+  setQuestChains: React.Dispatch<React.SetStateAction<QuestChain[]>>;
   totalPoints: number;
   setTotalPoints: React.Dispatch<React.SetStateAction<number>>;
   totalWeight: number;
   setTotalWeight: React.Dispatch<React.SetStateAction<number>>;
   triggerRefreshDailies: () => void;
+  triggerRefreshQuestChains: () => void;
   isLoading: boolean;
   updateDaily: (daily: Daily, patch: Partial<Daily>) => void;
 };
@@ -44,7 +46,7 @@ type DailiesProviderProps = {
 
 export default function DailiesProvider(props: DailiesProviderProps): React.ReactElement {
   const [dailies, setDailies] = React.useState<Daily[]>([]);
-  const [questChains, setQuestChains] = React.useState<string[]>([]);
+  const [questChains, setQuestChains] = React.useState<QuestChain[]>([]);
   const [totalPoints, setTotalPoints] = React.useState<number>(0);
   const [totalWeight, setTotalWeight] = React.useState<number>(0);
 
@@ -97,7 +99,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
   ReactUse.useOnceEffect(() => {
     const query_quest_chains = async (): Promise<void> => {
       await invoke<QuestChain[]>("query_quest_chains", { user_id: user.id })
-        .then(quest_chains => setQuestChains(quest_chains.map(value => value.chain)))
+        .then(result => setQuestChains(result))
         .catch(console.error);
     };
     query_quest_chains();
@@ -196,11 +198,13 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
       dailies,
       setDailies,
       questChains,
+      setQuestChains,
       totalPoints,
       setTotalPoints,
       totalWeight,
       setTotalWeight,
       triggerRefreshDailies,
+      triggerRefreshQuestChains,
       isLoading,
       updateDaily,
     };
@@ -211,6 +215,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
     totalPoints,
     totalWeight,
     triggerRefreshDailies,
+    triggerRefreshQuestChains,
     isLoading,
     updateDaily,
   ]);

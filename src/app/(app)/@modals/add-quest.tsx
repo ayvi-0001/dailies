@@ -42,6 +42,11 @@ export default function Modal(): React.ReactElement {
       const result = (await addQuest(state, payload)) as AddQuestErrors;
 
       dailiesState.triggerRefreshDailies();
+
+      const chain = payload.get("chain")?.toString();
+      if (chain && !dailiesState.questChains.map(v => v.chain).includes(chain))
+        dailiesState.triggerRefreshQuestChains();
+
       router.replace(getReturnPathname(), { scroll: false });
 
       return result;
