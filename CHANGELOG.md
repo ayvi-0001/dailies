@@ -11,6 +11,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v0.2.6]
+
 ### Added
 
 - Quest chain sorting menu.
