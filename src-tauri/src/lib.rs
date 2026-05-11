@@ -95,6 +95,8 @@ pub fn run() {
             build_info::vergen_cargo_target_triple,
             build_info::vergen_git_branch,
             build_info::vergen_git_describe,
+            build_info::vergen_git_dirty,
+            build_info::vergen_git_sha,
             config::get_key_as_bool,
             config::get_key_as_float,
             config::get_key_as_int,

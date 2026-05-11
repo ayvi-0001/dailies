@@ -1,14 +1,19 @@
 #[tauri::command()]
 pub fn vergen_git_describe() -> String {
-    format!(
-        "{}{}",
-        env!("VERGEN_GIT_DESCRIBE"),
-        if env!("VERGEN_GIT_DIRTY") == "true" {
-            format!("-dev+{}-{}", env!("GIT_INSERTIONS"), env!("GIT_DELETIONS"))
-        } else {
-            "".into()
-        }
-    )
+    env!("VERGEN_GIT_DESCRIBE").into()
+}
+
+#[tauri::command()]
+pub fn vergen_git_dirty() -> Option<String> {
+    if env!("VERGEN_GIT_DIRTY") == "true" {
+        Some(format!(
+            "-dev+{}-{}",
+            env!("GIT_INSERTIONS"),
+            env!("GIT_DELETIONS")
+        ))
+    } else {
+        None
+    }
 }
 
 #[tauri::command()]
@@ -19,6 +24,11 @@ pub fn vergen_cargo_target_triple() -> String {
 #[tauri::command()]
 pub fn vergen_git_branch() -> String {
     env!("VERGEN_GIT_BRANCH").into()
+}
+
+#[tauri::command()]
+pub fn vergen_git_sha() -> String {
+    env!("VERGEN_GIT_SHA").into()
 }
 
 #[tauri::command()]

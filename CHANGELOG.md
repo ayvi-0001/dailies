@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- App 'About' page (version/build date/target/etc.).
+
 ## [v0.2.6]
 
 ### Added

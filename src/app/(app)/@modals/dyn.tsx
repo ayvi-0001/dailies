@@ -18,6 +18,13 @@ export default function App(): React.ReactElement {
       );
       return <Modal />;
     }
+    case ModalParam.BuildInfo: {
+      const Modal: React.ComponentType = dynamic(
+        () => import(`./build-info`).then(mod => mod.default),
+        { ssr: false },
+      );
+      return <Modal />;
+    }
     case ModalParam.QuestChains: {
       const Modal: React.ComponentType = dynamic(
         () => import(`./quest-chains`).then(mod => mod.default),

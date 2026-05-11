@@ -4,12 +4,12 @@ import * as React from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import * as ReactUse from "@reactuses/core";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
 
-import type { AppBuildInfo } from "@/lib/app-build";
-import getAppBuild from "@/lib/app-build";
-import { invoke } from "@/lib/tauri";
-import { call } from "@/lib/utils";
-import { Option } from "@/types/option";
+import { ModalParam } from "@/app/(app)/@modals/params";
+import { AppMetaState, useAppMetaState } from "@/app/providers/app-meta";
+import { updateParam } from "@/lib/params";
 
 import DevConsole from "./dev-console";
 
@@ -26,17 +26,10 @@ export const defaultElement = "footer";
 export default function AppBuildInfo<E extends React.ElementType = typeof defaultElement>({
   as,
 }: PolymorphicProps<E>): React.ReactElement {
-  const [appBuild, setAppBuild] = React.useState<Option<AppBuildInfo>>(null);
-  const [vergenGitDescribe, setVergenGitDescribe] = React.useState<string>("");
-  const [vergenBuildDate, setVergenBuildDate] = React.useState<string>("");
-  const [vergenCargoTargetTriple, setVergenCargoTargetTriple] = React.useState<string>("");
+  const appMeta: AppMetaState = useAppMetaState();
 
-  React.useEffect((): void => {
-    call(async () => setAppBuild(await getAppBuild()));
-    invoke<string>("vergen_cargo_target_triple").then(value => setVergenCargoTargetTriple(value));
-    invoke<string>("vergen_build_date").then(value => setVergenBuildDate(value));
-    invoke<string>("vergen_git_describe").then(value => setVergenGitDescribe(value));
-  }, []);
+  const router: AppRouterInstance = useRouter();
+  const searchParams: ReadonlyURLSearchParams = useSearchParams();
 
   const { value: devTerminalOpen, toggle: toggleOpen } = ReactUse.useBoolean(false);
 
@@ -67,37 +60,32 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
     setLastClickTime(Date.now());
   };
 
-  const Info = ({
-    textClassValue = "text-[9px]/4 leading-none tracking-tighter text-white/50",
-  }: {
-    textClassValue?: string;
-  }): React.ReactElement => (
-    // TODO(ayvi): show dep versions on 'about' page http://ayvi:3000/ayvi/dailies/issues/185
-    // {
-    //   <p className={textClassValue}>
-    //     {process.env.NEXT_VERSION && (
-    //       <span className={textClassValue}>{`Nextjs@${process.env.NEXT_VERSION} | `}</span>
-    //     )}
-    //     {appBuild?.tauriVersion && (
-    //       <span className={textClassValue}>{`Tauri v${appBuild?.tauriVersion}`}</span>
-    //     )}
-    //   </p>
-    // }
-    // <p className={textClassValue}>
-    //   {process.env.NODE_ENV == "development" ? "dev" : "prod"}{" "}
-    // </p>
+  const longPressEvent = ReactUse.useLongPress(
+    () => {
+      updateParam(router, searchParams, [{ key: "modal", value: ModalParam.BuildInfo }]);
+    },
+    {
+      isPreventDefault: false,
+      delay: 700,
+    },
+  );
 
-    <div className="cursor-move pr-2 text-right select-none">
-      {/* <p className={textClassValue}>
-        {appBuild?.identifier && appBuild.identifier}
-        {appBuild?.version && ` v${appBuild.version}`}
-      </p> */}
-      <p className={textClassValue}>git:{vergenGitDescribe}</p>
-      <p className={textClassValue}>
-        {vergenCargoTargetTriple && ` ${vergenCargoTargetTriple}`} {vergenBuildDate}
+  const Info = (): React.ReactElement => (
+    <span className="text-right text-[9px]/4 leading-none tracking-tighter text-white/50 select-none">
+      <p>
+        {appMeta.cargoTargetTriple && ` ${appMeta.cargoTargetTriple} `}
+        {appMeta.buildDate}
       </p>
-      {appBuild?.bundleType ? <p className={textClassValue}>{appBuild?.bundleType}</p> : null}
-    </div>
+      <p>
+        {appMeta.gitDescribe}
+        {appMeta.gitDescribe &&
+          appMeta.gitSha &&
+          !/g\w{7}/.test(appMeta.gitDescribe) &&
+          `-g${appMeta.gitSha.slice(0, 7)}`}
+        {appMeta.gitDirty}
+      </p>
+      {appMeta.buildInfo?.bundleType && <p>{appMeta.buildInfo?.bundleType}</p>}
+    </span>
   );
 
   switch (as) {
@@ -107,11 +95,13 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
           <React.Suspense>
             <DevConsole open={devTerminalOpen} toggleOpenAction={toggleOpen} />
           </React.Suspense>
-          <DragRegion onClick={handleClick} />
+          <DragRegion />
           <header
+            {...longPressEvent}
             data-tauri-drag-region
-            className="fixed top-2 right-2 z-999 mt-2 mr-2 bg-transparent"
+            className="fixed top-4 right-6 z-999 bg-transparent"
             id="app-build-info"
+            onClick={handleClick}
           >
             <Info />
           </header>
@@ -126,9 +116,11 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
           </React.Suspense>
           <DragRegion onClick={handleClick} />
           <footer
+            {...longPressEvent}
             data-tauri-drag-region
-            className="fixed right-2 bottom-2 z-999 m-5 bg-transparent"
+            className="fixed right-6 bottom-4 z-999 bg-transparent"
             id="app-build-info"
+            onClick={handleClick}
           >
             <Info />
           </footer>
@@ -144,7 +136,7 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
 const DragRegion = (props: React.ComponentProps<"div">): React.ReactElement => (
   <div
     data-tauri-drag-region
-    className="absolute inset-0 top-0 z-1000 h-8 w-screen cursor-move"
+    className="absolute inset-0 top-0 z-1000 h-4 w-screen cursor-move"
     id="data-tauri-drag-region"
     {...props}
   />
