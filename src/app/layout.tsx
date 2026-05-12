@@ -49,7 +49,9 @@ export default function RootLayout(pages: Pages): React.ReactNode {
       </head>
       <body className="touch-none overflow-hidden select-none">
         <Providers>
-          <AppBuildInfo as="header" />
+          <React.Suspense>
+            <AppBuildInfo as="header" />
+          </React.Suspense>
           <Toaster />
           <div className="fixed z-1 flex h-screen w-screen bg-transparent py-15" id="layout">
             {children}
