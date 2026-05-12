@@ -147,6 +147,7 @@ pub fn run() {
             db::session::truncate_sessions,
             db::user::create_user,
             db::user::get_user,
+            db::user::update_password,
             db::user::verify_user,
             state::get_jwt_secret,
         ])

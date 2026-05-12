@@ -3,4 +3,5 @@ export enum ModalParam {
   BuildInfo = "BuildInfo",
   QuestChains = "quest-chains",
   Stats = "stats",
+  User = "user",
 }

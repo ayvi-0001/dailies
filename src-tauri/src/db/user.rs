@@ -118,7 +118,58 @@ pub async fn verify_user<'a>(
             let password_hash = PasswordHash::new(&hash).map_err(Error::Argon2)?;
             match argon2.verify_password(password.as_bytes(), &password_hash) {
                 Ok(_) => Ok(()),
-                Err(_) => Err(Error::User(UserError::InvalidPassword)),
+                Err(_) => Err(Error::User(UserError::IncorrectPassword)),
+            }
+        }
+        Err(e) => Err(e),
+    }
+}
+
+#[tauri::command(async, rename_all = "snake_case")]
+pub async fn update_password<'a>(
+    state: tauri::State<'a, Mutex<state::AppState>>,
+    user_id: i64,
+    current_password: &'a str,
+    new_password: &'a str,
+) -> Result<(), crate::errors::Error> {
+    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+    let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
+    let conn: &mut SqliteConnection = pool.acquire().await?;
+
+    let stored_hash: Result<String, Error> = sqlx::query_scalar!(
+        r#"SELECT password AS "password!" FROM "users" WHERE id = $1 LIMIT 1;"#,
+        user_id
+    )
+    .fetch_one(&mut *conn)
+    .await
+    .map_err(|_| Error::User(UserError::UnknownUser));
+
+    let argon2 = Argon2::default();
+
+    match stored_hash {
+        Ok(hash) => {
+            let stored_password_hash = PasswordHash::new(&hash).map_err(Error::Argon2)?;
+            match argon2.verify_password(current_password.as_bytes(), &stored_password_hash) {
+                Ok(_) => {
+                    let salt = SaltString::generate(&mut OsRng);
+                    let argon2 = Argon2::default();
+                    let new_password_hash = argon2
+                        .hash_password(new_password.as_bytes(), &salt)?
+                        .to_string();
+
+                    let result: SqliteQueryResult = sqlx::query!(
+                        r#"UPDATE "users" SET password = $1 WHERE id = $2;"#,
+                        new_password_hash,
+                        user_id,
+                    )
+                    .execute(&mut *conn)
+                    .await?;
+
+                    log::info!("{result:?}");
+
+                    Ok(())
+                }
+                Err(_) => Err(Error::User(UserError::IncorrectPassword)),
             }
         }
         Err(e) => Err(e),

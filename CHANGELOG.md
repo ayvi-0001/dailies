@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - App 'About' page (version/build date/target/etc.).
+- User menu + change password form.
 
 ## [v0.2.6]
 

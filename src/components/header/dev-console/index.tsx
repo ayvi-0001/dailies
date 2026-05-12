@@ -61,6 +61,18 @@ export default function DevConsole({
       },
       description: "logs out all users",
     },
+    {
+      name: "change-password",
+      run: async (ctx: TerminalContext) => {
+        return await (
+          await import("@tauri-apps/api/core")
+        ).invoke("update_password", {
+          user_id: ctx.args.at(0),
+          current_password: ctx.args.at(1),
+          new_password: ctx.args.at(2),
+        });
+      },
+    },
     commandInsertDailies,
     ...progCommands,
     ...dataCommands,

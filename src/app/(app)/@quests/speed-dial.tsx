@@ -6,6 +6,7 @@ import { exit } from "@tauri-apps/plugin-process";
 import {
   BookMarkedIcon,
   BookPlusIcon,
+  BookUserIcon,
   BoxIcon,
   CircleXIcon,
   ImportIcon,
@@ -24,29 +25,35 @@ import { updateParam } from "@/lib/params";
 
 export default function App(): React.ReactElement {
   const router: AppRouterInstance = useRouter();
-
   const searchParams: ReadonlyURLSearchParams = useSearchParams();
 
   // TODO(ayvi): unhide export/import functions
   const actionButtons = [
     {
+      icon: <BookUserIcon size={14} stroke="#f0f0ff" />,
+      label: <p className="text-xs">User</p>,
+      key: "user",
+      buttonAction: () =>
+        updateParam(router, searchParams, [{ key: "modal", value: ModalParam.User }]),
+    },
+    {
       icon: <BookMarkedIcon size={14} stroke="#f0f0ff" />,
       label: <p className="text-xs">Quest Chains</p>,
-      key: "add",
+      key: "quest-chains",
       buttonAction: () =>
         updateParam(router, searchParams, [{ key: "modal", value: ModalParam.QuestChains }]),
     },
     {
       icon: <BookPlusIcon size={14} stroke="#f0f0ff" />,
       label: <p className="text-xs">Add Quest</p>,
-      key: "add",
+      key: "add-quest",
       buttonAction: () =>
         updateParam(router, searchParams, [{ key: "modal", value: ModalParam.AddQuest }]),
     },
     {
       icon: <UploadIcon size={14} stroke="#f0f0ff" />,
       label: <p className="text-xs">Export Data</p>,
-      key: "export",
+      key: "export-data",
       hidden: true,
       buttonAction: async () =>
         await dataCommands[0].run({ args: [] } as unknown as TerminalContext),
@@ -54,7 +61,7 @@ export default function App(): React.ReactElement {
     {
       icon: <ImportIcon size={14} stroke="#f0f0ff" />,
       label: <p className="text-xs">Import Data</p>,
-      key: "import",
+      key: "import-data",
       hidden: true,
       buttonAction: async () =>
         await dataCommands[1].run({ args: [] } as unknown as TerminalContext),

@@ -38,6 +38,12 @@ export default function App(): React.ReactElement {
       });
       return <Modal />;
     }
+    case ModalParam.User: {
+      const Modal: React.ComponentType = dynamic(() => import(`./user`).then(mod => mod.default), {
+        ssr: false,
+      });
+      return <Modal />;
+    }
     default: {
       return <></>;
     }
