@@ -16,6 +16,10 @@ All notable changes to this project will be documented in this file.
 - App 'About' page (version/build date/target/etc.).
 - User menu + change password form.
 
+### Changed
+
+- Modals now keyboard dismissible.
+
 ## [v0.2.6]
 
 ### Added

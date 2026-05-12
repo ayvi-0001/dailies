@@ -19,41 +19,16 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { HTMLMotionProps } from "framer-motion";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { DailiesState, QuestChain, useDailies } from "@/components/daily";
 import { SortDirection, SortableItem } from "@/components/daily/quest-chain";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
+import SearchParamModal from "./modal";
+
 export default function Modal(): React.ReactElement {
   const dailiesState: DailiesState = useDailies();
-
-  const router: AppRouterInstance = useRouter();
-  const searchParams: ReadonlyURLSearchParams = useSearchParams();
-  const pathname: string = usePathname();
-
-  const getReturnPathname = React.useCallback((): string => {
-    const currentParams = new URLSearchParams(searchParams.toString());
-    currentParams.delete("modal");
-    return `${pathname}?${currentParams.toString()}`;
-  }, [pathname, searchParams]);
-
-  const draggableRef = React.useRef<HTMLElement>(null as unknown as HTMLElement);
-  const { moveProps } = heroui.useDraggable({
-    targetRef: draggableRef,
-    canOverflow: false,
-    isDisabled: false,
-  });
-
-  const motionProps: Omit<HTMLMotionProps<"div">, "ref"> = {
-    variants: {
-      enter: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" } },
-      exit: { y: -20, opacity: 0, transition: { duration: 0.2, ease: "easeIn" } },
-    },
-  };
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -79,76 +54,55 @@ export default function Modal(): React.ReactElement {
   );
 
   return (
-    <heroui.Modal
-      ref={draggableRef}
-      disableAnimation
-      hideCloseButton
-      isKeyboardDismissDisabled
-      shouldBlockScroll
-      backdrop="transparent"
-      className="dark z-1000 w-9/10 text-white select-none"
-      defaultOpen={true}
-      isDismissable={false}
-      motionProps={motionProps}
-      placement="center"
-      radius="none"
-      shadow="lg"
-      size="sm"
-    >
-      <heroui.ModalContent className="flex border-1 border-gray-600 bg-black/95">
-        {onClose => (
-          <>
-            <heroui.ModalHeader
-              {...moveProps}
-              className="text-md flex flex-col gap-1 justify-self-center"
-            >
-              Quest Chains
-            </heroui.ModalHeader>
-            <heroui.ModalBody className="h-fit w-full overflow-hidden bg-black/90 text-white">
-              <DndContext
-                collisionDetection={closestCenter}
-                sensors={sensors}
-                onDragEnd={(event: DragEndEvent) => onDragEnd(event)}
-              >
-                <SortableContext
-                  items={dailiesState.questChains.map(questChain => questChain.sequence)}
-                  strategy={verticalListSortingStrategy}
+    <SearchParamModal
+      modalContentAction={(moveProps, closeModal) =>
+        function modalContent() {
+          return (
+            <>
+              <heroui.ModalHeader {...moveProps} className="text-md justify-self-center">
+                Quest Chains
+              </heroui.ModalHeader>
+              <heroui.ModalBody className="h-fit w-full overflow-hidden bg-black/90 text-white">
+                <DndContext
+                  collisionDetection={closestCenter}
+                  sensors={sensors}
+                  onDragEnd={(event: DragEndEvent) => onDragEnd(event)}
                 >
-                  {dailiesState.questChains.map((value, idx) => (
-                    <SortableItem
-                      key={`${value.chain}-${value.sequence}`}
-                      className="max-w-full min-w-full flex-shrink-0"
-                      // @ts-expect-error: overwrite assigning number to id - req for onDragEnd
-                      id={value.sequence}
-                    >
-                      <div
-                        key={idx}
-                        className="flex w-full justify-center border-2 border-[#ece5d8] bg-[#2d3b4a]/70 px-2 py-1"
+                  <SortableContext
+                    items={dailiesState.questChains.map(questChain => questChain.sequence)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {dailiesState.questChains.map((value, idx) => (
+                      <SortableItem
+                        key={`${value.chain}-${value.sequence}`}
+                        className="max-w-full min-w-full flex-shrink-0"
+                        // @ts-expect-error: overwrite assigning number to id - req for onDragEnd
+                        id={value.sequence}
                       >
-                        {value.chain}
-                      </div>
-                    </SortableItem>
-                  ))}
-                </SortableContext>
-              </DndContext>
-            </heroui.ModalBody>
-            <heroui.ModalFooter className="flex justify-center">
-              <heroui.Button
-                color="danger"
-                size="sm"
-                variant="light"
-                onPress={(_: heroui.PressEvent) => {
-                  onClose();
-                  router.replace(getReturnPathname(), { scroll: false });
-                }}
-              >
-                Close
-              </heroui.Button>
-            </heroui.ModalFooter>
-          </>
-        )}
-      </heroui.ModalContent>
-    </heroui.Modal>
+                        <div
+                          key={idx}
+                          className="flex w-full justify-center border-2 border-[#ece5d8] bg-[#2d3b4a]/70 px-2 py-1 font-bold"
+                        >
+                          {value.chain}
+                        </div>
+                      </SortableItem>
+                    ))}
+                  </SortableContext>
+                </DndContext>
+              </heroui.ModalBody>
+              <heroui.ModalFooter className="flex flex-col justify-center">
+                <heroui.Button color="danger" size="sm" variant="light" onPress={closeModal}>
+                  Close
+                </heroui.Button>
+              </heroui.ModalFooter>
+            </>
+          );
+        }
+      }
+      modalContentProps={{ className: "flex border-1 border-gray-600 bg-black/95" }}
+      modalProps={{ className: "dark w-9/10 text-[#f0f0ff]" }}
+      searchParamKey="modal"
+    />
   );
 }
 

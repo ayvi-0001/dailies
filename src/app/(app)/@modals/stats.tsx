@@ -4,14 +4,6 @@ import * as React from "react";
 
 import * as heroui from "@heroui/react";
 import clsx from "clsx";
-import { HTMLMotionProps } from "framer-motion";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import {
-  ReadonlyURLSearchParams,
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
 
 import { User, useState as useUserState } from "@/app/providers/user";
 import { roundTo } from "@/lib/number";
@@ -19,102 +11,59 @@ import { invoke } from "@/lib/tauri";
 import { cn } from "@/lib/utils";
 import { Option } from "@/types/option";
 
+import SearchParamModal from "./modal";
+
 export default function Modal(): React.ReactElement {
-  const router: AppRouterInstance = useRouter();
-  const searchParams: ReadonlyURLSearchParams = useSearchParams();
-  const pathname: string = usePathname();
-
-  const getReturnPathname = React.useCallback((): string => {
-    const currentParams = new URLSearchParams(searchParams.toString());
-    currentParams.delete("modal");
-    return `${pathname}?${currentParams.toString()}`;
-  }, [pathname, searchParams]);
-
-  const draggableRef = React.useRef<HTMLElement>(null as unknown as HTMLElement);
-  const { moveProps } = heroui.useDraggable({
-    targetRef: draggableRef,
-    canOverflow: false,
-    isDisabled: false,
-  });
-
   const [graphType, setGraphType] = React.useState<string>(`${GraphType.YTD}`);
 
-  const motionProps: Omit<HTMLMotionProps<"div">, "ref"> = {
-    variants: {
-      enter: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" } },
-      exit: { y: -20, opacity: 0, transition: { duration: 0.2, ease: "easeIn" } },
-    },
-  };
-
   return (
-    <heroui.Modal
-      ref={draggableRef}
-      disableAnimation
-      hideCloseButton
-      isKeyboardDismissDisabled
-      shouldBlockScroll
-      backdrop="transparent"
-      className="dark z-1000 w-9/10 text-white select-none"
-      defaultOpen={true}
-      isDismissable={false}
-      motionProps={motionProps}
-      placement="center"
-      radius="none"
-      shadow="lg"
-      size="sm"
-    >
-      <heroui.ModalContent className="flex border-1 border-gray-600 bg-black/95">
-        {onClose => (
-          <div>
-            <heroui.ModalHeader
-              {...moveProps}
-              className="text-md flex flex-col gap-1 justify-self-center"
-            >
-              Stats
-            </heroui.ModalHeader>
-            <heroui.ModalBody className="bg-black/90 text-white">
-              <div className="w-full">
-                <heroui.RadioGroup
-                  className="w-fit"
-                  value={graphType ?? ""}
-                  onValueChange={setGraphType}
-                >
-                  <heroui.Radio classNames={{ label: "text-xs" }} value={`${GraphType.YTD}`}>
-                    YTD
-                  </heroui.Radio>
-                  <heroui.Radio classNames={{ label: "text-xs" }} value={`${GraphType.Last365}`}>
-                    Last 365 days
-                  </heroui.Radio>
-                </heroui.RadioGroup>
-              </div>
-              <heroui.ScrollShadow orientation="horizontal">
-                <DailyHistoryGraph graphType={graphType} />
-              </heroui.ScrollShadow>
-            </heroui.ModalBody>
-            <heroui.ModalFooter className="flex justify-self-center">
-              <heroui.Button
-                color="danger"
-                size="sm"
-                variant="light"
-                onPress={() => {
-                  onClose();
-                  router.replace(getReturnPathname(), { scroll: false });
-                }}
-              >
-                Close
-              </heroui.Button>
-            </heroui.ModalFooter>
-          </div>
-        )}
-      </heroui.ModalContent>
-    </heroui.Modal>
+    <SearchParamModal
+      modalContentAction={(moveProps, closeModal) =>
+        function modalContent() {
+          return (
+            <>
+              <heroui.ModalHeader {...moveProps} className="text-md justify-center">
+                Add Quest
+              </heroui.ModalHeader>
+              <heroui.ModalBody className="bg-black/90 text-[#f0f0ff]">
+                <div className="w-full">
+                  <heroui.RadioGroup
+                    className="w-fit"
+                    value={graphType ?? ""}
+                    onValueChange={setGraphType}
+                  >
+                    <heroui.Radio classNames={{ label: "text-xs" }} value={`${GraphType.YTD}`}>
+                      YTD
+                    </heroui.Radio>
+                    <heroui.Radio classNames={{ label: "text-xs" }} value={`${GraphType.Last365}`}>
+                      Last 365 days
+                    </heroui.Radio>
+                  </heroui.RadioGroup>
+                </div>
+                <heroui.ScrollShadow orientation="horizontal">
+                  <DailyHistoryGraph graphType={graphType} />
+                </heroui.ScrollShadow>
+              </heroui.ModalBody>
+              <heroui.ModalFooter className="flex flex-col justify-center">
+                <heroui.Button color="danger" size="sm" variant="light" onPress={closeModal}>
+                  Close
+                </heroui.Button>
+              </heroui.ModalFooter>
+            </>
+          );
+        }
+      }
+      modalContentProps={{ className: "flex border-1 border-gray-600 bg-black/95" }}
+      modalProps={{ className: "dark w-9/10 text-[#f0f0ff]" }}
+      searchParamKey="modal"
+    />
   );
 }
 
 const defaultGraphData = Array.from({ length: 53 }, () => Array.from({ length: 7 }, () => 0));
 
 function DailyHistoryGraph({ graphType }: { graphType: string }): React.ReactElement {
-  const user: User = useUserState().user!;
+  const user: User = useUserState().user;
 
   const [values, setValues] = React.useState<Option<number>[][]>([[]]);
 
@@ -160,7 +109,7 @@ function DailyHistoryGraph({ graphType }: { graphType: string }): React.ReactEle
                         "grid h-9 w-9 rounded-[2px] text-[0.55rem] leading-none text-black",
                         clsx(
                           !value && "bg-gray-950",
-                          value && "bg-green-500 font-bold text-white",
+                          value && "bg-green-500 font-bold text-[#f0f0ff]",
                           value && value == 100 && "italic underline",
                           value && value < 90 && "bg-green-600 text-green-50",
                           value && value < 80 && "bg-green-700 text-green-100",
