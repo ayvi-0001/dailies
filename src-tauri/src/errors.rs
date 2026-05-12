@@ -60,8 +60,6 @@ enum ErrorKind {
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum UserError {
-    #[error("Invalid password")]
-    InvalidPassword,
     #[error("Incorrect password")]
     IncorrectPassword,
     #[error("Username not found")]
