@@ -14,7 +14,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - App 'About' page (version/build date/target/etc.).
-- User menu + change password form.
+- User menu
+  - Change password form.
+  - Exposed data import/export functions.
 
 ### Changed
 

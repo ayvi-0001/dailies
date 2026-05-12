@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 import dataCommands from "./commands/data";
 import commandInsertDailies from "./commands/insert-dailies";
 import progCommands from "./commands/prog";
-import queryCommands from "./commands/query";
 
 export default function DevConsole({
   open,
@@ -76,7 +75,6 @@ export default function DevConsole({
     commandInsertDailies,
     ...progCommands,
     ...dataCommands,
-    ...queryCommands,
   ];
 
   return open ? (

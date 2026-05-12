@@ -1,4 +1,4 @@
-import { getSession } from "@/actions/session";
+import { exportUserData, importUserData } from "@/actions/data";
 import type { TerminalCommand, TerminalContext } from "@/components/ui/terminal";
 import Utils from "@/lib/utils";
 
@@ -25,14 +25,10 @@ const dataCommands: TerminalCommand[] = [
           );
         default:
           return JSON.stringify(
-            await (
-              await import("@tauri-apps/api/core")
-            )
-              .invoke("export_user_data", {
-                user: await getSession(),
-                dir: arg && arg !== "" ? arg : null,
-              })
-              .catch(e => new Error(e)),
+            exportUserData(
+              await (await import("@/actions/session")).getSession(),
+              arg && arg !== "" ? arg : null,
+            ),
             Utils.sortKeysReplacer,
             2,
           );
@@ -61,14 +57,10 @@ const dataCommands: TerminalCommand[] = [
           );
         default:
           return JSON.stringify(
-            await (
-              await import("@tauri-apps/api/core")
-            )
-              .invoke("import_user_data", {
-                user: await getSession(),
-                path: arg && arg !== "" ? arg : null,
-              })
-              .catch(e => new Error(e)),
+            importUserData(
+              await (await import("@/actions/session")).getSession(),
+              arg && arg !== "" ? arg : null,
+            ),
             Utils.sortKeysReplacer,
             2,
           );

@@ -6,6 +6,8 @@ import * as heroui from "@heroui/react";
 import * as ReactUse from "@reactuses/core";
 
 import changePassword from "@/actions/change-password";
+import { exportUserData, importUserData } from "@/actions/data";
+import { getSession } from "@/actions/session";
 import { User, useState as useUserState } from "@/app/providers/user";
 import { FormFieldErrors, FormState, PasswordField } from "@/lib/forms";
 import { Option } from "@/types/option";
@@ -50,6 +52,22 @@ export default function Modal(): React.ReactElement {
                       onPress={() => setUserActionState({ changePassword: true })}
                     >
                       Change Password
+                    </heroui.Button>
+                    <heroui.Button
+                      color="primary"
+                      size="sm"
+                      variant="flat"
+                      onPress={async () => exportUserData(await getSession())}
+                    >
+                      Export Data
+                    </heroui.Button>
+                    <heroui.Button
+                      color="primary"
+                      size="sm"
+                      variant="flat"
+                      onPress={async () => importUserData(await getSession())}
+                    >
+                      Import Data
                     </heroui.Button>
                     <heroui.Button isDisabled color="danger" size="sm" variant="flat">
                       Delete User
