@@ -4,36 +4,11 @@ import { z } from "zod";
 
 import { Quest } from "@/components/daily";
 import { LOCAL_TZ } from "@/lib/dates";
+import { FormState } from "@/lib/forms";
 import type { AppError } from "@/types/errors";
 import { Option } from "@/types/option";
 
-export type AddQuestErrors = {
-  errors?: {
-    chain?: string[];
-    name?: string[];
-    typeId?: string[];
-    defaultPoints?: string[];
-    total?: string[];
-    weight?: string[];
-    streakTarget?: string[];
-    requirements?: string[];
-    timeStart?: string[];
-    timeEnd?: string[];
-    accepted?: string[];
-    archived?: string[];
-    days?: string[];
-    description?: string[];
-    streak?: string[];
-    other?: string[];
-  };
-};
-
-export type AddQuestState = AddQuestErrors | undefined;
-
-export default async function addQuest(
-  _: AddQuestState,
-  formData: FormData,
-): Promise<AddQuestErrors | undefined> {
+export default async function addQuest(_state: FormState, formData: FormData): Promise<FormState> {
   const now: Date = today(LOCAL_TZ).toDate(LOCAL_TZ);
 
   const validatedFields = Quest.NewQuestFormSchema.safeParse({
@@ -58,23 +33,25 @@ export default async function addQuest(
     const errTree = z.treeifyError(validatedFields.error);
     return {
       errors: {
-        chain: errTree.properties?.chain?.errors,
-        name: errTree.properties?.name?.errors,
-        typeId: errTree.properties?.typeId?.errors,
-        defaultPoints: errTree.properties?.defaultPoints?.errors,
-        total: errTree.properties?.total?.errors,
-        weight: errTree.properties?.weight?.errors,
-        streakTarget: errTree.properties?.streakTarget?.errors,
-        requirements: errTree.properties?.requirements?.errors,
-        timeStart: errTree.properties?.timeStart?.errors,
-        timeEnd: errTree.properties?.timeEnd?.errors,
-        days: errTree.properties?.days?.errors,
-        description: errTree.properties?.description?.errors,
+        chain: errTree.properties?.chain?.errors ?? null,
+        name: errTree.properties?.name?.errors ?? null,
+        typeId: errTree.properties?.typeId?.errors ?? null,
+        defaultPoints: errTree.properties?.defaultPoints?.errors ?? null,
+        total: errTree.properties?.total?.errors ?? null,
+        weight: errTree.properties?.weight?.errors ?? null,
+        streakTarget: errTree.properties?.streakTarget?.errors ?? null,
+        requirements: errTree.properties?.requirements?.errors ?? null,
+        timeStart: errTree.properties?.timeStart?.errors ?? null,
+        timeEnd: errTree.properties?.timeEnd?.errors ?? null,
+        days: errTree.properties?.days?.errors ?? null,
+        description: errTree.properties?.description?.errors ?? null,
       },
     };
   }
 
   await invoke<Option<AppError>>("insert_quest", {
     quest: validatedFields.data,
-  }).catch((err: AppError) => console.error(err));
+  }).catch(console.error);
+
+  return {} satisfies FormState;
 }

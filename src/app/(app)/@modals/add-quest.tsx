@@ -7,11 +7,12 @@ import { HTMLMotionProps } from "framer-motion";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import addQuest, { AddQuestErrors, AddQuestState } from "@/actions/add-quest";
+import addQuest from "@/actions/add-quest";
 import { UserState, useState as useUserState } from "@/app/providers/user";
 import { DailiesState, useDailies } from "@/components/daily";
 import AddQuestForm from "@/components/daily/forms/add";
 import { QuestType, useQuestTypes } from "@/components/daily/providers/quest-types";
+import { FormState } from "@/lib/forms";
 import { Option } from "@/types/option";
 
 export default function Modal(): React.ReactElement {
@@ -29,8 +30,8 @@ export default function Modal(): React.ReactElement {
     return `${pathname}?${currentParams.toString()}`;
   }, [pathname, searchParams]);
 
-  const [_, action, pending] = React.useActionState(
-    async (state: AddQuestState, payload: FormData): Promise<AddQuestErrors> => {
+  const [_state, action, pending] = React.useActionState(
+    async (state: FormState, payload: FormData): Promise<FormState> => {
       payload.set("userId", `${userState.user?.id}`);
 
       const typeId = payload.get("typeId");
@@ -39,7 +40,7 @@ export default function Modal(): React.ReactElement {
         questTypes.find((questType: QuestType) => questType.name == typeId)!.id.replace("_", "-"),
       );
 
-      const result = (await addQuest(state, payload)) as AddQuestErrors;
+      const result = await addQuest(state, payload);
 
       dailiesState.triggerRefreshDailies();
 
@@ -51,7 +52,7 @@ export default function Modal(): React.ReactElement {
 
       return result;
     },
-    undefined,
+    {},
   );
 
   const [isLoading, setIsLoading] = React.useState<boolean>(pending);

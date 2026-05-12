@@ -3,6 +3,7 @@ import { RedirectType, redirect } from "next/navigation";
 import { z } from "zod";
 
 import type { User } from "@/app/providers/user";
+import { FormState } from "@/lib/forms";
 import { createSession } from "@/lib/session";
 
 export const SignupFormSchema = z
@@ -29,18 +30,7 @@ export const SignupFormSchema = z
     }
   });
 
-export type SignupErrors = {
-  errors?: {
-    username?: string[];
-    password?: string[];
-    confirmPassword?: string[];
-    other?: string[];
-  };
-};
-
-export type SignupState = SignupErrors | undefined;
-
-export default async function signup(_: SignupState, formData: FormData): Promise<SignupErrors> {
+export default async function signup(_state: FormState, formData: FormData): Promise<FormState> {
   const validatedFields = SignupFormSchema.safeParse({
     username: formData.get("username"),
     password: formData.get("password"),
@@ -51,9 +41,9 @@ export default async function signup(_: SignupState, formData: FormData): Promis
     const errTree = z.treeifyError(validatedFields.error);
     return {
       errors: {
-        username: errTree.properties?.username?.errors,
-        password: errTree.properties?.password?.errors,
-        confirmPassword: errTree.properties?.confirmPassword?.errors,
+        username: errTree.properties?.username?.errors ?? null,
+        password: errTree.properties?.password?.errors ?? null,
+        confirmPassword: errTree.properties?.confirmPassword?.errors ?? null,
       },
     };
   }
