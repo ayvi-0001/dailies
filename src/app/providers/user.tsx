@@ -54,7 +54,7 @@ export default function UserProvider({
       if (retryCount.current < MAX_RETRIES) {
         retryCount.current += 1;
         const delay = Math.min(1000 * 2 ** retryCount.current, 8000);
-        await new Promise(r => setTimeout(r, delay));
+        await new Promise((r) => setTimeout(r, delay));
         return loadSession();
       }
       setError(`${err}`);

@@ -113,7 +113,7 @@ export function NumpadPopover(props: NumpadPopoverProps): React.ReactElement {
   };
 
   const appendChar = (ch: string): void => {
-    setPointsAction(prev => {
+    setPointsAction((prev) => {
       const current = replaceOnNextRef.current ? "" : (prev ?? "");
       if (ch === "." && current.includes(".")) return current;
       if (current.length >= MAX_POINTS_LENGTH) return current;
@@ -123,7 +123,7 @@ export function NumpadPopover(props: NumpadPopoverProps): React.ReactElement {
   };
 
   const backspace = (): void => {
-    setPointsAction(prev => {
+    setPointsAction((prev) => {
       const current = replaceOnNextRef.current ? "" : (prev ?? "");
       const next = current.slice(0, -1);
       return next === "" ? "" : next;
@@ -207,7 +207,7 @@ export function NumpadPopover(props: NumpadPopoverProps): React.ReactElement {
                 transition={{ duration: 0.15 }}
               >
                 <div className="grid grid-cols-3 gap-2">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => {
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => {
                     return (
                       <NumpadKey
                         key={n}

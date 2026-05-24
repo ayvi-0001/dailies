@@ -83,7 +83,7 @@ export default function Counter(props: CounterProps) {
   }, [isInView, delay, isGoingUp, targetValue, motionValue]);
 
   React.useEffect(() => {
-    springValue.on("change", value => {
+    springValue.on("change", (value) => {
       if (ref.current) {
         ref.current.textContent = format ? format(value) : `${value}`;
       }

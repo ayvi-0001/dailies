@@ -1,6 +1,7 @@
-plugins:
-  - "@trivago/prettier-plugin-sort-imports"
-  - prettier-plugin-tailwindcss
+arrowParens: "always"
+bracketSameLine: false
+embeddedLanguageFormatting: "auto"
+endOfLine: "lf"
 importOrder:
   - "^react"
   - "<THIRD_PARTY_MODULES>"
@@ -10,13 +11,13 @@ importOrder:
   - "^@/types/(.*)$"
   - "^\\..*\\.css$"
   - "^[./]"
+importOrderGroupNamespaceSpecifiers: true
 importOrderSeparation: true
 importOrderSortSpecifiers: true
-importOrderGroupNamespaceSpecifiers: true
-arrowParens: avoid
-bracketSameLine: false
-embeddedLanguageFormatting: auto
-endOfLine: lf
+objectWrap: "preserve"
+plugins:
+  - "@trivago/prettier-plugin-sort-imports"
+  - "prettier-plugin-tailwindcss"
 printWidth: 100
 semi: true
-trailingComma: all
+trailingComma: "all"

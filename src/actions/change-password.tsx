@@ -9,7 +9,7 @@ import { Option } from "@/types/option";
 export const ChangePasswordFormSchema = z
   .object({
     userId: z.preprocess<Option<number>, SomeType, number>(
-      val => (`${val}` === "" ? null : val),
+      (val) => (`${val}` === "" ? null : val),
       z.coerce.number<number>(),
     ),
     currentPassword: z.string().trim(),

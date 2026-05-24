@@ -141,7 +141,7 @@ export default async function editQuest(
   if (Object.hasOwn(diff, "errors")) return {};
 
   const diffEntries: [string, unknown][] = Object.entries(diff);
-  const diffKeys = diffEntries.map(v => v[0]);
+  const diffKeys = diffEntries.map((v) => v[0]);
 
   // Make sure if `name` is updated to run it last due to id updates
   if (diffKeys.includes("name")) {

@@ -20,7 +20,7 @@ export default function QuestTypesProvider({
   useOnceEffect(() => {
     const get_quest_types = async (): Promise<void> => {
       await invoke<QuestType[]>("get_quest_types", {})
-        .then(result => setQuestTypes(result))
+        .then((result) => setQuestTypes(result))
         .catch(console.error);
     };
     get_quest_types();

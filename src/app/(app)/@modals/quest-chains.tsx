@@ -69,7 +69,7 @@ export default function Modal(): React.ReactElement {
                   onDragEnd={(event: DragEndEvent) => onDragEnd(event)}
                 >
                   <SortableContext
-                    items={dailiesState.questChains.map(questChain => questChain.sequence)}
+                    items={dailiesState.questChains.map((questChain) => questChain.sequence)}
                     strategy={verticalListSortingStrategy}
                   >
                     {dailiesState.questChains.map((value, idx) => (
@@ -119,7 +119,7 @@ function handleDragEnd(
   const activeId: number = +`${active.id}`;
 
   const activeQuestChain: Option<QuestChain> =
-    questChains.find(d => d.sequence == activeId) ?? null;
+    questChains.find((d) => d.sequence == activeId) ?? null;
   if (!activeQuestChain) return;
 
   if (!over) return;
@@ -133,15 +133,15 @@ function handleDragEnd(
     Math.sign(activeIndex - overIndex) == 1 ? SortDirection.Up : SortDirection.Down;
 
   if (active.id !== over?.id) {
-    setQuestChains(items => {
+    setQuestChains((items) => {
       items = arrayMove(
         items,
         items.indexOf(activeQuestChain),
-        items.findIndex(v => v.sequence == overId),
+        items.findIndex((v) => v.sequence == overId),
       );
 
-      items = items.map(questChain => {
-        if (questChains.map(d => d.id).includes(questChain.id)) {
+      items = items.map((questChain) => {
+        if (questChains.map((d) => d.id).includes(questChain.id)) {
           const sortedQuestChain = Object.assign({}, questChain);
 
           if (sortedQuestChain.id == activeQuestChain.id) {

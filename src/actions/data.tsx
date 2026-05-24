@@ -21,7 +21,7 @@ const exportUserData = async (user: Option<User>, path?: Option<string>) =>
       }),
     {
       loading: "Exporting data...",
-      success: result => `Saved to ${result.output_path}`,
+      success: (result) => `Saved to ${result.output_path}`,
       error: "Error exporting data",
     },
   );
@@ -42,7 +42,7 @@ const importUserData = async (user: Option<User>, path?: Option<string>) =>
       }),
     {
       loading: "Importing data...",
-      success: result => `Imported data from ${result.data_path}`,
+      success: (result) => `Imported data from ${result.data_path}`,
       error: "Error importing data",
     },
   );

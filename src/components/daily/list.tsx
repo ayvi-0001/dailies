@@ -137,7 +137,7 @@ function useQuestListConfig(user: User): {
         user_id: user.id,
         key: "quest-list--is-archived-quests-filtered",
       })
-        .then(result => setArchivedQuestsFiltered(result || false))
+        .then((result) => setArchivedQuestsFiltered(result || false))
         .catch(console.error);
     };
     const get_config_is_completed_quests_filtered = async () => {
@@ -145,7 +145,7 @@ function useQuestListConfig(user: User): {
         user_id: user.id,
         key: "quest-list--is-completed-quests-filtered",
       })
-        .then(result => setCompletedQuestsFiltered(result || false))
+        .then((result) => setCompletedQuestsFiltered(result || false))
         .catch(console.error);
     };
     const get_config_is_optional_quests_filtered = async () => {
@@ -153,7 +153,7 @@ function useQuestListConfig(user: User): {
         user_id: user.id,
         key: "quest-list--is-optional-quests-filtered",
       })
-        .then(result => setOptionalQuestsFiltered(result || false))
+        .then((result) => setOptionalQuestsFiltered(result || false))
         .catch(console.error);
     };
     const get_config_is_quest_chains_collapsed = async () => {
@@ -161,7 +161,7 @@ function useQuestListConfig(user: User): {
         user_id: user.id,
         key: "quest-list--is-quest-chains-collapsed",
       })
-        .then(result => setIsAllQuestChainCollapsed(result || false))
+        .then((result) => setIsAllQuestChainCollapsed(result || false))
         .catch(console.error);
     };
 

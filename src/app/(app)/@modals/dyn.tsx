@@ -13,35 +13,41 @@ export default function App(): React.ReactElement {
   switch (searchParams.get("modal")) {
     case ModalParam.AddQuest: {
       const Modal: React.ComponentType = dynamic(
-        () => import(`./add-quest`).then(mod => mod.default),
+        () => import(`./add-quest`).then((mod) => mod.default),
         { ssr: false },
       );
       return <Modal />;
     }
     case ModalParam.BuildInfo: {
       const Modal: React.ComponentType = dynamic(
-        () => import(`./build-info`).then(mod => mod.default),
+        () => import(`./build-info`).then((mod) => mod.default),
         { ssr: false },
       );
       return <Modal />;
     }
     case ModalParam.QuestChains: {
       const Modal: React.ComponentType = dynamic(
-        () => import(`./quest-chains`).then(mod => mod.default),
+        () => import(`./quest-chains`).then((mod) => mod.default),
         { ssr: false },
       );
       return <Modal />;
     }
     case ModalParam.Stats: {
-      const Modal: React.ComponentType = dynamic(() => import(`./stats`).then(mod => mod.default), {
-        ssr: false,
-      });
+      const Modal: React.ComponentType = dynamic(
+        () => import(`./stats`).then((mod) => mod.default),
+        {
+          ssr: false,
+        },
+      );
       return <Modal />;
     }
     case ModalParam.User: {
-      const Modal: React.ComponentType = dynamic(() => import(`./user`).then(mod => mod.default), {
-        ssr: false,
-      });
+      const Modal: React.ComponentType = dynamic(
+        () => import(`./user`).then((mod) => mod.default),
+        {
+          ssr: false,
+        },
+      );
       return <Modal />;
     }
     default: {

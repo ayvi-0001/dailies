@@ -33,7 +33,7 @@ export default function Modal(): React.ReactElement {
       dailiesState.triggerRefreshDailies();
 
       const chain = payload.get("chain")?.toString();
-      if (chain && !dailiesState.questChains.map(v => v.chain).includes(chain))
+      if (chain && !dailiesState.questChains.map((v) => v.chain).includes(chain))
         dailiesState.triggerRefreshQuestChains();
 
       return result;

@@ -74,7 +74,7 @@ function DailyHistoryGraph({ graphType }: { graphType: string }): React.ReactEle
         graph_type: GraphType[+`${graphType}`],
         user: user.name,
       })
-        .then(result => setValues(result))
+        .then((result) => setValues(result))
         .catch(console.error);
     };
     get_dailies_graph_data();

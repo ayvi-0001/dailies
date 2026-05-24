@@ -45,7 +45,7 @@ export default function ExpBar(): React.ReactNode {
     const value = isRealNumber(x) ? roundTo(x * 100, 2) : 0;
     if (value !== 0 && previousTotalPoints !== undefined) {
       const id = nextIdRef.current++;
-      setPercentChanges(prev => [...prev, { id, value }]);
+      setPercentChanges((prev) => [...prev, { id, value }]);
     }
   }, [previousTotalPoints, dailiesState.totalPoints, dailiesState.totalWeight]);
 
@@ -57,7 +57,7 @@ export default function ExpBar(): React.ReactNode {
   }, [dailiesState.totalPoints, dailiesState.totalWeight]);
 
   const dismissItem = React.useCallback((id: number) => {
-    setPercentChanges(prev => prev.filter(item => item.id !== id));
+    setPercentChanges((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
   const textClass: ClassValue = "text-xs font-bold text-[#f0f0ff]";
@@ -67,7 +67,7 @@ export default function ExpBar(): React.ReactNode {
       <div className="absolute z-400 flex w-full flex-col-reverse items-end pr-10">
         <div className="absolute flex h-fit flex-col items-start justify-items-end overflow-hidden">
           <AnimatePresence mode="popLayout">
-            {percentChanges.map(item => (
+            {percentChanges.map((item) => (
               <PercentChangeToast
                 key={item.id}
                 item={item}

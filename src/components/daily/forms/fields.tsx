@@ -58,7 +58,7 @@ export function TypeField(props: TypeFieldProps): React.ReactElement {
         daily &&
         questTypes.find((type: QuestType) => type.id === `${daily.type}`.replace("_", "-"))?.name
       }
-      defaultItems={questTypes.filter(questType => questType.available)}
+      defaultItems={questTypes.filter((questType) => questType.available)}
       label="Type"
       name="typeId"
       radius="none"
@@ -66,13 +66,13 @@ export function TypeField(props: TypeFieldProps): React.ReactElement {
       value={questType ?? ""}
       variant="bordered"
       onInputChange={(value: string) => {
-        setQuestTypesAction(questTypes.find(type => type.name == value)?.id || null);
+        setQuestTypesAction(questTypes.find((type) => type.name == value)?.id || null);
       }}
       onValueChange={(value: string) => {
         setQuestTypesAction(value);
       }}
     >
-      {questType => (
+      {(questType) => (
         <heroui.AutocompleteItem key={questType.id} className="dark">
           {questType.name}
         </heroui.AutocompleteItem>
@@ -96,7 +96,7 @@ export function ChainField(props: ChainFieldProps): React.ReactElement {
       className="text-sm text-white"
       classNames={{ base: "text-sm" }}
       defaultInputValue={daily?.chain ?? ""}
-      defaultItems={questChains.map(questChain => {
+      defaultItems={questChains.map((questChain) => {
         return { key: questChain, name: questChain };
       })}
       label="Chain"
@@ -105,7 +105,7 @@ export function ChainField(props: ChainFieldProps): React.ReactElement {
       type="text"
       variant="bordered"
     >
-      {questType => (
+      {(questType) => (
         <heroui.AutocompleteItem key={questType.key} className="dark">
           {questType.name}
         </heroui.AutocompleteItem>
@@ -387,7 +387,7 @@ export function DaysField(props: DaysFieldProps): React.ReactElement {
       onValueChange={setDaysAction}
     >
       {Object.values(DaysOfWeek)
-        .filter(value => typeof value !== "number")
+        .filter((value) => typeof value !== "number")
         .map((day: string, idx: number) => (
           <div key={day} className="flex flex-col">
             <div className="place-self-center text-xs">{`${day}`.at(0)}</div>

@@ -188,7 +188,7 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
         user_id: user.id,
         chain: chain,
       };
-      await invoke<boolean>("get_quest_chain_collapsed", args).then(result => {
+      await invoke<boolean>("get_quest_chain_collapsed", args).then((result) => {
         setIsQuestChainCollapsed(result);
         if (result) setSelectedKeys(new Set([]));
         else setSelectedKeys(new Set([chain]));
@@ -278,12 +278,12 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
             )}
           >
             <SortableContext
-              items={dailies.map(d => d.sequence)}
+              items={dailies.map((d) => d.sequence)}
               strategy={verticalListSortingStrategy}
             >
               {dailies
-                .filter(daily => isDailyFilteredAction(daily))
-                .map(daily => (
+                .filter((daily) => isDailyFilteredAction(daily))
+                .map((daily) => (
                   <SortableItem
                     key={`${daily.pointId}-${daily.sequence}`}
                     className="max-w-full min-w-full flex-shrink-0"
@@ -331,7 +331,7 @@ function handleDragEnd(
   const activeId: number = +`${active.id}`;
 
   const activeQuest: Option<Daily> =
-    dailies.find(d => d.chain == chain && d.sequence == activeId) ?? null;
+    dailies.find((d) => d.chain == chain && d.sequence == activeId) ?? null;
   if (!activeQuest) return;
 
   if (!over) return;
@@ -354,15 +354,15 @@ function handleDragEnd(
     };
     invoke("update_quest_sequence", args);
 
-    setDailies(items => {
+    setDailies((items) => {
       items = arrayMove(
         items,
         items.indexOf(activeQuest),
-        items.findIndex(daily => daily.chain == chain && daily.sequence == overId),
+        items.findIndex((daily) => daily.chain == chain && daily.sequence == overId),
       );
 
-      return items.map(daily => {
-        if (dailies.map(d => d.questId).includes(daily.questId)) {
+      return items.map((daily) => {
+        if (dailies.map((d) => d.questId).includes(daily.questId)) {
           const sortedDaily = Object.assign({}, daily);
 
           if (sortedDaily.questId == activeQuest.questId) {

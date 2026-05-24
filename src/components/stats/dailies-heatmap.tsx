@@ -50,7 +50,7 @@ export default function DailiesHeatmap({ user }: { user: User }): React.ReactEle
   const { value: visible, setTrue } = ReactUse.useBoolean(false);
   ReactUse.useUpdateEffect(() => {
     const toggle_visible = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setTrue();
     };
     toggle_visible();
@@ -229,7 +229,7 @@ interface HeatmapSeriesProps {
   selections?: unknown;
 }
 
-const HeatmapSeries: React.FC<Partial<HeatmapSeriesProps>> = props => {
+const HeatmapSeries: React.FC<Partial<HeatmapSeriesProps>> = (props) => {
   const {
     animated,
     emptyColor,
@@ -362,7 +362,7 @@ const HeatmapCell: React.FC<Partial<HeatmapCellProps>> = ({
   const rect = React.useRef<SVGRectElement | null>(null);
 
   const { pointerOut, pointerOver } = reaviz.useHoverIntent({
-    onPointerOver: event => {
+    onPointerOver: (event) => {
       setActive(true);
       if (onMouseEnter)
         onMouseEnter({
@@ -371,7 +371,7 @@ const HeatmapCell: React.FC<Partial<HeatmapCellProps>> = ({
           nativeEvent: event,
         });
     },
-    onPointerOut: event => {
+    onPointerOut: (event) => {
       setActive(false);
       if (onMouseLeave)
         onMouseLeave({

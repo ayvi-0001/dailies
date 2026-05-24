@@ -56,7 +56,7 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
 
   React.useEffect(() => {
     setName(daily.name);
-    setDays(daily.days?.map(v => `${v}`) || []);
+    setDays(daily.days?.map((v) => `${v}`) || []);
     // setArchivedDate(daily.archived ? parseDateTime(daily.archived.toString()) : null);
     setQuestType(daily.type);
     setTotal(daily.total);
@@ -88,7 +88,7 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
       {!historic && (
         <DailyForm.ChainField
           daily={daily}
-          questChains={dailiesState.questChains.map(v => v.chain)}
+          questChains={dailiesState.questChains.map((v) => v.chain)}
         />
       )}
       <div className="flex w-full flex-row gap-2">

@@ -52,7 +52,7 @@ export default function Details(props: DetailsProps): React.ReactElement {
           requirements: +`${daily.requirements}`,
           date: daily.date,
         })
-          .then(result => {
+          .then((result) => {
             setWeeklyQuestStats(result);
             // TODO(ayvi): calculate next required completion date for type `q-w-m` http://ayvi:3000/ayvi/dailies/issues/172
             if (
@@ -74,7 +74,7 @@ export default function Details(props: DetailsProps): React.ReactElement {
           requirements: +`${daily.requirements}`,
           date: daily.date,
         })
-          .then(result => setWeeklyQuestStats(result))
+          .then((result) => setWeeklyQuestStats(result))
           .catch(console.error);
       };
       get_weekly_sum_type_stats();

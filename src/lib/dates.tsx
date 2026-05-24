@@ -24,7 +24,7 @@ export const DaysOfWeek = {
 };
 
 const getDaysOfWeek = (e: typeof WeekDays | typeof WeekEnds): number[] => {
-  return [...Object.keys(e)].filter(v => isNumeric(v)).map(v => +v);
+  return [...Object.keys(e)].filter((v) => isNumeric(v)).map((v) => +v);
 };
 
 export const isWeekend = (days: number[]): boolean => {

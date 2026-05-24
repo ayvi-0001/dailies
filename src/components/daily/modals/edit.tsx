@@ -99,7 +99,7 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
         onOpenChange={disclosure.onOpenChange}
       >
         <heroui.ModalContent className="flex border-1 border-gray-600 bg-black/95">
-          {onClose => (
+          {(onClose) => (
             <>
               <heroui.ModalHeader
                 {...moveProps}

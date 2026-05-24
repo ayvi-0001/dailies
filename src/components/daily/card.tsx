@@ -56,7 +56,7 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
 
   const questTypes: QuestType[] = useQuestTypes();
   const questType: Option<QuestType> =
-    questTypes.find(type => `${type.id}` == `${daily.type}`) || null;
+    questTypes.find((type) => `${type.id}` == `${daily.type}`) || null;
   const questTypeStyles: QuestTypeStyles = questType?.styles || DEFAULT_QUEST_TYPE_STYLES;
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);

@@ -86,7 +86,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
         start_date: date.toString(),
         end_date: date.toString(),
       })
-        .then(result => setDailies(result))
+        .then((result) => setDailies(result))
         .catch(console.error)
         .finally(() => {
           setIsLoading(false);
@@ -99,7 +99,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
   ReactUse.useOnceEffect(() => {
     const query_quest_chains = async (): Promise<void> => {
       await invoke<QuestChain[]>("query_quest_chains", { user_id: user.id })
-        .then(result => setQuestChains(result))
+        .then((result) => setQuestChains(result))
         .catch(console.error);
     };
     query_quest_chains();
@@ -108,26 +108,26 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
   ReactUse.useOnceEffect(() => {
     setTotalPoints(
       dailies
-        ?.filter(d => d.points !== null)
-        ?.map(d => d.pointsWeighted ?? 0)
+        ?.filter((d) => d.points !== null)
+        ?.map((d) => d.pointsWeighted ?? 0)
         ?.reduce<number>((acc, n) => acc + n, 0),
     );
     setTotalWeight(
       dailies
-        ?.filter(d => d.points !== null)
-        ?.map(d => d.weight)
+        ?.filter((d) => d.points !== null)
+        ?.map((d) => d.weight)
         ?.reduce<number>((acc, n) => acc + n, 0),
     );
   }, [user, dailies, date]);
 
   const { run: triggerRefreshDailies } = ReactUse.useThrottleFn(async (...args: unknown[]) => {
     log.info(`trigger daily list refresh${args.length > 0 ? `: ${args[0]}` : "."}`);
-    setCountRefreshDailies(c => c + 1);
+    setCountRefreshDailies((c) => c + 1);
   }, 2000);
 
   const triggerRefreshQuestChains = React.useCallback(async () => {
     log.info(`trigger quest chains refresh.`);
-    setCountRefreshQuestChains(c => c + 1);
+    setCountRefreshQuestChains((c) => c + 1);
   }, []);
 
   const updateDaily = React.useCallback(
@@ -168,7 +168,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
         start_date: date.toString(),
         end_date: date.toString(),
       })
-        .then(result => {
+        .then((result) => {
           setDailies(result);
           setIsLoading(false);
         })
@@ -253,8 +253,8 @@ const updateDailyCallback = async (
   setIsPatching: React.Dispatch<React.SetStateAction<boolean>> = <T,>(value: T): T => value,
   isDailiesRefreshPending: Option<boolean> = false,
 ) => {
-  setDailies(prev =>
-    prev.map(d => {
+  setDailies((prev) =>
+    prev.map((d) => {
       if (d.pointId !== daily.pointId) return d;
 
       const updated = { ...d, ...patch };
@@ -284,7 +284,7 @@ const updateDailyCallback = async (
 
   if (dailyRefreshKeys) {
     // If any of the following keys are updated, pull just this daily.
-    const triggerKeys: string[] = patchKeys.filter(item => dailyRefreshKeys.has(item));
+    const triggerKeys: string[] = patchKeys.filter((item) => dailyRefreshKeys.has(item));
     if (triggerKeys.length > 0) {
       setIsPatching(true);
       const query_dailies = async (): Promise<void> => {
@@ -294,8 +294,8 @@ const updateDailyCallback = async (
           start_date: date.toString(),
           end_date: date.toString(),
         })
-          .then(result =>
-            setDailies(prev => prev.map(d => (d.pointId === daily.pointId ? result[0] : d))),
+          .then((result) =>
+            setDailies((prev) => prev.map((d) => (d.pointId === daily.pointId ? result[0] : d))),
           )
           .catch(console.error)
           .finally(() => setIsPatching(false));
@@ -306,7 +306,7 @@ const updateDailyCallback = async (
 
   if (fullRefreshKeys) {
     // If any of the following keys are updated, pull all dailies.
-    const triggerKeysFull: string[] = patchKeys.filter(item => fullRefreshKeys.has(item));
+    const triggerKeysFull: string[] = patchKeys.filter((item) => fullRefreshKeys.has(item));
     if (triggerKeysFull.length > 0 && !isDailiesRefreshPending) {
       triggerRefreshDailies(`updated key(s): ${triggerKeysFull.join(", ")}`);
     }

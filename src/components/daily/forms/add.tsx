@@ -63,7 +63,7 @@ export default function AddQuestForm(props: AddQuestFormProps): React.ReactEleme
         questTypes={questTypes}
         setQuestTypesAction={setQuestType}
       />
-      <DailyForm.ChainField questChains={dailiesState.questChains.map(v => v.chain)} />
+      <DailyForm.ChainField questChains={dailiesState.questChains.map((v) => v.chain)} />
       <div className="flex w-full flex-row gap-2">
         <DailyForm.TotalField setTotalAction={setTotal} total={total} />
         {

@@ -113,7 +113,7 @@ export default function Speeddial(props: SpeedialProps): React.ReactElement {
         )}
       >
         {props.actionButtons
-          ?.filter(b => !b?.hidden)
+          ?.filter((b) => !b?.hidden)
           .map((action, index) => (
             <Tooltip key={index} direction={props.direction} text={action.label}>
               <button

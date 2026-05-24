@@ -63,7 +63,7 @@ export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactEle
       size="2xl"
     >
       <heroui.DrawerContent>
-        {onClose => (
+        {(onClose) => (
           <div>
             <heroui.DrawerHeader className="flex place-self-center">
               <span className="text-[#f0f0ff] underline underline-offset-2">{daily.name}</span>
@@ -154,14 +154,14 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
   ReactUse.useOnceEffect(() => {
     const query_dailies = async (): Promise<void> => {
       await cachedQueryQuestHistory(user.name, daily.questId, dateRange!.start, dateRange!.end)
-        .then(result => setDailies(result))
+        .then((result) => setDailies(result))
         .finally(() => setIsLoading(false));
     };
     query_dailies();
   }, [user, countRefreshDailies, dateRange]);
 
   const triggerRefreshDailies = React.useCallback(async () => {
-    setCountRefreshDailies(c => c + 1);
+    setCountRefreshDailies((c) => c + 1);
   }, []);
 
   // TODO(ayvi): fix: updating note on a history card not immediately reflected on front-end
@@ -232,7 +232,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
   const { daily, index, minutelyRefresh, questTypes, totalWeight, updateDailyAction, user } = props;
 
   const questType: Option<QuestType> =
-    questTypes.find(type => `${type.id}` == `${daily.type}`) || null;
+    questTypes.find((type) => `${type.id}` == `${daily.type}`) || null;
   const questTypeStyles: QuestTypeStyles = questType?.styles || DEFAULT_QUEST_TYPE_STYLES;
 
   const [points, setPoints] = React.useState<Option<string>>(

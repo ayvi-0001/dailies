@@ -83,7 +83,7 @@ export default function Terminal(props: TerminalProps) {
     const map = new Map<string, TerminalCommand>();
     for (const cmd of commands) {
       map.set(normalize(cmd.name), cmd);
-      cmd.aliases?.forEach(a => map.set(normalize(a), cmd));
+      cmd.aliases?.forEach((a) => map.set(normalize(a), cmd));
     }
     return map;
   }, [commands, normalize]);
@@ -93,7 +93,7 @@ export default function Terminal(props: TerminalProps) {
   }, [lines]);
 
   const print = React.useCallback((text: React.ReactNode, kind: TerminalLineKind = "output") => {
-    setLines(prev => [...prev, { id: nextId(), kind, text }]);
+    setLines((prev) => [...prev, { id: nextId(), kind, text }]);
   }, []);
 
   const clear = React.useCallback(() => setLines([]), []);
@@ -117,7 +117,7 @@ export default function Terminal(props: TerminalProps) {
               name: "help",
             },
           ];
-          const width = Math.max(...all.map(c => c.name.length));
+          const width = Math.max(...all.map((c) => c.name.length));
           for (const c of all) {
             p(
               <span className="grid grid-cols-2">
@@ -142,9 +142,9 @@ export default function Terminal(props: TerminalProps) {
   const submit = React.useCallback(
     async (raw: string) => {
       const trimmed = raw.trim();
-      setLines(prev => [...prev, { id: nextId(), kind: "input", text: `${prompt} ${raw}` }]);
+      setLines((prev) => [...prev, { id: nextId(), kind: "input", text: `${prompt} ${raw}` }]);
       if (!trimmed) return;
-      setCmdHistory(prev => (prev[prev.length - 1] === trimmed ? prev : [...prev, trimmed]));
+      setCmdHistory((prev) => (prev[prev.length - 1] === trimmed ? prev : [...prev, trimmed]));
 
       const args = parseArgs(trimmed);
       const name = args.shift() ?? "";
@@ -176,7 +176,7 @@ export default function Terminal(props: TerminalProps) {
     [clear, fullMap, lines, normalize, onUnknownCommand, print, prompt],
   );
 
-  const onSubmit: React.FormEventHandler<HTMLFormElement> = e => {
+  const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     const raw = value;
     setValue("");
@@ -184,7 +184,7 @@ export default function Terminal(props: TerminalProps) {
     void submit(raw);
   };
 
-  const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = e => {
+  const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key === "F1") {
       inputRef.current?.blur();
     } else if (e.key === "Escape") {
@@ -214,7 +214,7 @@ export default function Terminal(props: TerminalProps) {
       setValue("");
     } else if (e.key === "w" && e.ctrlKey) {
       e.preventDefault();
-      setValue(value => {
+      setValue((value) => {
         value = value.trimEnd().split(" ").slice(0, -1).join(" ");
         if (value.length > 0) value = value.concat(" ");
         return value;
@@ -237,7 +237,7 @@ export default function Terminal(props: TerminalProps) {
         data-slot="terminal-output"
       >
         {welcome != null && <div className="text-muted-foreground mb-2">{welcome}</div>}
-        {lines.map(l => (
+        {lines.map((l) => (
           <div
             key={l.id}
             className={cn(
@@ -269,7 +269,7 @@ export default function Terminal(props: TerminalProps) {
             style={{ caretShape: "block" }}
             type="text"
             value={value}
-            onChange={e => setValue(e.target.value)}
+            onChange={(e) => setValue(e.target.value)}
             onKeyDown={onKeyDown}
           />
           <button aria-hidden="true" className="sr-only" tabIndex={-1} type="submit">
