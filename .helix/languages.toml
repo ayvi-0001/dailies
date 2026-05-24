@@ -2,9 +2,22 @@
 command = "rust-analyzer"
 
   [language-server.rust-analyzer.config]
-  check.command        = "clippy"
-  cargo.features       = "all"
-  diagnostics.disabled = ["unlinked-file"]
+  cargo.features                                 = "all"
+  cargo.targetDir                                = true
+  check.command                                  = "check"
+  inlayHints.bindingModeHints.enable             = false
+  inlayHints.closingBraceHints.minLines          = 10
+  inlayHints.closureReturnTypeHints.enable       = "with_block"
+  inlayHints.discriminantHints.enable            = "fieldless"
+  inlayHints.lifetimeElisionHints.enable         = "skip_trivial"
+  inlayHints.typeHints.hideClosureInitialization = false
+  lruCapacity                                    = 16384
+  lru.capacity                                   = 16384
+  diagnostics.disabled                           = ["unlinked-file"]
+
+    [language-server.rust-analyzer.config.files]
+    watcher = "server"
+    # watcher = "default"
 
 [[language]]
 name                          = "rust"
@@ -32,14 +45,36 @@ args    = ["--stdio"]
   [language-server.typescript-language-server.config]
   hostInfo = "helix"
 
+[language-server.vscode-eslint-language-server]
+command = "vscode-eslint-language-server"
+args    = ["--stdio"]
+
+  [language-server.vscode-eslint-language-server.config]
+  validate            = "on"
+  experimental        = { useFlatConfig = false }
+  rulesCustomizations = []
+  run                 = "onType"
+  problems            = { shortenToSingleLine = false }
+  nodePath            = ""
+
+    [language-server.vscode-eslint-language-server.config.codeAction.disableRuleComment]
+    enable   = true
+    location = "separateLine"
+
+    [language-server.vscode-eslint-language-server.config.codeAction.showDocumentation]
+    enable = true
+
+    [language-server.vscode-eslint-language-server.config.workingDirectory]
+    mode = "location" # "auto"
+
 [[language]]
 name             = "typescript"
 language-servers = ["vscode-eslint-language-server", "tailwindcss-ls", "typescript-language-server"]
 auto-format      = true
 
   [language.formatter]
-  command = "prettier"
-  args    = ["--parser=typescript", "--stdin-filepath", "%{buffer_name}"]
+  command = "bash"
+  args    = ["-c", "prettier-eslint '%{buffer_name}'  '%{current_working_directory}'"]
 
 [[language]]
 name             = "tsx"
@@ -47,26 +82,8 @@ language-servers = ["vscode-eslint-language-server", "tailwindcss-ls", "typescri
 auto-format      = true
 
   [language.formatter]
-  command = "prettier"
-  args    = ["--parser=typescript", "--stdin-filepath", "%{buffer_name}"]
-
-[[language]]
-name             = "javascript"
-language-servers = ["vscode-eslint-language-server", "tailwindcss-ls", "typescript-language-server"]
-auto-format      = true
-
-  [language.formatter]
-  command = "prettier"
-  args    = ["--parser=typescript", "--stdin-filepath", "%{buffer_name}"]
-
-[[language]]
-name             = "jsx"
-language-servers = ["vscode-eslint-language-server", "tailwindcss-ls", "typescript-language-server"]
-auto-format      = true
-
-  [language.formatter]
-  command = "prettier"
-  args    = ["--parser=typescript", "--stdin-filepath", "%{buffer_name}"]
+  command = "bash"
+  args    = ["-c", "prettier-eslint '%{buffer_name}'  '%{current_working_directory}'"]
 
 [[language]]
 name             = "html"
