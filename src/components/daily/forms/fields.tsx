@@ -65,12 +65,8 @@ export function TypeField(props: TypeFieldProps): React.ReactElement {
       type="text"
       value={questType ?? ""}
       variant="bordered"
-      onInputChange={(value: string) => {
-        setQuestTypesAction(questTypes.find((type) => type.name == value)?.id || null);
-      }}
-      onValueChange={(value: string) => {
-        setQuestTypesAction(value);
-      }}
+      onInputChange={(value: string) => { setQuestTypesAction(questTypes.find((type) => type.name == value)?.id || null); }}
+      onValueChange={(value: string) => { setQuestTypesAction(value); }}
     >
       {(questType) => (
         <heroui.AutocompleteItem key={questType.id} className="dark">
@@ -96,9 +92,7 @@ export function ChainField(props: ChainFieldProps): React.ReactElement {
       className="text-sm text-white"
       classNames={{ base: "text-sm" }}
       defaultInputValue={daily?.chain ?? ""}
-      defaultItems={questChains.map((questChain) => {
-        return { key: questChain, name: questChain };
-      })}
+      defaultItems={questChains.map((questChain) => { return { key: questChain, name: questChain }; })}
       label="Chain"
       name="chain"
       radius="none"
@@ -347,9 +341,7 @@ export function ArchivedField(props: ArchivedFieldProps): React.ReactElement {
             className="m-0 h-fit min-w-0 border-none p-0 px-0 py-0"
             size="sm"
             variant="ghost"
-            onPress={() => {
-              setArchivedDateAction(null);
-            }}
+            onPress={() => { setArchivedDateAction(null); }}
           >
             <X size={18} />
           </heroui.Button>

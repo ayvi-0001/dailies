@@ -23,17 +23,11 @@ export const DaysOfWeek = {
   ...WeekEnds,
 };
 
-const getDaysOfWeek = (e: typeof WeekDays | typeof WeekEnds): number[] => {
-  return [...Object.keys(e)].filter((v) => isNumeric(v)).map((v) => +v);
-};
+const getDaysOfWeek = (e: typeof WeekDays | typeof WeekEnds): number[] => { return [...Object.keys(e)].filter((v) => isNumeric(v)).map((v) => +v); };
 
-export const isWeekend = (days: number[]): boolean => {
-  return Utils.identicalArrays<number>([...getDaysOfWeek(WeekEnds)], days);
-};
+export const isWeekend = (days: number[]): boolean => { return Utils.identicalArrays<number>([...getDaysOfWeek(WeekEnds)], days); };
 
-export const isWeekDay = (days: number[]): boolean => {
-  return Utils.identicalArrays<number>([...getDaysOfWeek(WeekDays)], days);
-};
+export const isWeekDay = (days: number[]): boolean => { return Utils.identicalArrays<number>([...getDaysOfWeek(WeekDays)], days); };
 
 export const isEveryDay = (days: number[]): boolean => {
   return Utils.identicalArrays<number>(

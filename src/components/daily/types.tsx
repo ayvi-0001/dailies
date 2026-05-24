@@ -95,7 +95,13 @@ export namespace Quest {
     defaultPoints: z.coerce.number<number>().gte(0),
     description: z.preprocess<Option<string>, SomeType, string>(val => (val === "" ? null : val), z.string().nullable()),
     name: z.string().nonempty(),
-    requirements: z.preprocess<Option<unknown>, SomeType, unknown>(val => { if (!val) { return null } else { return val } }, z.any().nullable()),
+    requirements: z.preprocess<Option<unknown>, SomeType, unknown>(val => {
+ if (!val) {
+ return null 
+} else {
+ return val 
+} 
+}, z.any().nullable()),
     streakTarget: z.preprocess<Option<number>, SomeType, number>(val => (`${val}` === "" ? null : val), z.coerce.number<number>().nullable()),
     timeEnd: z.preprocess<Option<string>, SomeType, string>(val => (`${val}` === "" ? null : val), z.iso.time().nullable()),
     timeStart: z.preprocess<Option<string>, SomeType, string>(val => (`${val}` === "" ? null : val), z.iso.time().nullable()),
@@ -114,7 +120,13 @@ export namespace Quest {
     description: z.preprocess<Option<string>, SomeType, string>(val => (val === "" ? null : val), z.string().nullable()),
     name: z.string().nonempty(),
     note: z.preprocess<Option<string>, SomeType, string>(val => (val === "" ? null : val), z.string().nullable()),
-    requirements: z.preprocess<Option<unknown>, SomeType, unknown>(val => { if (!val) { return null } else { return val } }, z.any().nullable()),
+    requirements: z.preprocess<Option<unknown>, SomeType, unknown>(val => {
+ if (!val) {
+ return null 
+} else {
+ return val 
+} 
+}, z.any().nullable()),
     streakTarget: z.preprocess<Option<number>, SomeType, number>(val => (`${val}` === "" ? null : val), z.coerce.number<number>().nullable()),
     timeEnd: z.preprocess<Option<string>, SomeType, string>(val => (`${val}` === "" ? null : val), z.iso.time().nullable()),
     timeStart: z.preprocess<Option<string>, SomeType, string>(val => (`${val}` === "" ? null : val), z.iso.time().nullable()),

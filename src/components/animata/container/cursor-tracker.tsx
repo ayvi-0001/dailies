@@ -53,9 +53,7 @@ export default function CursorTracker(props: CursorTrackerProps): React.JSX.Elem
     <div
       ref={divRef}
       className="group relative cursor-none"
-      onContextMenu={(event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        event.preventDefault();
-      }}
+      onContextMenu={(event: React.MouseEvent<HTMLDivElement, MouseEvent>) => { event.preventDefault(); }}
     >
       {components}
       {/* Cursor tracker */}

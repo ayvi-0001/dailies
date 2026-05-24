@@ -24,9 +24,7 @@ export default function DeleteMenuOption(props: MenuOptionProps) {
           },
           {
             loading: "Deleting record...",
-            success: () => {
-              return `Deleted`;
-            },
+            success: () => { return `Deleted`; },
             error: "Error",
           },
         );

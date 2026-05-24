@@ -207,9 +207,7 @@ function useQuestListConfig(user: User): {
     });
   };
 
-  const setQuestNameFilterTextAction = async (value: string): Promise<void> => {
-    setQuestNameFilterText(value);
-  };
+  const setQuestNameFilterTextAction = async (value: string): Promise<void> => { setQuestNameFilterText(value); };
 
   const isDailyFilteredAction = React.useCallback(
     (daily: Daily): Option<Daily> => {

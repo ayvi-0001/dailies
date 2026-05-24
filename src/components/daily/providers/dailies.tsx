@@ -63,13 +63,9 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
 
   const [date, setDate] = React.useState<CalendarDate>(today(LOCAL_TZ));
 
-  ReactUse.useOnceEffect(() => {
-    if (searchParams.has("date")) setDate(parseDate(searchParams.get("date")!));
-  }, []);
+  ReactUse.useOnceEffect(() => { if (searchParams.has("date")) setDate(parseDate(searchParams.get("date")!)); }, []);
 
-  ReactUse.useOnceEffect(() => {
-    updateParam(router, searchParams, [{ key: "date", value: date.toString() }]);
-  }, [date]);
+  ReactUse.useOnceEffect(() => { updateParam(router, searchParams, [{ key: "date", value: date.toString() }]); }, [date]);
 
   ReactUse.useOnceEffect(() => {
     setIsLoading(true);

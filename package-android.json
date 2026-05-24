@@ -57,10 +57,13 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@tailwindcss/cli": "^4.1.14",
     "@tailwindcss/language-server": "^0.14.27",
     "@tailwindcss/postcss": "^4",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/chroma-js": "^3.1.2",
+    "@types/d3": "^7.4.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

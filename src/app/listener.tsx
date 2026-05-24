@@ -10,12 +10,8 @@ import type { ErrorMessage } from "@/types/errors";
 
 export default function Toaster(): React.ReactElement {
   React.useEffect(() => {
-    const unlistenInfo = listen<ErrorMessage>("tauri://info", (event: Event<ErrorMessage>) => {
-      toast.info("tauri://info", { description: event.payload.message });
-    });
-    const unlistenError = listen<ErrorMessage>("tauri://error", (event: Event<ErrorMessage>) => {
-      toast.error("tauri://error", { description: event.payload.message });
-    });
+    const unlistenInfo = listen<ErrorMessage>("tauri://info", (event: Event<ErrorMessage>) => { toast.info("tauri://info", { description: event.payload.message }); });
+    const unlistenError = listen<ErrorMessage>("tauri://error", (event: Event<ErrorMessage>) => { toast.error("tauri://error", { description: event.payload.message }); });
 
     return () => {
       unlistenInfo.then((off: UnlistenFn) => off());

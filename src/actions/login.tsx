@@ -30,9 +30,7 @@ export default async function login(_state: FormState, formData: FormData): Prom
   }
 
   const verifiedResult = await invoke<Option<AppError>>("verify_user", validatedFields.data).catch(
-    (err) => {
-      return err as AppError;
-    },
+    (err) => { return err as AppError; },
   );
 
   if (verifiedResult) return { errors: { other: [verifiedResult.message] } };

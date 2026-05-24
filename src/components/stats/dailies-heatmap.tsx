@@ -19,9 +19,7 @@ import { invoke } from "@/lib/tauri";
 
 export default function DailiesHeatmap({ user }: { user: User }): React.ReactElement {
   const today = now(LOCAL_TZ);
-  const defaultGraphData = Array.from({ length: 365 }, (_: unknown, k: number) => {
-    return { key: today.subtract({ days: k }).toDate() };
-  }) as reaviz.ChartShallowDataShape[];
+  const defaultGraphData = Array.from({ length: 365 }, (_: unknown, k: number) => { return { key: today.subtract({ days: k }).toDate() }; }) as reaviz.ChartShallowDataShape[];
 
   // TODO(ayvi): add year filter
   const start_date: string = now(LOCAL_TZ).subtract({ days: 365 }).toString().substring(0, 10);
@@ -37,9 +35,7 @@ export default function DailiesHeatmap({ user }: { user: User }): React.ReactEle
       })
         .then((result: DailiesCompleteDataPoint[]) =>
           setData(
-            Array.from(result, (v: DailiesCompleteDataPoint) => {
-              return { key: parseDate(v.date).toDate(LOCAL_TZ), data: v.value * 100 };
-            }),
+            Array.from(result, (v: DailiesCompleteDataPoint) => { return { key: parseDate(v.date).toDate(LOCAL_TZ), data: v.value * 100 }; }),
           ),
         )
         .catch(console.error);

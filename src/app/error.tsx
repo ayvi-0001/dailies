@@ -13,9 +13,7 @@ export default function Error({
 }) {
   useEffect(() => console.error(error), [error]);
 
-  useEffect(() => {
-    toast.error(error.message);
-  }, [error]);
+  useEffect(() => { toast.error(error.message); }, [error]);
 
   return <></>;
 }

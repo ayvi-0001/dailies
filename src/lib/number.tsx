@@ -3,9 +3,7 @@ export const roundTo = (num: number, precision: number): number => {
   return Math.round(num * factor) / factor;
 };
 
-export const isRealNumber = (value: unknown): value is number => {
-  return typeof value === "number" && Number.isFinite(value);
-};
+export const isRealNumber = (value: unknown): value is number => { return typeof value === "number" && Number.isFinite(value); };
 
 export const isNumeric = (s: string): boolean => {
   const num = +s;

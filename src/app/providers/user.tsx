@@ -64,9 +64,7 @@ export default function UserProvider({
     }
   }, []);
 
-  React.useEffect(() => {
-    loadSession();
-  }, [loadSession]);
+  React.useEffect(() => { loadSession(); }, [loadSession]);
 
   if (loading) {
     return (

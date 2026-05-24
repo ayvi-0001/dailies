@@ -17,9 +17,7 @@ export default function Progress<T>(props: ProgressProps<T>): React.ReactElement
   const bars = Math.floor(width / (barWidth + gap));
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
-    setWidth(containerRef.current?.offsetWidth ?? 0);
-  }, [deps]);
+  React.useEffect(() => { setWidth(containerRef.current?.offsetWidth ?? 0); }, [deps]);
 
   const [shouldUseValue, setShouldUseValue] = React.useState(false);
 

@@ -75,9 +75,7 @@ export default function Counter(props: CounterProps) {
       return;
     }
 
-    const timer = setTimeout(() => {
-      motionValue.set(isGoingUp ? targetValue : 0);
-    }, delay);
+    const timer = setTimeout(() => { motionValue.set(isGoingUp ? targetValue : 0); }, delay);
 
     return () => clearTimeout(timer);
   }, [isInView, delay, isGoingUp, targetValue, motionValue]);

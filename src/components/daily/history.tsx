@@ -160,9 +160,7 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
     query_dailies();
   }, [user, countRefreshDailies, dateRange]);
 
-  const triggerRefreshDailies = React.useCallback(async () => {
-    setCountRefreshDailies((c) => c + 1);
-  }, []);
+  const triggerRefreshDailies = React.useCallback(async () => { setCountRefreshDailies((c) => c + 1); }, []);
 
   // TODO(ayvi): fix: updating note on a history card not immediately reflected on front-end
   // http://ayvi:3000/ayvi/dailies/issues/208

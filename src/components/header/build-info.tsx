@@ -47,9 +47,7 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
       return;
     }
     if (count > 0) {
-      const timer = setTimeout(() => {
-        resetCount();
-      }, TIMEOUT_MS_TRIGGER_DEV_TERMINAL);
+      const timer = setTimeout(() => { resetCount(); }, TIMEOUT_MS_TRIGGER_DEV_TERMINAL);
       return () => clearTimeout(timer);
     }
   }, [count, resetCount, toggleOpen]);
@@ -61,9 +59,7 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
   };
 
   const longPressEvent = ReactUse.useLongPress(
-    () => {
-      updateParam(router, searchParams, [{ key: "modal", value: ModalParam.BuildInfo }]);
-    },
+    () => { updateParam(router, searchParams, [{ key: "modal", value: ModalParam.BuildInfo }]); },
     {
       isPreventDefault: false,
       delay: 700,
