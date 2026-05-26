@@ -3,6 +3,8 @@
 import * as React from "react";
 
 import * as ReactUse from "@reactuses/core";
+import { CalendarDate } from "@heroui/react";
+import { ZonedDateTime, parseAbsoluteToLocal, parseDate } from "@internationalized/date";
 import { type Platform, platform as getPlatform } from "@tauri-apps/plugin-os";
 import ok from "assert";
 
@@ -11,9 +13,9 @@ import { call } from "@/lib/utils";
 import { Option } from "@/types/option";
 
 export type AppMetaState = {
-  buildDate: Option<string>;
+  buildDate: Option<CalendarDate>;
   buildInfo: Option<AppBuildInfo>;
-  buildTimestamp: Option<string>;
+  buildTimestamp: Option<ZonedDateTime>;
   cargoTargetTriple: Option<string>;
   env: string;
   gitDescribe: Option<string>;
@@ -31,9 +33,9 @@ const AppMetaContext = React.createContext<AppMetaState | null>(null);
 export default function AppMetaProvider({
   children,
 }: Readonly<{ children?: React.ReactNode }>): React.ReactNode {
-  const [buildDate, setBuildDate] = React.useState<Option<string>>(null);
+  const [buildDate, setBuildDate] = React.useState<Option<CalendarDate>>(null);
   const [buildInfo, setBuildInfo] = React.useState<Option<AppBuildInfo>>(null);
-  const [buildTimestamp, setBuildTimestamp] = React.useState<Option<string>>(null);
+  const [buildTimestamp, setBuildTimestamp] = React.useState<Option<ZonedDateTime>>(null);
   const [cargoTargetTriple, setCargoTargetTriple] = React.useState<Option<string>>(null);
   const [env] = React.useState<string>(process.env.NODE_ENV == "development" ? "dev" : "prod");
   const [gitDescribe, setGitDescribe] = React.useState<Option<string>>(null);
@@ -47,8 +49,10 @@ export default function AppMetaProvider({
 
   React.useEffect((): void => {
     call(async () => setBuildInfo(await getAppBuild()));
-    invoke<string>("vergen_build_date").then(setBuildDate);
-    invoke<string>("vergen_build_timestamp").then(setBuildTimestamp);
+    invoke<string>("vergen_build_date").then((result) => setBuildDate(parseDate(result)));
+    invoke<string>("vergen_build_timestamp").then((result) =>
+      setBuildTimestamp(parseAbsoluteToLocal(result)),
+    );
     invoke<string>("vergen_cargo_target_triple").then(setCargoTargetTriple);
     invoke<string>("vergen_git_describe").then(setGitDescribe);
     invoke<string>("vergen_git_dirty").then(setGitDirty);

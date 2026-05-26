@@ -38,5 +38,16 @@ pub fn vergen_build_date() -> String {
 
 #[tauri::command()]
 pub fn vergen_build_timestamp() -> String {
-    env!("VERGEN_BUILD_TIMESTAMP").into()
+    let build_timestamp: chrono::DateTime<chrono::FixedOffset> =
+        chrono::DateTime::parse_from_rfc3339(env!("VERGEN_BUILD_TIMESTAMP")).unwrap_or_else(|_| {
+            panic!(
+                "vergen build script failed to run, missing env var: {}",
+                "VERGEN_BUILD_TIMESTAMP"
+            )
+        });
+
+    build_timestamp
+        .with_timezone(&chrono::Local)
+        .format("%Y-%m-%dT%H:%M:%S%z")
+        .to_string()
 }
