@@ -6,11 +6,13 @@ import * as heroui from "@heroui/react";
 import * as ReactUse from "@reactuses/core";
 import * as log from "@tauri-apps/plugin-log";
 import { CalendarDate, parseDate, today } from "@internationalized/date";
-import ok from "assert";
+import { Result, err, ok } from "neverthrow";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
-import { User, useState as useUserState } from "@/app/providers/user";
+import { queryDailies, queryQuestChains } from "@/actions/query";
+import { User, useUser } from "@/app/providers/user";
 import { LOCAL_TZ, formatDateTimeISO8601, getMsToMidnight } from "@/lib/dates";
 import { updateParam } from "@/lib/params";
 import { invoke } from "@/lib/tauri";
@@ -38,7 +40,16 @@ export type DailiesState = {
   updateDaily: (daily: Daily, patch: Partial<Daily>) => void;
 };
 
-export const DailiesContext = React.createContext<Option<DailiesState>>(null);
+const DailiesContext = React.createContext<Result<DailiesState, Error>>(
+  err(new Error("Dailies state was used outside of its Provider")),
+);
+
+export function useDailies(): DailiesState {
+  return React.useContext(DailiesContext).match(
+    (t) => t,
+    (e) => { throw e; },
+  );
+}
 
 type DailiesProviderProps = {
   children?: Readonly<React.ReactNode>;
@@ -59,13 +70,17 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
   const router: AppRouterInstance = useRouter();
   const searchParams: ReadonlyURLSearchParams = useSearchParams();
 
-  const user: User = useUserState().user;
+  const user: Result<User, Error> = useUser();
+  const userName: Option<string> = user.map((t) => t.name).unwrapOr(null);
 
   const [date, setDate] = React.useState<CalendarDate>(today(LOCAL_TZ));
 
   ReactUse.useOnceEffect(() => { if (searchParams.has("date")) setDate(parseDate(searchParams.get("date")!)); }, []);
 
-  ReactUse.useOnceEffect(() => { updateParam(router, searchParams, [{ key: "date", value: date.toString() }]); }, [date]);
+  ReactUse.useOnceEffect(
+    () => updateParam(router, searchParams, [{ key: "date", value: date.toString() }]),
+    [date],
+  );
 
   ReactUse.useOnceEffect(() => {
     setIsLoading(true);
@@ -75,31 +90,25 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
 
   ReactUse.useOnceEffect(() => {
     setIsPatching(true);
-    const query_dailies = async (): Promise<void> => {
-      await invoke<Daily[]>("query_dailies", {
-        user: user.name,
-        quest_id: null, // pull all dailies
-        start_date: date.toString(),
-        end_date: date.toString(),
-      })
-        .then((result) => setDailies(result))
-        .catch(console.error)
-        .finally(() => {
-          setIsLoading(false);
-          setIsPatching(false);
-        });
-    };
-    query_dailies();
-  }, [user, countRefreshDailies, date]);
+    queryDailies({
+      user: userName,
+      quest_id: null, // pull all dailies
+      start_date: date.toString(),
+      end_date: date.toString(),
+    })
+      .andTee((t) => { setDailies(t); })
+      .mapErr((e) => { toast.error(e.title, { description: e.message }); })
+      .then(() => {
+        setIsLoading(false);
+        setIsPatching(false);
+      });
+  }, [userName, countRefreshDailies, date]);
 
   ReactUse.useOnceEffect(() => {
-    const query_quest_chains = async (): Promise<void> => {
-      await invoke<QuestChain[]>("query_quest_chains", { user_id: user.id })
-        .then((result) => setQuestChains(result))
-        .catch(console.error);
-    };
-    query_quest_chains();
-  }, [user, countRefreshQuestChains]);
+    queryQuestChains({ user_id: user.map((t) => t.id).unwrapOr(null) })
+      .andTee((t) => setQuestChains(t))
+      .mapErr((e) => { toast.error(e.title, { description: e.message }); });
+  }, [countRefreshQuestChains]);
 
   ReactUse.useOnceEffect(() => {
     setTotalPoints(
@@ -114,7 +123,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
         ?.map((d) => d.weight)
         ?.reduce<number>((acc, n) => acc + n, 0),
     );
-  }, [user, dailies, date]);
+  }, [dailies, date]);
 
   const { run: triggerRefreshDailies } = ReactUse.useThrottleFn(async (...args: unknown[]) => {
     log.info(`trigger daily list refresh${args.length > 0 ? `: ${args[0]}` : "."}`);
@@ -129,7 +138,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
   const updateDaily = React.useCallback(
     async (daily: Daily, patch: Partial<Daily>) =>
       updateDailyCallback(
-        user,
+        userName,
         date,
         daily,
         patch,
@@ -146,35 +155,36 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
         triggerRefreshQuestChains,
         setIsPatching,
       ),
-    [user, date, triggerRefreshDailies, triggerRefreshQuestChains],
+    [userName, date, triggerRefreshDailies, triggerRefreshQuestChains],
   );
 
   React.useEffect(() => {
-    const insert_dailies = async (date: CalendarDate): Promise<void> => {
+    const insertDailies = async (date: CalendarDate): Promise<void> => {
       await invoke("insert_dailies", {
         datetime: formatDateTimeISO8601(date.toDate(LOCAL_TZ), true),
       });
     };
 
-    const query_dailies = async (date: CalendarDate): Promise<void> => {
+    const queryAndSetDailies = async (date: CalendarDate): Promise<void> => {
       setIsLoading(true);
-      await invoke<Daily[]>("query_dailies", {
-        user: user.name,
+
+      const dailies: Daily[] = await queryDailies({
+        user: userName,
         quest_id: null, // pull all dailies
         start_date: date.toString(),
         end_date: date.toString(),
       })
-        .then((result) => {
-          setDailies(result);
-          setIsLoading(false);
-        })
-        .catch(console.error);
+        .mapErr((e) => { toast.error(e.title, { description: e.message }); })
+        .andTee(() => { setIsLoading(false); })
+        .unwrapOr([]);
+
+      setDailies(dailies);
     };
 
     const midnightDailyRefresh = (): void => {
       const date: CalendarDate = today(LOCAL_TZ);
-      insert_dailies(date);
-      query_dailies(date);
+      insertDailies(date);
+      queryAndSetDailies(date);
       setDate(date);
     };
 
@@ -185,7 +195,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
     }, getMsToMidnight());
 
     return () => clearTimeout(timeoutId);
-  }, [user]);
+  }, [userName]);
 
   const value: DailiesState = React.useMemo(() => {
     return {
@@ -219,7 +229,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
   return (
     <>
       <QuestTypesProvider>
-        <DailiesContext.Provider value={value}>{props.children}</DailiesContext.Provider>
+        <DailiesContext.Provider value={ok(value)}>{props.children}</DailiesContext.Provider>
       </QuestTypesProvider>
       {isPatching && (
         <div className="absolute top-6 left-6">
@@ -230,14 +240,8 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
   );
 }
 
-export function useDailies(): DailiesState {
-  const context: Option<DailiesState> = React.useContext(DailiesContext);
-  ok(context, new Error("useDailies was used outside of its Provider"));
-  return context;
-}
-
 const updateDailyCallback = async (
-  user: User,
+  userName: Option<string>,
   date: CalendarDate,
   daily: Daily,
   patch: Partial<Daily>,
@@ -283,20 +287,16 @@ const updateDailyCallback = async (
     const triggerKeys: string[] = patchKeys.filter((item) => dailyRefreshKeys.has(item));
     if (triggerKeys.length > 0) {
       setIsPatching(true);
-      const query_dailies = async (): Promise<void> => {
-        await invoke<Daily[]>("query_dailies", {
-          user: user.name,
-          quest_id: daily.questId,
-          start_date: date.toString(),
-          end_date: date.toString(),
-        })
-          .then((result) =>
-            setDailies((prev) => prev.map((d) => (d.pointId === daily.pointId ? result[0] : d))),
-          )
-          .catch(console.error)
-          .finally(() => setIsPatching(false));
-      };
-      query_dailies();
+
+      queryDailies({
+        user: userName,
+        quest_id: daily.questId,
+        start_date: date.toString(),
+        end_date: date.toString(),
+      })
+        .andTee((t) => { setDailies((prev) => prev.map((d) => (d.pointId === daily.pointId ? t[0] : d))); })
+        .mapErr((e) => { toast.error(e.title, { description: e.message }); })
+        .then(() => setIsPatching(false));
     }
   }
 

@@ -4,13 +4,21 @@ import * as React from "react";
 
 import * as heroui from "@heroui/react";
 import * as ReactUse from "@reactuses/core";
+import { RedirectType, redirect } from "next/navigation";
 
 import signup from "@/actions/signup";
-import { FormFieldErrors, PasswordField } from "@/lib/forms";
+import { FormFieldErrors, FormState, PasswordField } from "@/lib/forms";
 import { UseBoolean } from "@/types/props";
 
 export default function SignupForm(): React.ReactElement {
-  const [state, action, pending] = React.useActionState(signup, {});
+  const [state, action, pending] = React.useActionState(
+    async (state: FormState, formData: FormData) => {
+      return (await signup(state, formData))
+        .andThen((_) => redirect("/", RedirectType.replace))
+        .unwrapOr({});
+    },
+    {},
+  );
   const [isLoading, setIsLoading] = React.useState<boolean>(pending);
   const passwordVisibility: UseBoolean = ReactUse.useBoolean();
   const confirmPasswordVisibility: UseBoolean = ReactUse.useBoolean();

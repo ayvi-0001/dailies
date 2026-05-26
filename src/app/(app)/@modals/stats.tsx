@@ -4,8 +4,9 @@ import * as React from "react";
 
 import * as heroui from "@heroui/react";
 import clsx from "clsx";
+import { Result } from "neverthrow";
 
-import { User, useState as useUserState } from "@/app/providers/user";
+import { User, useUser } from "@/app/providers/user";
 import { roundTo } from "@/lib/number";
 import { invoke } from "@/lib/tauri";
 import { cn } from "@/lib/utils";
@@ -63,7 +64,7 @@ export default function Modal(): React.ReactElement {
 const defaultGraphData = Array.from({ length: 53 }, () => Array.from({ length: 7 }, () => 0));
 
 function DailyHistoryGraph({ graphType }: { graphType: string }): React.ReactElement {
-  const user: User = useUserState().user;
+  const user: Result<User, Error> = useUser();
 
   const [values, setValues] = React.useState<Option<number>[][]>([[]]);
 
@@ -72,7 +73,7 @@ function DailyHistoryGraph({ graphType }: { graphType: string }): React.ReactEle
       setValues(defaultGraphData);
       await invoke<Option<number>[][]>("get_dailies_graph_data", {
         graph_type: GraphType[+`${graphType}`],
-        user: user.name,
+        user: user.map((t) => t.name).unwrapOr(null),
       })
         .then((result) => setValues(result))
         .catch(console.error);

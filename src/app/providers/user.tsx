@@ -3,11 +3,12 @@
 import * as React from "react";
 
 import * as heroui from "@heroui/react";
-import ok from "assert";
-import { toast } from "sonner";
+import * as ReactUse from "@reactuses/core";
+import { Result, ResultAsync, err, ok } from "neverthrow";
+import { RedirectType, redirect } from "next/navigation";
 
-import logout from "@/actions/logout";
-import { getSession } from "@/actions/session";
+import { DecodedToken, getSessionDecoded } from "@/actions/session";
+import { getUser } from "@/actions/user";
 import { Option } from "@/types/option";
 
 export type User = {
@@ -17,54 +18,42 @@ export type User = {
   updated: Date;
 };
 
-export type DecodedToken = {
-  userName: string;
-  iat: number;
+export type UseUserParams = {
+  fallbackPath: string;
 };
 
-export type Session = {
-  id: string;
-};
+const UserContext = React.createContext<Result<Option<User>, Error>>(
+  err(new Error("User state was used outside of its Provider")),
+);
 
-export type UserState = {
-  user: User;
-  setUser: React.Dispatch<React.SetStateAction<Option<User>>>;
-};
-
-const UserContext = React.createContext<Option<UserState>>(null);
-
-const MAX_RETRIES = 3;
+export function useUser(opts?: UseUserParams): Result<User, Error> {
+  return React.useContext<Result<Option<User>, Error>>(UserContext).andThen<Result<User, Error>>(
+    (t) => {
+      if (!t) {
+        if (opts && opts.fallbackPath) redirect(opts.fallbackPath, RedirectType.replace);
+        else return err(new Error("No user logged in"));
+      } else {
+        return ok(t);
+      }
+    },
+  );
+}
 
 export default function UserProvider({
   children,
 }: Readonly<{ children?: React.ReactNode }>): React.ReactNode {
   const [user, setUser] = React.useState<Option<User>>(null);
   const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<Option<string>>(null);
-  const retryCount = React.useRef<number>(0);
 
-  const loadSession = React.useCallback(async () => {
+  const loadSession = React.useCallback(async (): Promise<ResultAsync<User, Error>> => {
     setLoading(true);
-    setError(null);
-    try {
-      const result: Option<User> = await getSession();
-      setUser(result);
-    } catch (err: unknown) {
-      console.error(err);
-      if (retryCount.current < MAX_RETRIES) {
-        retryCount.current += 1;
-        const delay = Math.min(1000 * 2 ** retryCount.current, 8000);
-        await new Promise((r) => setTimeout(r, delay));
-        return loadSession();
-      }
-      setError(`${err}`);
-      toast.error(`${err}`);
-    } finally {
-      setLoading(false);
-    }
+    const session: Result<DecodedToken, Error> = await getSessionDecoded();
+    return session.asyncAndThen((t) =>
+      getUser({ name: t.userName, id: null }).andTee((t) => setUser(t)),
+    );
   }, []);
 
-  React.useEffect(() => { loadSession(); }, [loadSession]);
+  ReactUse.useMount(async () => await loadSession().then(() => setLoading(false)));
 
   if (loading) {
     return (
@@ -75,36 +64,5 @@ export default function UserProvider({
     );
   }
 
-  if (error || !user) {
-    return (
-      <div className="flex h-screen w-full flex-col items-center justify-center gap-4">
-        <p className="text-foreground/60 text-sm">{error ?? "Session expired"}</p>
-        <div className="flex gap-2">
-          <heroui.Button
-            size="sm"
-            variant="solid"
-            onPress={() => {
-              retryCount.current = 0;
-              loadSession();
-            }}
-          >
-            Retry
-          </heroui.Button>
-          <heroui.Button color="danger" size="sm" variant="solid" onPress={() => logout()}>
-            Logout
-          </heroui.Button>
-        </div>
-      </div>
-    );
-  }
-
-  return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
-}
-
-export function useState<
-  State = { user: User; setUser: React.Dispatch<React.SetStateAction<User>> },
->(): State {
-  const context = React.useContext<Option<UserState>>(UserContext);
-  ok(context, new Error("User state was used outside of its Provider"));
-  return context as State;
+  return <UserContext.Provider value={ok(user)}>{children}</UserContext.Provider>;
 }

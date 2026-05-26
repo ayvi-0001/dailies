@@ -35,18 +35,14 @@ export default function App(): React.ReactElement {
     case ModalParam.Stats: {
       const Modal: React.ComponentType = dynamic(
         () => import(`./stats`).then((mod) => mod.default),
-        {
-          ssr: false,
-        },
+        { ssr: false },
       );
       return <Modal />;
     }
     case ModalParam.User: {
       const Modal: React.ComponentType = dynamic(
         () => import(`./user`).then((mod) => mod.default),
-        {
-          ssr: false,
-        },
+        { ssr: false },
       );
       return <Modal />;
     }

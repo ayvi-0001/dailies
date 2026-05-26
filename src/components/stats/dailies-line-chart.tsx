@@ -7,15 +7,20 @@ import * as ReactUse from "@reactuses/core";
 import * as reaviz from "reaviz";
 import { Skeleton } from "@heroui/skeleton";
 import { now, parseDate } from "@internationalized/date";
+import { Result } from "neverthrow";
 
-import { type User } from "@/app/providers/user";
+import { type User, useUser } from "@/app/providers/user";
 import { LOCAL_TZ } from "@/lib/dates";
 import { invoke } from "@/lib/tauri";
+import { Option } from "@/types/option";
 
-export default function DailiesLineChart({ user }: { user: User }): React.ReactElement {
+export default function DailiesLineChart(): React.ReactElement {
   // TODO(ayvi): add date filters
   const start_date: string = now(LOCAL_TZ).subtract({ days: 90 }).toString().substring(0, 10);
   const end_date: string = now(LOCAL_TZ).toString().substring(0, 10);
+
+  const user: Result<User, Error> = useUser();
+  const userName: Option<string> = user.map((t) => t.name).unwrapOr(null);
 
   const [data, setData] = React.useState<reaviz.ChartNestedDataShape[]>([]);
   ReactUse.useOnceEffect(() => {
@@ -23,7 +28,7 @@ export default function DailiesLineChart({ user }: { user: User }): React.ReactE
       await invoke<{ [key: string]: QuestChainsCompleteDataPoint[] }>(
         "query_quest_chains_complete",
         {
-          user: user.name,
+          user: userName,
           start_date: start_date,
           end_date: end_date,
         },
@@ -48,7 +53,7 @@ export default function DailiesLineChart({ user }: { user: User }): React.ReactE
         .catch(console.error);
     };
     query_quest_chains_complete();
-  }, [user]);
+  }, [userName]);
 
   return data.length > 0 ? (
     <div className="m-5">

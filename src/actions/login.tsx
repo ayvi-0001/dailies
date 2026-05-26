@@ -1,19 +1,22 @@
-import { invoke } from "@tauri-apps/api/core";
-import { RedirectType, redirect } from "next/navigation";
+import { Result, err, ok } from "neverthrow";
 import { z } from "zod";
 
-import type { Session } from "@/app/providers/user";
+import { User } from "@/app/providers/user";
 import { FormState } from "@/lib/forms";
 import { createSession } from "@/lib/session";
-import type { AppError } from "@/types/errors";
-import { Option } from "@/types/option";
+
+import { DecodedToken, getSessionDecoded } from "./session";
+import { verifyUser } from "./user";
 
 export const LoginFormSchema = z.object({
   username: z.string().trim(),
   password: z.string().trim(),
 });
 
-export default async function login(_state: FormState, formData: FormData): Promise<FormState> {
+export default async function login(
+  state: FormState,
+  formData: FormData,
+): Promise<Result<FormState, FormState>> {
   const validatedFields = LoginFormSchema.safeParse({
     username: formData.get("username"),
     password: formData.get("password"),
@@ -21,23 +24,35 @@ export default async function login(_state: FormState, formData: FormData): Prom
 
   if (!validatedFields.success) {
     const errTree = z.treeifyError(validatedFields.error);
-    return {
+    return err({
       errors: {
         username: errTree.properties?.username?.errors ?? null,
         password: errTree.properties?.password?.errors ?? null,
       },
-    };
+    } as FormState);
   }
 
-  const verifiedResult = await invoke<Option<AppError>>("verify_user", validatedFields.data).catch(
-    (err) => { return err as AppError; },
-  );
+  const payload = {
+    name: validatedFields.data.username,
+    id: null,
+    password: validatedFields.data.password,
+  };
 
-  if (verifiedResult) return { errors: { other: [verifiedResult.message] } };
+  const user: Result<User, Error> = await verifyUser(payload);
 
-  const session = await invoke<Option<Session>>("get_session");
+  if (user.isErr()) {
+    return err({ errors: { other: [user.error.message] } } as FormState);
+  }
 
-  if (!session) await createSession(validatedFields.data.username);
+  const session: Result<DecodedToken, Error> = await getSessionDecoded();
 
-  redirect("/", RedirectType.replace);
+  if (session.isErr()) {
+    const newSession: Result<string, Error> = await createSession(validatedFields.data.username);
+
+    if (newSession.isErr()) {
+      return err({ errors: { other: [newSession.error.message] } } as FormState);
+    }
+  }
+
+  return ok(state);
 }

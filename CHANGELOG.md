@@ -21,6 +21,12 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Modals now keyboard dismissible.
+- Error handling frontend (neverthrow) + backend.
+
+### Fixed
+
+- Error routing to login page after deleting active session.
+- Issue rendering quest list when no quests exist.
 
 ## [v0.2.6]
 

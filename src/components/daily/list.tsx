@@ -4,8 +4,9 @@ import * as React from "react";
 
 import * as heroui from "@heroui/react";
 import * as ReactUse from "@reactuses/core";
+import { Result } from "neverthrow";
 
-import { User, UserState, useState as useUserState } from "@/app/providers/user";
+import { User, useUser } from "@/app/providers/user";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
@@ -14,7 +15,15 @@ import QuestChain, { QuestsHeader } from "./quest-chain";
 import { Daily, Quest } from "./types";
 
 export default function QuestList({ title }: { title: string }): React.ReactElement {
-  const userState: UserState = useUserState();
+  const user: Result<User, Error> = useUser({ fallbackPath: "/login" });
+
+  return user.match(
+    (t) => { return <UserQuestList title={title} user={t} />; },
+    (_) => <></>,
+  );
+}
+
+export function UserQuestList({ title, user }: { title: string; user: User }): React.ReactElement {
   const dailiesState: DailiesState = useDailies();
 
   const [minutelyRefresh, setMinutelyRefresh] = React.useState<Date>(new Date());
@@ -44,7 +53,7 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
     setIsAllQuestChainCollapsedAction,
     setOptionalQuestsFilteredAction,
     setQuestNameFilterTextAction,
-  } = useQuestListConfig(userState.user);
+  } = useQuestListConfig(user);
 
   const groupedDailies: Record<string, Option<Daily[]>> = React.useMemo(
     () =>
@@ -103,7 +112,7 @@ export default function QuestList({ title }: { title: string }): React.ReactElem
               setDailiesAction={dailiesState.setDailies}
               totalWeight={dailiesState.totalWeight}
               updateDaily={dailiesState.updateDaily}
-              user={userState.user}
+              user={user}
             />
           ))}
         </heroui.ScrollShadow>
@@ -169,7 +178,7 @@ function useQuestListConfig(user: User): {
     get_config_is_completed_quests_filtered();
     get_config_is_optional_quests_filtered();
     get_config_is_quest_chains_collapsed();
-  }, [user.id]);
+  }, [user]);
 
   const setArchivedQuestsFilteredAction = async (value: boolean): Promise<void> => {
     setArchivedQuestsFiltered(value);
@@ -207,7 +216,8 @@ function useQuestListConfig(user: User): {
     });
   };
 
-  const setQuestNameFilterTextAction = async (value: string): Promise<void> => { setQuestNameFilterText(value); };
+  const setQuestNameFilterTextAction = async (value: string): Promise<void> =>
+    setQuestNameFilterText(value);
 
   const isDailyFilteredAction = React.useCallback(
     (daily: Daily): Option<Daily> => {

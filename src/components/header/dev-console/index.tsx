@@ -6,7 +6,7 @@ import clsx from "clsx";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useRouter } from "next/navigation";
 
-import { truncate_sessions } from "@/actions/logout";
+import logout from "@/actions/logout";
 import { AppMetaState, useAppMetaState } from "@/app/providers/app-meta";
 import Terminal from "@/components/ui/terminal";
 import type { TerminalCommand, TerminalContext } from "@/components/ui/terminal";
@@ -53,12 +53,12 @@ export default function DevConsole({
       description: "show current size/orientation",
     },
     {
-      name: "logout-all",
-      run: async () => {
-        await truncate_sessions();
-        router.push("/login");
-      },
-      description: "logs out all users",
+      name: "logout",
+      run: async () =>
+        logout().match(
+          (_) => {},
+          (e) => e.message,
+        ),
     },
     {
       name: "change-password",

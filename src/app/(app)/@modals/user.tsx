@@ -4,11 +4,18 @@ import * as React from "react";
 
 import * as heroui from "@heroui/react";
 import * as ReactUse from "@reactuses/core";
+import { Result } from "neverthrow";
+import { toast } from "sonner";
 
 import changePassword from "@/actions/change-password";
-import { exportUserData, importUserData } from "@/actions/data";
-import { getSession } from "@/actions/session";
-import { User, useState as useUserState } from "@/app/providers/user";
+import {
+  UserExportDataSummary,
+  UserImportDataSummary,
+  exportUserData,
+  importUserData,
+} from "@/actions/data";
+import logout from "@/actions/logout";
+import { User, useUser } from "@/app/providers/user";
 import { FormFieldErrors, FormState, PasswordField } from "@/lib/forms";
 import { Option } from "@/types/option";
 import { UseBoolean } from "@/types/props";
@@ -16,9 +23,41 @@ import { UseBoolean } from "@/types/props";
 import SearchParamModal from "./modal";
 
 export default function Modal(): React.ReactElement {
-  const user: User = useUserState().user;
+  const user: Result<User, Error> = useUser();
 
   const [userActionState, setUserActionState] = ReactUse.useSetState({ changePassword: false });
+
+  const exportDataCallback = React.useCallback(async () => {
+    if (user.isOk())
+      toast.promise(
+        async () =>
+          exportUserData(user.value).match(
+            (t) => t,
+            (e) => { throw e; },
+          ),
+        {
+          loading: "Exporting data...",
+          success: (result: UserExportDataSummary) => `Saved to ${result.output_path}`,
+          error: (e: Error) => e.message,
+        },
+      );
+  }, [user]);
+
+  const importDataCallback = React.useCallback(async () => {
+    if (user.isOk())
+      toast.promise(
+        async () =>
+          importUserData(user.value).match(
+            (t) => t,
+            (e) => { throw e; },
+          ),
+        {
+          loading: "Importing data...",
+          success: (result: UserImportDataSummary) => `Saved to ${result.data_path}`,
+          error: (e: Error) => e.message,
+        },
+      );
+  }, [user]);
 
   return (
     <SearchParamModal
@@ -31,15 +70,17 @@ export default function Modal(): React.ReactElement {
               </heroui.ModalHeader>
               <heroui.ModalBody className="h-fit w-full overflow-hidden bg-black/90 text-sm">
                 <div className="flex flex-col gap-1 text-right">
-                  <div className="text-xl font-bold text-shadow-md">{user.name}</div>
-                  <div>ID: {user.id}</div>
-                  <div>Created: {user.created.toString()}</div>
+                  <div className="text-xl font-bold text-shadow-md">
+                    {user.map((t) => t.name).unwrapOr(null)}
+                  </div>
+                  <div>ID: {user.map((t) => t.id).unwrapOr(null)}</div>
+                  <div>Created: {user.map((t) => t.created.toString()).unwrapOr(null)}</div>
                 </div>
                 <heroui.Divider className="my-2" />
                 {userActionState.changePassword ? (
                   <div className="flex flex-col gap-3">
                     <ChangePasswordForm
-                      userId={user.id}
+                      userId={user.map((t) => t.id).unwrapOr(null)}
                       onCloseAction={() => setUserActionState({ changePassword: false })}
                     />
                   </div>
@@ -57,7 +98,7 @@ export default function Modal(): React.ReactElement {
                       color="primary"
                       size="sm"
                       variant="flat"
-                      onPress={async () => exportUserData(await getSession())}
+                      onPress={exportDataCallback}
                     >
                       Export Data
                     </heroui.Button>
@@ -65,9 +106,17 @@ export default function Modal(): React.ReactElement {
                       color="primary"
                       size="sm"
                       variant="flat"
-                      onPress={async () => importUserData(await getSession())}
+                      onPress={importDataCallback}
                     >
                       Import Data
+                    </heroui.Button>
+                    <heroui.Button
+                      color="secondary"
+                      size="sm"
+                      variant="flat"
+                      onPress={() => logout()}
+                    >
+                      Logout
                     </heroui.Button>
                     <heroui.Button isDisabled color="danger" size="sm" variant="flat">
                       Delete User
@@ -93,17 +142,19 @@ export default function Modal(): React.ReactElement {
 }
 
 export function ChangePasswordForm(props: {
-  userId: number;
+  userId: Option<number>;
   onCloseAction?: () => void;
 }): React.ReactElement {
   const formRef: React.RefObject<Option<HTMLFormElement>> = React.useRef(null);
 
   const [state, action, pending] = React.useActionState(
     async (state: FormState, formData: FormData): Promise<FormState> => {
-      formData.set("userId", `${props.userId}`);
-      const result = await changePassword(state, formData);
-      if (!result?.errors && props.onCloseAction) props.onCloseAction();
-      return result;
+      if (props.userId) {
+        formData.set("userId", props.userId ? `${props.userId}` : "");
+        const result = await changePassword(state, formData);
+        if (!result?.errors && props.onCloseAction) props.onCloseAction();
+        return result;
+      } else return {} satisfies FormState;
     },
     {},
   );

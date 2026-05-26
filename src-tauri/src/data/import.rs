@@ -1,10 +1,10 @@
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use serde::Serialize;
 use sqlx::{Acquire, Sqlite, SqliteConnection, Transaction, pool::PoolConnection, sqlite::SqliteQueryResult};
 use tauri::{Manager, Wry};
 use tokio::sync::{Mutex, MutexGuard};
 
-use crate::{data::structs::UserExportData, db::user::User, errors::{DataImportError, Error}, state};
+use crate::{data::{errors::UserDataError, structs::UserExportData}, db::user::User, state};
 
 #[derive(Debug, Default, Serialize)]
 pub struct UserImportDataSummary {
@@ -18,7 +18,7 @@ pub async fn insert_user_export_data(
     app_handle: &tauri::AppHandle<Wry>,
     user: &User,
     data: UserExportData,
-) -> Result<UserImportDataSummary, crate::errors::Error> {
+) -> Result<UserImportDataSummary, crate::AppError> {
     let state = app_handle.state::<Mutex<state::AppState>>();
     let guard: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = guard.db.pool.acquire().await?;
@@ -153,36 +153,21 @@ pub async fn import_user_data(
     app_handle: tauri::AppHandle<Wry>,
     path: Option<&str>, // unused, to keep function signature consistent with windows version
     user: User,
-) -> std::result::Result<Option<UserImportDataSummary>, crate::errors::Error> {
-    use tauri_plugin_android_fs::{AndroidFsExt, FileUri, PublicGeneralPurposeDir, api::api_async::AndroidFs};
+) -> Result<UserImportDataSummary, crate::AppError> {
+    use tauri_plugin_android_fs::{AndroidFsExt, FileUri, api::api_async::AndroidFs};
 
     let api: &AndroidFs<Wry> = app_handle.android_fs_async();
 
-    let uri: Option<FileUri> = api
+    let uri: FileUri = api
         .file_picker()
         .pick_file(None, &["application/json", "*/*"], false)
         .await
-        .map_err(|e| {
-            crate::errors::emit_app_error(&app_handle, "tauri://error", &e);
-            std::io::Error::other(e.to_string())
-        })?;
+        .map_err(|e| UserDataError::Dialog(e.to_string()))?
+        .ok_or(UserDataError::Cancelled)?;
 
-    let Some(uri) = uri else {
-        log::info!("Android import JSON: file picker cancelled");
-        return Ok(None);
-    };
-
-    let name: String = api.get_name(&uri).await.map_err(|e| {
-        crate::errors::emit_app_error(&app_handle, "tauri://error", &e);
-        std::io::Error::other(e.to_string())
-    })?;
-    let bytes: Vec<u8> = api.read(&uri).await.map_err(|e| {
-        crate::errors::emit_app_error(&app_handle, "tauri://error", &e);
-        std::io::Error::other(e.to_string())
-    })?;
-
-    let data: UserExportData = serde_json::from_slice(&bytes)
-        .map_err(|e| std::io::Error::other(format!("`{name}` is not a valid JSON data: {e}")))?;
+    let name: String = api.get_name(&uri).await.map_err(|e| anyhow!(e))?;
+    let bytes: Vec<u8> = api.read(&uri).await.map_err(|e| anyhow!(e))?;
+    let data: UserExportData = serde_json::from_slice(&bytes).map_err(|e| anyhow!(e))?;
 
     let state = app_handle.state::<Mutex<state::AppState>>();
     let guard: MutexGuard<'_, state::AppState> = state.lock().await;
@@ -190,14 +175,10 @@ pub async fn import_user_data(
     let conn: &mut SqliteConnection = pool.acquire().await?;
 
     let app_version: semver::Version =
-        semver::Version::parse(&app_handle.package_info().version.to_string()).unwrap();
-    let data_export_app_version: semver::Version = semver::Version::parse(&data.app_version)
-        .map_err(|e| {
-            std::io::Error::other(format!(
-                "cannot parse app version from user data export: {}",
-                e
-            ))
-        })?;
+        semver::Version::parse(&app_handle.package_info().version.to_string())
+            .map_err(|e| anyhow!(e))?;
+    let data_export_app_version: semver::Version =
+        semver::Version::parse(&data.app_version).map_err(|e| anyhow!(e))?;
 
     let current_sqlite_user_ver: i64 = sqlx::query_scalar!("PRAGMA user_version;")
         .fetch_one(&mut *conn)
@@ -206,17 +187,15 @@ pub async fn import_user_data(
 
     // TODO(ayvi): add proper version checks. http://ayvi:3000/ayvi/dailies/issues/224
     if data_export_app_version.major < app_version.major {
-        Err(Error::DataImport(DataImportError::IncompatibleAppVersion(
+        Err(UserDataError::IncompatibleAppVersion(
             data_export_app_version,
             app_version,
-        )))
+        ))?
     } else if data.sqlite_user_version < current_sqlite_user_ver {
-        Err(Error::DataImport(
-            DataImportError::IncompatibleSqliteUserVersion(
-                data.sqlite_user_version,
-                current_sqlite_user_ver,
-            ),
-        ))
+        Err(UserDataError::IncompatibleSqliteUserVersion(
+            data.sqlite_user_version,
+            current_sqlite_user_ver,
+        ))?
     } else {
         std::mem::drop(guard);
 
@@ -234,7 +213,7 @@ pub async fn import_user_data(
 
         log::info!("{:?}", summary);
 
-        Ok(Some(summary))
+        Ok(summary)
     }
 }
 
@@ -244,7 +223,7 @@ pub async fn import_user_data(
     app_handle: tauri::AppHandle<Wry>,
     user: User,
     path: Option<&str>,
-) -> Result<Option<UserImportDataSummary>, crate::errors::Error> {
+) -> Result<UserImportDataSummary, crate::AppError> {
     use std::{fs::File, path::PathBuf};
 
     use tauri_plugin_dialog::DialogExt;
@@ -262,49 +241,37 @@ pub async fn import_user_data(
                     let _ = tx.send(file_path);
                 });
 
-            let picked = rx
+            let file_path = rx
                 .await
-                .map_err(|e| std::io::Error::other(format!("file dialog channel error: {e}")))?;
+                .map_err(|e| UserDataError::Dialog(e.to_string()))?
+                .ok_or(UserDataError::Cancelled)?;
 
-            let Some(file_path) = picked else {
-                log::info!("Windows import JSON: file picker cancelled");
-                return Ok(None);
-            };
-
-            file_path.into_path().map_err(|e| {
-                std::io::Error::other(format!("failed to resolve picked file path: {e}"))
-            })?
+            file_path
+                .into_path()
+                .map_err(|e| UserDataError::Path(e.to_string()))?
         }
     };
 
     if !in_path.is_file() {
-        return Err(crate::errors::Error::Io(std::io::Error::other(format!(
-            "import path is not a file: {}",
-            in_path.display()
-        ))));
+        return Err(anyhow!("Import path is not a file: {}", in_path.display()))?;
     }
 
     let mut file: File = File::open(&in_path)?;
     let mut buf: Vec<u8> = Vec::new();
     std::io::Read::read_to_end(&mut file, &mut buf)?;
 
-    let data: UserExportData = serde_json::from_slice(&buf)
-        .map_err(|e| std::io::Error::other(format!("invalid JSON export: {e}")))?;
+    let data: UserExportData = serde_json::from_slice(&buf).map_err(|e| anyhow!(e))?;
 
     let state = app_handle.state::<Mutex<state::AppState>>();
     let guard: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = guard.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
 
+    let package_info = app_handle.package_info();
     let app_version: semver::Version =
-        semver::Version::parse(&app_handle.package_info().version.to_string()).unwrap();
-    let data_export_app_version: semver::Version = semver::Version::parse(&data.app_version)
-        .map_err(|e| {
-            std::io::Error::other(format!(
-                "cannot parse app version from user data export: {}",
-                e
-            ))
-        })?;
+        semver::Version::parse(&package_info.version.to_string()).map_err(|e| anyhow!(e))?;
+    let data_export_app_version: semver::Version =
+        semver::Version::parse(&data.app_version).map_err(|e| anyhow!(e))?;
 
     let current_sqlite_user_ver: i64 = sqlx::query_scalar!("PRAGMA user_version;")
         .fetch_one(&mut *conn)
@@ -313,17 +280,15 @@ pub async fn import_user_data(
 
     // TODO(ayvi): add proper version checks. http://ayvi:3000/ayvi/dailies/issues/224
     if data_export_app_version.major < app_version.major {
-        Err(Error::DataImport(DataImportError::IncompatibleAppVersion(
+        Err(UserDataError::IncompatibleAppVersion(
             data_export_app_version,
             app_version,
-        )))
+        ))?
     } else if data.sqlite_user_version < current_sqlite_user_ver {
-        Err(Error::DataImport(
-            DataImportError::IncompatibleSqliteUserVersion(
-                data.sqlite_user_version,
-                current_sqlite_user_ver,
-            ),
-        ))
+        Err(UserDataError::IncompatibleSqliteUserVersion(
+            data.sqlite_user_version,
+            current_sqlite_user_ver,
+        ))?
     } else {
         std::mem::drop(guard);
 
@@ -333,6 +298,6 @@ pub async fn import_user_data(
 
         log::info!("{:?}", summary);
 
-        Ok(Some(summary))
+        Ok(summary)
     }
 }

@@ -3,9 +3,10 @@
 import * as React from "react";
 
 import * as heroui from "@heroui/react";
+import { Result } from "neverthrow";
 
 import addQuest from "@/actions/add-quest";
-import { UserState, useState as useUserState } from "@/app/providers/user";
+import { User, useUser } from "@/app/providers/user";
 import { DailiesState, useDailies } from "@/components/daily";
 import AddQuestForm from "@/components/daily/forms/add";
 import { QuestType, useQuestTypes } from "@/components/daily/providers/quest-types";
@@ -15,28 +16,35 @@ import { Option } from "@/types/option";
 import SearchParamModal from "./modal";
 
 export default function Modal(): React.ReactElement {
-  const userState: UserState = useUserState();
+  const user: Result<User, Error> = useUser();
   const questTypes: QuestType[] = useQuestTypes();
   const dailiesState: DailiesState = useDailies();
   const [_state, action, pending] = React.useActionState(
     async (state: FormState, payload: FormData): Promise<FormState> => {
-      payload.set("userId", `${userState.user?.id}`);
+      return user.match(
+        async (t) => {
+          payload.set("userId", t.id.toString());
 
-      const typeId = payload.get("typeId");
-      payload.set(
-        "typeId",
-        questTypes.find((questType: QuestType) => questType.name == typeId)!.id.replace("_", "-"),
+          const typeId = payload.get("typeId");
+          payload.set(
+            "typeId",
+            questTypes
+              .find((questType: QuestType) => questType.name == typeId)!
+              .id.replace("_", "-"),
+          );
+
+          const result = await addQuest(state, payload);
+
+          dailiesState.triggerRefreshDailies();
+
+          const chain = payload.get("chain")?.toString();
+          if (chain && !dailiesState.questChains.map((v) => v.chain).includes(chain))
+            dailiesState.triggerRefreshQuestChains();
+
+          return result;
+        },
+        async (_) => { return {} satisfies FormState; },
       );
-
-      const result = await addQuest(state, payload);
-
-      dailiesState.triggerRefreshDailies();
-
-      const chain = payload.get("chain")?.toString();
-      if (chain && !dailiesState.questChains.map((v) => v.chain).includes(chain))
-        dailiesState.triggerRefreshQuestChains();
-
-      return result;
     },
     {},
   );

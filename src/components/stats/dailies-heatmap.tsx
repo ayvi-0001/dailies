@@ -11,37 +11,47 @@ import { now, parseDate } from "@internationalized/date";
 import chroma from "chroma-js";
 import type { ScaleBand } from "d3";
 import { motion } from "motion/react";
+import { Result } from "neverthrow";
 import { CloneElement } from "reablocks";
 
-import { type User } from "@/app/providers/user";
+import { type User, useUser } from "@/app/providers/user";
 import { LOCAL_TZ } from "@/lib/dates";
 import { invoke } from "@/lib/tauri";
+import { Option } from "@/types/option";
 
-export default function DailiesHeatmap({ user }: { user: User }): React.ReactElement {
+export default function DailiesHeatmap(): React.ReactElement {
   const today = now(LOCAL_TZ);
-  const defaultGraphData = Array.from({ length: 365 }, (_: unknown, k: number) => { return { key: today.subtract({ days: k }).toDate() }; }) as reaviz.ChartShallowDataShape[];
+  const defaultGraphData = Array.from({ length: 365 }, (_: unknown, k: number) => ({
+    key: today.subtract({ days: k }).toDate(),
+  })) as reaviz.ChartShallowDataShape[];
 
   // TODO(ayvi): add year filter
   const start_date: string = now(LOCAL_TZ).subtract({ days: 365 }).toString().substring(0, 10);
   const end_date: string = now(LOCAL_TZ).toString().substring(0, 10);
 
+  const user: Result<User, Error> = useUser();
+  const userName: Option<string> = user.map((t) => t.name).unwrapOr(null);
+
   const [data, setData] = React.useState<reaviz.ChartShallowDataShape[]>(defaultGraphData);
   ReactUse.useOnceEffect(() => {
     const query_dailies_complete = async (): Promise<void> => {
       await invoke<DailiesCompleteDataPoint[]>("query_dailies_complete", {
-        user: user.name,
+        user: userName,
         start_date: start_date,
         end_date: end_date,
       })
         .then((result: DailiesCompleteDataPoint[]) =>
           setData(
-            Array.from(result, (v: DailiesCompleteDataPoint) => { return { key: parseDate(v.date).toDate(LOCAL_TZ), data: v.value * 100 }; }),
+            Array.from(result, (v: DailiesCompleteDataPoint) => ({
+              key: parseDate(v.date).toDate(LOCAL_TZ),
+              data: v.value * 100,
+            })),
           ),
         )
         .catch(console.error);
     };
     query_dailies_complete();
-  }, [user]);
+  }, [userName]);
 
   const { value: visible, setTrue } = ReactUse.useBoolean(false);
   ReactUse.useUpdateEffect(() => {

@@ -3,8 +3,9 @@ import * as React from "react";
 import * as heroui from "@heroui/react";
 import clsx from "clsx";
 
-import editQuest, { EditQuestState } from "@/actions/edit-quest";
+import editQuest from "@/actions/edit-quest";
 import { User } from "@/app/providers/user";
+import { FormState } from "@/lib/forms";
 import type { Option } from "@/types/option";
 
 import type { Daily } from "../../daily";
@@ -44,7 +45,7 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
 
   const [_state, action, pending] = React.useActionState(
-    async (state: EditQuestState, payload: FormData): Promise<EditQuestState> => {
+    async (state: FormState, payload: FormData): Promise<FormState> => {
       setIsLoadingAction(true);
 
       const diff: Partial<Daily> = (await editQuest(
@@ -62,9 +63,9 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
 
       setIsOpen(true);
 
-      return;
+      return state;
     },
-    undefined,
+    {},
   );
 
   React.useEffect(() => {

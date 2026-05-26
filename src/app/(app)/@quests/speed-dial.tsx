@@ -14,7 +14,7 @@ import {
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
 
-import { truncate_sessions } from "@/actions/logout";
+import logout from "@/actions/logout";
 import { ModalParam } from "@/app/(app)/@modals/params";
 import Speeddial, { SpeeddialDirection } from "@/components/animata/container/speed-dial";
 import { updateParam } from "@/lib/params";
@@ -49,10 +49,7 @@ export default function App(): React.ReactElement {
       icon: <LogOutIcon size={14} stroke="#f0f0ff" />,
       label: <p className="text-xs">Logout</p>,
       key: "logout",
-      buttonAction: async () => {
-        await truncate_sessions();
-        router.push("/login");
-      },
+      buttonAction: () => logout(),
     },
     {
       icon: <CircleXIcon size={14} stroke="#f0f0ff" />,

@@ -6,17 +6,17 @@ import { Event, UnlistenFn, listen } from "@tauri-apps/api/event";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
 
-import type { ErrorMessage } from "@/types/errors";
+import { AppErrorContent } from "@/types/errors";
 
 export default function Toaster(): React.ReactElement {
   React.useEffect(() => {
-    const unlistenInfo = listen<ErrorMessage>("tauri://info", (event: Event<ErrorMessage>) => { toast.info("tauri://info", { description: event.payload.message }); });
-    const unlistenError = listen<ErrorMessage>("tauri://error", (event: Event<ErrorMessage>) => { toast.error("tauri://error", { description: event.payload.message }); });
+    const unlistenError = listen<AppErrorContent>(
+      "tauri://error",
+      (event: Event<AppErrorContent>) =>
+        toast.error(event.payload.title, { description: event.payload.content }),
+    );
 
-    return () => {
-      unlistenInfo.then((off: UnlistenFn) => off());
-      unlistenError.then((off: UnlistenFn) => off());
-    };
+    return () => { unlistenError.then((off: UnlistenFn) => off()); };
   }, []);
 
   const Toaster = dynamic(() => import("sonner").then((mod) => mod.Toaster), {

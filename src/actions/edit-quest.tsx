@@ -5,41 +5,19 @@ import { z } from "zod";
 import { Daily, Quest } from "@/components/daily";
 import { QuestType } from "@/components/daily/providers/quest-types";
 import { formatDateTimeISO8601 } from "@/lib/dates";
+import { FormState } from "@/lib/forms";
 import { camelCaseToSnakeCase } from "@/lib/string";
 import { invoke } from "@/lib/tauri";
 import Utils from "@/lib/utils";
-import type { AppError } from "@/types/errors";
-
-export type EditQuestErrors = {
-  errors?: {
-    archived?: string[];
-    chain?: string[];
-    days?: string[];
-    name?: string[];
-    description?: string[];
-    note?: string[];
-    requirements?: string[];
-    streakTarget?: string[];
-    timeStart?: string[];
-    timeEnd?: string[];
-    defaultPoints?: string[];
-    total?: string[];
-    typeId?: string[];
-    weight?: string[];
-    other?: string[];
-  };
-};
-
-export type EditQuestState = EditQuestErrors | undefined;
 
 export default async function editQuest(
-  _: EditQuestState,
+  _state: FormState,
   formData: FormData,
   originalValues: Daily,
   questTypes: QuestType[],
   userId: number,
   historic?: boolean,
-): Promise<EditQuestErrors | Partial<Daily>> {
+): Promise<FormState | Partial<Daily>> {
   const validatedFields = Quest.EditQuestFormSchema.safeParse({
     archived: historic ? originalValues.archived : formData.get("archived"),
     chain: historic ? originalValues.chain : formData.get("chain"),
@@ -98,20 +76,20 @@ export default async function editQuest(
 
     return {
       errors: {
-        archived: errTree.properties?.archived?.errors,
-        chain: errTree.properties?.chain?.errors,
-        days: errTree.properties?.days?.errors,
-        name: errTree.properties?.name?.errors,
-        description: errTree.properties?.description?.errors,
-        note: errTree.properties?.note?.errors,
-        requirements: errTree.properties?.requirements?.errors,
-        streakTarget: errTree.properties?.streakTarget?.errors,
-        timeStart: errTree.properties?.timeStart?.errors,
-        timeEnd: errTree.properties?.timeEnd?.errors,
-        defaultPoints: errTree.properties?.defaultPoints?.errors,
-        total: errTree.properties?.total?.errors,
-        typeId: errTree.properties?.typeId?.errors,
-        weight: errTree.properties?.weight?.errors,
+        archived: errTree.properties?.archived?.errors ?? null,
+        chain: errTree.properties?.chain?.errors ?? null,
+        days: errTree.properties?.days?.errors ?? null,
+        name: errTree.properties?.name?.errors ?? null,
+        description: errTree.properties?.description?.errors ?? null,
+        note: errTree.properties?.note?.errors ?? null,
+        requirements: errTree.properties?.requirements?.errors ?? null,
+        streakTarget: errTree.properties?.streakTarget?.errors ?? null,
+        timeStart: errTree.properties?.timeStart?.errors ?? null,
+        timeEnd: errTree.properties?.timeEnd?.errors ?? null,
+        defaultPoints: errTree.properties?.defaultPoints?.errors ?? null,
+        total: errTree.properties?.total?.errors ?? null,
+        typeId: errTree.properties?.typeId?.errors ?? null,
+        weight: errTree.properties?.weight?.errors ?? null,
       },
     };
   }
@@ -157,7 +135,7 @@ export default async function editQuest(
       quest_id: originalValues.questId,
       point_id: originalValues.pointId,
       value: typeof value === "boolean" ? !!value : value,
-    }).catch((_: AppError) => {
+    }).catch((_) => {
       if (key === "name") {
         toast.error(`A quest with the same name and quest chain already exists.`);
         delete diff.name;

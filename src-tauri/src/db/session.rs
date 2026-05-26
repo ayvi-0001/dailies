@@ -9,7 +9,7 @@ pub async fn save_session<'a>(
     state: tauri::State<'a, Mutex<state::AppState>>,
     user: &'a str,
     session_id: &'a str,
-) -> Result<(), crate::errors::Error> {
+) -> Result<String, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -24,13 +24,13 @@ pub async fn save_session<'a>(
 
     log::info!("{result:?}");
 
-    Ok(())
+    Ok(session_id.into())
 }
 
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn get_session<'a>(
     state: tauri::State<'a, Mutex<state::AppState>>,
-) -> Result<Option<String>, crate::errors::Error> {
+) -> Result<Option<String>, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -48,7 +48,7 @@ pub async fn get_session<'a>(
 pub async fn delete_session<'a>(
     state: tauri::State<'a, Mutex<state::AppState>>,
     id: Option<i64>,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -65,7 +65,7 @@ pub async fn delete_session<'a>(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn truncate_sessions<'a>(
     state: tauri::State<'a, Mutex<state::AppState>>,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;

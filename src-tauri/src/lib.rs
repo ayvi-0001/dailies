@@ -6,6 +6,8 @@ use tokio::sync::Mutex;
 pub(crate) mod macros;
 crate::mod_flat!(build_info, config, dailies, data, db, errors, state, utils);
 
+use crate::errors::AppError;
+
 lazy_static::lazy_static! {
     pub static ref JWT_SECRET: &'static str = env!("JWT_SECRET");
 }

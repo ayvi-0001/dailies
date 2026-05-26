@@ -5,10 +5,8 @@ import { z } from "zod";
 import { Quest } from "@/components/daily";
 import { LOCAL_TZ } from "@/lib/dates";
 import { FormState } from "@/lib/forms";
-import type { AppError } from "@/types/errors";
-import { Option } from "@/types/option";
 
-export default async function addQuest(_state: FormState, formData: FormData): Promise<FormState> {
+export default async function addQuest(state: FormState, formData: FormData): Promise<FormState> {
   const now: Date = today(LOCAL_TZ).toDate(LOCAL_TZ);
 
   const validatedFields = Quest.NewQuestFormSchema.safeParse({
@@ -49,9 +47,7 @@ export default async function addQuest(_state: FormState, formData: FormData): P
     };
   }
 
-  await invoke<Option<AppError>>("insert_quest", {
-    quest: validatedFields.data,
-  }).catch(console.error);
+  await invoke("insert_quest", { quest: validatedFields.data }).catch(console.error);
 
-  return {} satisfies FormState;
+  return state;
 }

@@ -1,7 +1,8 @@
-import { toast } from "sonner";
+import { ResultAsync } from "neverthrow";
 
 import { User } from "@/app/providers/user";
 import { invoke } from "@/lib/tauri";
+import { AppError, AppErrorContent } from "@/types/errors";
 import { Option } from "@/types/option";
 
 export type UserExportDataSummary = {
@@ -12,19 +13,18 @@ export type UserExportDataSummary = {
   quests: number;
 };
 
-const exportUserData = async (user: Option<User>, path?: Option<string>) =>
-  toast.promise<UserExportDataSummary>(
-    async () =>
-      await invoke<UserExportDataSummary>("export_user_data", {
-        user: user,
-        path: path ?? null,
-      }),
-    {
-      loading: "Exporting data...",
-      success: (result) => `Saved to ${result.output_path}`,
-      error: "Error exporting data",
-    },
+export function exportUserData(
+  user: User,
+  path?: Option<string>,
+): ResultAsync<UserExportDataSummary, AppError> {
+  return ResultAsync.fromPromise(
+    invoke<UserExportDataSummary>("export_user_data", {
+      user: user,
+      path: path ?? null,
+    }),
+    (e: unknown) => new AppError(e as AppErrorContent),
   );
+}
 
 export type UserImportDataSummary = {
   quest_chains_inserted: number;
@@ -33,18 +33,15 @@ export type UserImportDataSummary = {
   data_path: string;
 };
 
-const importUserData = async (user: Option<User>, path?: Option<string>) =>
-  toast.promise<UserImportDataSummary>(
-    async () =>
-      await invoke<UserImportDataSummary>("import_user_data", {
-        user: user,
-        path: path ?? null,
-      }),
-    {
-      loading: "Importing data...",
-      success: (result) => `Imported data from ${result.data_path}`,
-      error: "Error importing data",
-    },
+export function importUserData(
+  user: User,
+  path?: Option<string>,
+): ResultAsync<UserImportDataSummary, AppError> {
+  return ResultAsync.fromPromise(
+    invoke<UserImportDataSummary>("import_user_data", {
+      user: user,
+      path: path ?? null,
+    }),
+    (e: unknown) => new AppError(e as AppErrorContent),
   );
-
-export { exportUserData, importUserData };
+}

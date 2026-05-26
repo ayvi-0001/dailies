@@ -1,11 +1,11 @@
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use chrono::Local;
 use serde::Serialize;
 use sqlx::{Acquire, Sqlite, SqliteConnection, pool::PoolConnection};
 use tauri::{Manager, Wry};
 use tokio::sync::{Mutex, MutexGuard};
 
-use crate::{dailies::{point::Point, quest::{Quest, QuestChain}}, data::structs::UserExportData, db::user::User, state};
+use crate::{dailies::{point::Point, quest::{Quest, QuestChain}}, data::{errors::UserDataError, structs::UserExportData}, db::user::User, state};
 
 #[derive(Debug, Default, Serialize)]
 pub struct UserExportDataSummary {
@@ -19,7 +19,7 @@ pub struct UserExportDataSummary {
 pub async fn fetch_user_export_data(
     app_handle: &tauri::AppHandle<Wry>,
     user: &User,
-) -> Result<UserExportData, crate::errors::Error> {
+) -> Result<UserExportData, crate::AppError> {
     let state = app_handle.state::<Mutex<state::AppState>>();
     let guard: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = guard.db.pool.acquire().await?;
@@ -103,14 +103,13 @@ pub async fn export_user_data(
     app_handle: tauri::AppHandle<Wry>,
     user: User,
     relative_path: Option<String>,
-) -> std::result::Result<Option<UserExportDataSummary>, crate::errors::Error> {
+) -> Result<UserExportDataSummary, crate::AppError> {
     use tauri_plugin_android_fs::{AndroidFsExt, FileUri, PublicGeneralPurposeDir, api::api_async::AndroidFs};
 
     let api: &AndroidFs<Wry> = app_handle.android_fs_async();
 
     let data: UserExportData = fetch_user_export_data(&app_handle, &user).await?;
-    let bytes: Vec<u8> =
-        serde_json::to_vec_pretty(&data).map_err(|e| std::io::Error::other(e.to_string()))?;
+    let bytes: Vec<u8> = serde_json::to_vec_pretty(&data).map_err(|e| anyhow!(e))?;
 
     let uri: FileUri = match relative_path.filter(|p| !p.is_empty()) {
         Some(sub_dir) => {
@@ -124,25 +123,15 @@ pub async fn export_user_data(
                     &bytes,
                 )
                 .await
-                .map_err(|e| {
-                    crate::errors::emit_app_error(&app_handle, "tauri://error", &e);
-                    std::io::Error::other(e.to_string())
-                })?
+                .map_err(|e| anyhow!(e))?
         }
         None => {
-            let dir_uri: Option<FileUri> = api
+            let dir_uri: FileUri = api
                 .file_picker()
                 .pick_dir(None, false)
                 .await
-                .map_err(|e| {
-                    crate::errors::emit_app_error(&app_handle, "tauri://error", &e);
-                    std::io::Error::other(e.to_string())
-                })?;
-
-            let Some(dir_uri) = dir_uri else {
-                log::info!("Android export JSON: folder picker cancelled");
-                return Ok(None);
-            };
+                .map_err(|e| UserDataError::Dialog(e.to_string()))?
+                .ok_or(UserDataError::Cancelled)?;
 
             let filename = format!(
                 "dailies-user-{}-{}.json",
@@ -153,15 +142,11 @@ pub async fn export_user_data(
             let file_uri: FileUri = api
                 .create_new_file(&dir_uri, &filename, Some("application/json"))
                 .await
-                .map_err(|e| {
-                    crate::errors::emit_app_error(&app_handle, "tauri://error", &e);
-                    std::io::Error::other(e.to_string())
-                })?;
+                .map_err(|e| UserDataError::Path(e.to_string()))?;
 
-            api.write(&file_uri, &bytes).await.map_err(|e| {
-                crate::errors::emit_app_error(&app_handle, "tauri://error", &e);
-                std::io::Error::other(e.to_string())
-            })?;
+            api.write(&file_uri, &bytes)
+                .await
+                .map_err(|e| anyhow!(e))?;
 
             file_uri
         }
@@ -184,7 +169,7 @@ pub async fn export_user_data(
 
     log::info!("{:?}", summary);
 
-    Ok(Some(summary))
+    Ok(summary)
 }
 
 #[cfg(target_os = "windows")]
@@ -193,10 +178,11 @@ pub async fn export_user_data(
     app_handle: tauri::AppHandle<Wry>,
     user: User,
     dir: Option<&str>,
-) -> Result<Option<UserExportDataSummary>, crate::errors::Error> {
+) -> Result<UserExportDataSummary, crate::AppError> {
     use std::{fs::File, io::{BufWriter, Write}, path::PathBuf};
 
     use tauri_plugin_dialog::DialogExt;
+    use tauri_plugin_fs::FilePath;
 
     let mut out_path: PathBuf = match dir.filter(|d| !d.is_empty()) {
         Some(d) => PathBuf::from(d),
@@ -210,18 +196,14 @@ pub async fn export_user_data(
                     let _ = tx.send(folder_path);
                 });
 
-            let picked = rx
+            let folder_path: FilePath = rx
                 .await
-                .map_err(|e| std::io::Error::other(format!("folder dialog channel error: {e}")))?;
+                .map_err(|e| UserDataError::Dialog(e.to_string()))?
+                .ok_or(UserDataError::Cancelled)?;
 
-            let Some(folder_path) = picked else {
-                log::info!("Windows export JSON: folder picker cancelled");
-                return Ok(None);
-            };
-
-            folder_path.into_path().map_err(|e| {
-                std::io::Error::other(format!("failed to resolve picked folder path: {e}"))
-            })?
+            folder_path
+                .into_path()
+                .map_err(|e| UserDataError::Path(e.to_string()))?
         }
     };
 
@@ -236,8 +218,7 @@ pub async fn export_user_data(
     out_path.push(filename);
 
     let data: UserExportData = fetch_user_export_data(&app_handle, &user).await?;
-    let bytes: Vec<u8> =
-        serde_json::to_vec_pretty(&data).map_err(|e| std::io::Error::other(e.to_string()))?;
+    let bytes: Vec<u8> = serde_json::to_vec_pretty(&data).map_err(|e| anyhow!(e))?;
 
     let file: File = File::create(&out_path)?;
     let mut w: BufWriter<File> = BufWriter::new(file);
@@ -254,5 +235,5 @@ pub async fn export_user_data(
 
     log::info!("{:?}", summary);
 
-    Ok(Some(summary))
+    Ok(summary)
 }

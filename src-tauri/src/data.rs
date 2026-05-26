@@ -1,1 +1,1 @@
-crate::mod_pub!(export, import, structs);
+crate::mod_pub!(errors, export, import, structs);

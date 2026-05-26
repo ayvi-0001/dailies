@@ -1,4 +1,5 @@
 import { exportUserData, importUserData } from "@/actions/data";
+import { getSessionUser } from "@/actions/session";
 import type { TerminalCommand, TerminalContext } from "@/components/ui/terminal";
 import Utils from "@/lib/utils";
 
@@ -24,13 +25,15 @@ const dataCommands: TerminalCommand[] = [
             </div>
           );
         default:
-          return JSON.stringify(
-            exportUserData(
-              await (await import("@/actions/session")).getSession(),
-              arg && arg !== "" ? arg : null,
-            ),
-            Utils.sortKeysReplacer,
-            2,
+          const user = await getSessionUser();
+          return user.match(
+            async (t) => {
+              return exportUserData(t).match(
+                (t) => JSON.stringify(t, Utils.sortKeysReplacer, 2),
+                (e) => { throw e; },
+              );
+            },
+            (e) => { throw e; },
           );
       }
     },
@@ -56,13 +59,15 @@ const dataCommands: TerminalCommand[] = [
             </div>
           );
         default:
-          return JSON.stringify(
-            importUserData(
-              await (await import("@/actions/session")).getSession(),
-              arg && arg !== "" ? arg : null,
-            ),
-            Utils.sortKeysReplacer,
-            2,
+          const user = await getSessionUser();
+          return user.match(
+            async (t) => {
+              return importUserData(t).match(
+                (t) => JSON.stringify(t, Utils.sortKeysReplacer, 2),
+                (e) => { throw e; },
+              );
+            },
+            (e) => { throw e; },
           );
       }
     },

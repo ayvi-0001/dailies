@@ -1,6 +1,6 @@
 use std::{collections::HashMap, str::FromStr};
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use chrono::{DateTime, Duration, Local, NaiveDate, NaiveDateTime, NaiveTime};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -20,7 +20,7 @@ pub async fn query_dailies(
     quest_id: Option<&str>,
     start_date: &str,
     end_date: &str,
-) -> Result<Vec<Daily>, crate::errors::Error> {
+) -> Result<Vec<Daily>, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
 
     let start_date = NaiveDate::from_str(start_date)?;
@@ -83,7 +83,7 @@ pub async fn query_dailies(
 pub async fn query_quest_chains(
     state: tauri::State<'_, Mutex<state::AppState>>,
     user_id: i64,
-) -> Result<Vec<QuestChain>, crate::errors::Error> {
+) -> Result<Vec<QuestChain>, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
 
     let rows = sqlx::query_as!(
@@ -115,7 +115,7 @@ pub async fn get_total_points(
     state: tauri::State<'_, Mutex<state::AppState>>,
     user: Option<&str>,
     date: &str,
-) -> Result<TotalPointEval, crate::errors::Error> {
+) -> Result<TotalPointEval, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
 
     let user = user.unwrap_or("");
@@ -146,7 +146,7 @@ pub async fn get_total_points(
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn get_quest_types(
     state: tauri::State<'_, Mutex<state::AppState>>,
-) -> Result<Vec<QuestTypeRecord>, crate::errors::Error> {
+) -> Result<Vec<QuestTypeRecord>, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
 
     let row: Result<Vec<QuestTypeRecord>, sqlx::Error> = sqlx::query_as!(
@@ -173,7 +173,7 @@ pub async fn get_quest_types(
 pub async fn handle_point_change(
     state: tauri::State<'_, Mutex<state::AppState>>,
     daily: Daily,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
 
     if let Some(points) = daily.points {
@@ -200,7 +200,7 @@ pub async fn handle_point_change(
 pub async fn delete_daily(
     state: tauri::State<'_, Mutex<state::AppState>>,
     point_id: &str,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let guard: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = guard.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -219,7 +219,7 @@ pub async fn delete_daily(
 pub async fn insert_quest(
     state: tauri::State<'_, Mutex<state::AppState>>,
     quest: NewQuest,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let guard: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = guard.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -252,28 +252,41 @@ pub async fn insert_quest(
                 description,
                 updated
             )
-            VALUES
-                (
-                    LOWER(SHA1_HEX((SELECT name FROM "users" WHERE id = $1 LIMIT 1) || "_" || $2 || "_" || $3)),
-                    (SELECT COALESCE((SELECT MAX(sequence) + 1 FROM "quests" WHERE user_id = $1 AND chain = $2 GROUP BY chain), 1)),
-                    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
-                );
-        "#)
-        .bind(quest.user_id)
-        .bind(quest.chain)
-        .bind(quest.name)
-        .bind(quest.type_id)
-        .bind(quest.weight)
-        .bind(quest.total)
-        .bind(quest.accepted)
-        .bind(quest.archived)
-        .bind(quest.streak_target)
-        .bind(quest.requirements)
-        .bind(quest.time_start)
-        .bind(quest.time_end)
-        .bind(quest.days)
-        .bind(quest.description)
-        .bind(quest.updated)
+            SELECT
+                LOWER(SHA1_HEX((SELECT name FROM "users" WHERE id = $1 LIMIT 1) || "_" || $2 || "_" || $3)) AS user_id,
+                (SELECT COALESCE((SELECT MAX(sequence) + 1 FROM "quests" WHERE user_id = $1 AND chain = $2 GROUP BY chain), 1)) AS sequence,
+                $1 AS user_id,
+                $2 AS chain,
+                $3 AS name,
+                $4 AS type_id,
+                $5 AS weight,
+                $6 AS total,
+                $7 AS accepted,
+                $8 AS archived,
+                $9 AS streak_target,
+                $10 AS requirements,
+                $11 AS time_start,
+                $12 AS time_end,
+                $13 AS days,
+                $14 AS description,
+                $15 AS updated
+        "#
+    )
+    .bind(quest.user_id)
+    .bind(quest.chain)
+    .bind(quest.name)
+    .bind(quest.type_id)
+    .bind(quest.weight)
+    .bind(quest.total)
+    .bind(quest.accepted)
+    .bind(quest.archived)
+    .bind(quest.streak_target)
+    .bind(quest.requirements)
+    .bind(quest.time_start)
+    .bind(quest.time_end)
+    .bind(quest.days)
+    .bind(quest.description)
+    .bind(quest.updated)
     .execute(&mut *tx)
     .await?;
 
@@ -281,9 +294,8 @@ pub async fn insert_quest(
 
     std::mem::drop(guard);
 
-    let app_handle: &tauri::AppHandle = app_handle().ok_or_else(|| {
-        crate::errors::Error::Io(std::io::Error::other("App handle not available"))
-    })?;
+    let app_handle: &tauri::AppHandle =
+        app_handle().ok_or_else(|| anyhow!("App handle not available"))?;
     let current_datetime: DateTime<Local> = Local::now();
 
     insert_dailies(app_handle.clone(), current_datetime).await?;
@@ -299,7 +311,7 @@ pub async fn update_chain(
     quest_id: String,
     point_id: String,
     value: String,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
@@ -329,7 +341,7 @@ pub async fn update_days(
     quest_id: String,
     point_id: String,
     value: Option<Json<Vec<i64>>>,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
@@ -364,7 +376,7 @@ pub async fn update_name(
     quest_id: String,
     point_id: String,
     value: String,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let guard: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = guard.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -422,7 +434,7 @@ pub async fn update_name(
             tx.rollback().await?;
             std::mem::drop(guard);
             log::error!("{:?}", e);
-            Err(crate::errors::Error::Sqlx(e))
+            Err(crate::AppError::Sqlx(e))
         }
     }
 }
@@ -435,7 +447,7 @@ pub async fn update_type_id(
     quest_id: String,
     point_id: String,
     value: QuestType,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
@@ -458,7 +470,7 @@ pub async fn update_weight(
     quest_id: String,
     point_id: String,
     value: f64,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
@@ -482,7 +494,7 @@ pub async fn update_description(
     quest_id: String,
     point_id: String,
     value: Option<String>,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
@@ -517,7 +529,7 @@ pub async fn update_note(
     quest_id: String,
     point_id: String,
     value: Option<String>,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
@@ -552,7 +564,7 @@ pub async fn update_time_start(
     quest_id: String,
     point_id: String,
     value: Option<NaiveTime>,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
@@ -589,7 +601,7 @@ pub async fn update_time_end(
     quest_id: String,
     point_id: String,
     value: Option<NaiveTime>,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
@@ -626,7 +638,7 @@ pub async fn update_requirements(
     quest_id: String,
     point_id: String,
     value: Option<Json<Value>>,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
@@ -663,7 +675,7 @@ pub async fn update_total(
     quest_id: String,
     point_id: String,
     value: f64,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
@@ -687,7 +699,7 @@ pub async fn update_default_points(
     quest_id: String,
     point_id: String,
     value: f64,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
@@ -711,7 +723,7 @@ pub async fn update_streak_target(
     quest_id: String,
     point_id: String,
     value: Option<f64>,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
@@ -748,7 +760,7 @@ pub async fn update_archived(
     quest_id: String,
     point_id: String,
     value: Option<NaiveDateTime>,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let pool: &sqlx::Pool<sqlx::Sqlite> = &state.db.pool;
 
@@ -783,7 +795,7 @@ pub async fn update_quest_sequence(
     quest_id: String,
     sequence: i64,
     sort_direction: SortDirection,
-) -> Result<Vec<QuestSequence>, crate::errors::Error> {
+) -> Result<Vec<QuestSequence>, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -882,7 +894,7 @@ pub async fn update_quest_sequence(
 pub async fn update_quest_chain_sequence(
     state: tauri::State<'_, Mutex<state::AppState>>,
     quest_chains: Vec<QuestChain>,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -912,7 +924,7 @@ pub async fn update_quest_chain_sequence(
 pub async fn insert_dailies(
     app_handle: tauri::AppHandle,
     datetime: DateTime<Local>,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state = app_handle.state::<Mutex<state::AppState>>();
     let guard: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = guard.db.pool.acquire().await?;
@@ -1076,7 +1088,7 @@ pub async fn insert_dailies(
 }
 
 #[tauri::command(async)]
-pub async fn backfill_dailies(app_handle: tauri::AppHandle) -> Result<(), crate::errors::Error> {
+pub async fn backfill_dailies(app_handle: tauri::AppHandle) -> Result<(), crate::AppError> {
     let state = app_handle.state::<Mutex<state::AppState>>();
 
     let guard: MutexGuard<'_, state::AppState> = state.lock().await;
@@ -1183,7 +1195,7 @@ pub async fn get_dailies_graph_data(
     state: tauri::State<'_, Mutex<state::AppState>>,
     user: &str,
     graph_type: GraphType,
-) -> Result<Vec<Vec<Option<f64>>>, crate::errors::Error> {
+) -> Result<Vec<Vec<Option<f64>>>, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -1297,7 +1309,7 @@ pub async fn query_quest_chains_complete(
     user: &str,
     start_date: &str,
     end_date: &str,
-) -> Result<HashMap<String, Vec<QuestChainsCompleteDataPoint>>, crate::errors::Error> {
+) -> Result<HashMap<String, Vec<QuestChainsCompleteDataPoint>>, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -1358,7 +1370,7 @@ pub async fn query_dailies_complete(
     user: &str,
     start_date: &str,
     end_date: &str,
-) -> Result<Vec<DailiesCompleteDataPoint>, crate::errors::Error> {
+) -> Result<Vec<DailiesCompleteDataPoint>, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -1399,7 +1411,7 @@ pub async fn get_quest_chain_collapsed(
     state: tauri::State<'_, Mutex<state::AppState>>,
     user_id: i64,
     chain: &str,
-) -> Result<bool, crate::errors::Error> {
+) -> Result<bool, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -1421,7 +1433,7 @@ pub async fn set_quest_chain_collapsed(
     user_id: i64,
     chain: &str,
     value: bool,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -1445,7 +1457,7 @@ pub async fn get_weekly_sum_type_stats(
     quest_id: &str,
     requirements: i64,
     date: &str,
-) -> Result<WeeklyQuestStats, crate::errors::Error> {
+) -> Result<WeeklyQuestStats, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -1519,7 +1531,7 @@ pub async fn get_weekly_max_type_stats(
     quest_id: &str,
     requirements: i64,
     date: &str,
-) -> Result<WeeklyQuestStats, crate::errors::Error> {
+) -> Result<WeeklyQuestStats, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -1580,7 +1592,7 @@ pub async fn get_weekly_max_type_stats(
 pub async fn get_daily_last_completed_date(
     state: tauri::State<'_, Mutex<state::AppState>>,
     quest_id: &str,
-) -> Result<NaiveDate, crate::errors::Error> {
+) -> Result<NaiveDate, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;

@@ -1,10 +1,10 @@
-import { invoke } from "@tauri-apps/api/core";
-import { RedirectType, redirect } from "next/navigation";
+import { Result, err, ok } from "neverthrow";
 import { z } from "zod";
 
-import type { User } from "@/app/providers/user";
 import { FormState } from "@/lib/forms";
 import { createSession } from "@/lib/session";
+
+import { createUser } from "./user";
 
 export const SignupFormSchema = z
   .object({
@@ -30,7 +30,10 @@ export const SignupFormSchema = z
     }
   });
 
-export default async function signup(_state: FormState, formData: FormData): Promise<FormState> {
+export default async function signup(
+  state: FormState,
+  formData: FormData,
+): Promise<Result<FormState, FormState>> {
   const validatedFields = SignupFormSchema.safeParse({
     username: formData.get("username"),
     password: formData.get("password"),
@@ -39,33 +42,30 @@ export default async function signup(_state: FormState, formData: FormData): Pro
 
   if (!validatedFields.success) {
     const errTree = z.treeifyError(validatedFields.error);
-    return {
+    return err({
       errors: {
         username: errTree.properties?.username?.errors ?? null,
         password: errTree.properties?.password?.errors ?? null,
         confirmPassword: errTree.properties?.confirmPassword?.errors ?? null,
       },
-    };
+    } as FormState);
   }
 
   const { username, password } = validatedFields.data;
 
-  const user = await invoke<User | void>("create_user", {
+  const user = await createUser({
     name: username,
     password: password,
-  }).catch(console.error);
+  });
 
-  if (!user?.name) return { errors: { other: ["invalid user"] } };
-
-  try {
-    await createSession(user.name);
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return { errors: { other: [error.message] } };
-    } else {
-      return { errors: { other: [`unknown error: ${error}`] } };
-    }
+  if (user.isErr()) {
+    return err({ errors: { other: [user.error.message] } });
   }
 
-  redirect("/", RedirectType.replace);
+  const session = await createSession(user.value.name);
+
+  return session.match(
+    (_) => ok(state),
+    (e) => err({ errors: { other: [e.message] } }),
+  );
 }

@@ -24,7 +24,7 @@ pub fn app_handle<'a>() -> Option<&'a tauri::AppHandle> {
 #[tauri::command(async, rename_all = "snake_case")]
 pub async fn get_jwt_secret<'a>(
     state: tauri::State<'a, Mutex<AppState>>,
-) -> Result<String, crate::errors::Error> {
+) -> Result<String, crate::AppError> {
     let state: MutexGuard<'_, AppState> = state.lock().await;
     Ok(state.jwt_secret.to_owned())
 }

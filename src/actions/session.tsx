@@ -1,23 +1,28 @@
 import { invoke } from "@tauri-apps/api/core";
-import { ok } from "assert";
+import { Result, ResultAsync, err, ok } from "neverthrow";
 
-import { DecodedToken, User } from "@/app/providers/user";
+import { User } from "@/app/providers/user";
 import { decrypt } from "@/lib/session";
+import { AppError, AppErrorContent } from "@/types/errors";
 import { Option } from "@/types/option";
 
-export async function getSession(): Promise<Option<User>> {
-  let user: Option<User> = null;
+import { getUser } from "./user";
 
-  try {
-    const session = await invoke<Option<string>>("get_session");
-    const token = await decrypt<DecodedToken>(session);
-    const payload = { name: token?.userName, id: null };
-    user = await invoke<User>("get_user", payload);
-  } catch (err: unknown) {
-    throw err;
-  }
+export type DecodedToken = {
+  userName: string;
+  iat: number;
+};
 
-  ok(user, new Error("Failed to retrieve session"));
+export async function getSessionDecoded(): Promise<Result<DecodedToken, Error>> {
+  const session: Result<string, Error> = await ResultAsync.fromPromise(
+    invoke<Option<string>>("get_session"),
+    (e: unknown) => new AppError(e as AppErrorContent),
+  ).andThen((t) => (t ? ok(t) : err(new Error("No active session found"))));
 
-  return user;
+  return await decrypt<DecodedToken>(session);
+}
+
+export async function getSessionUser(): Promise<Result<User, Error>> {
+  const token: Result<DecodedToken, Error> = await getSessionDecoded();
+  return token.asyncAndThen((t) => getUser({ name: t.userName, id: null }));
 }

@@ -1,28 +1,33 @@
-import * as React from "react";
-
-import { CalendarDate, DateValue } from "@internationalized/date";
 import { invoke } from "@tauri-apps/api/core";
+import { ResultAsync } from "neverthrow";
 
-import type { Daily } from "@/components/daily/types";
-import { LOCAL_TZ, formatDateTimeISO8601 } from "@/lib/dates";
+import type { Daily, QuestChain } from "@/components/daily/types";
+import { AppError, AppErrorContent } from "@/types/errors";
+import { Option } from "@/types/option";
 
-export async function queryQuestHistory(
-  userName: string,
-  questId: string,
-  startDate: DateValue,
-  endDate: DateValue,
-): Promise<Daily[]> {
-  return await invoke<Daily[]>("query_dailies", {
-    user: userName,
-    quest_id: questId,
-    end_date: formatDateTimeISO8601(endDate.toDate(LOCAL_TZ)).substring(0, 10),
-    start_date: formatDateTimeISO8601(startDate.toDate(LOCAL_TZ)).substring(0, 10),
-  });
+type queryDailiesParams = {
+  user: Option<string>;
+  quest_id: Option<string>;
+  start_date: string;
+  end_date: string;
+};
+
+export function queryDailies<T = Daily[]>(params: queryDailiesParams): ResultAsync<T, AppError> {
+  return ResultAsync.fromPromise(
+    invoke<T>("query_dailies", params),
+    (e: unknown) => new AppError(e as AppErrorContent),
+  );
 }
 
-export const cachedQueryQuestHistory: (
-  userName: string,
-  questId: string,
-  startDate: CalendarDate,
-  endDate: CalendarDate,
-) => Promise<Daily[]> = React.cache(queryQuestHistory);
+type queryQuestChainsParams = {
+  user_id: Option<number>;
+};
+
+export function queryQuestChains(
+  params: queryQuestChainsParams,
+): ResultAsync<QuestChain[], AppError> {
+  return ResultAsync.fromPromise(
+    invoke<QuestChain[]>("query_quest_chains", params),
+    (e: unknown) => new AppError(e as AppErrorContent),
+  );
+}

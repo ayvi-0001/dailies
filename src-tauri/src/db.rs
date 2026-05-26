@@ -2,13 +2,12 @@ use std::path::PathBuf;
 
 extern crate argon2;
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use sqlite_hashes::{register_sha1_functions, rusqlite::Connection};
 use sqlx::{Pool, Sqlite, SqliteConnection, sqlite::{LockedSqliteHandle, SqliteConnectOptions, SqlitePool, SqlitePoolOptions}};
 
 crate::mod_pub!(user, session);
-
-use crate::errors::Error;
+crate::mod_pub!(query);
 
 pub struct Database {
     pub pool: Pool<Sqlite>,
@@ -50,18 +49,12 @@ impl Database {
     pub async fn register_sqlite_sha1_functions(
         &self,
         sqlx_conn: &mut SqliteConnection,
-    ) -> Result<(), Error> {
-        let mut handle_lock: LockedSqliteHandle<'_> = sqlx_conn
-            .lock_handle()
-            .await
-            .map_err(Error::Sqlx)?;
+    ) -> Result<(), crate::AppError> {
+        let mut handle_lock: LockedSqliteHandle<'_> = sqlx_conn.lock_handle().await?;
         let handle = handle_lock.as_raw_handle().as_ptr();
-        let rusqlite_conn: Connection = unsafe { Connection::from_handle(handle) }
-            .map_err(|e| Error::Io(std::io::Error::other(e.to_string())))?;
+        let rusqlite_conn: Connection =
+            unsafe { Connection::from_handle(handle) }.map_err(|e| anyhow!(e))?;
 
-        register_sha1_functions(&rusqlite_conn)
-            .map_err(|e| Error::Io(std::io::Error::other(e.to_string())))?;
-
-        Ok(())
+        Ok(register_sha1_functions(&rusqlite_conn).map_err(|e| anyhow!(e))?)
     }
 }

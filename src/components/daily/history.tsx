@@ -7,9 +7,9 @@ import { CalendarDate, parseDate } from "@internationalized/date";
 import { AnimatePresence, motion } from "framer-motion";
 import { CalendarCogIcon } from "lucide-react";
 
-import { cachedQueryQuestHistory } from "@/actions/query";
+import { queryDailies } from "@/actions/query";
 import { User } from "@/app/providers/user";
-import { formatDateISO8601 } from "@/lib/dates";
+import { LOCAL_TZ, formatDateISO8601, formatDateTimeISO8601 } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import type { Option } from "@/types/option";
 
@@ -152,22 +152,27 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
   ReactUse.useOnceEffect(() => setIsLoading(true), [dateRange]);
 
   ReactUse.useOnceEffect(() => {
-    const query_dailies = async (): Promise<void> => {
-      await cachedQueryQuestHistory(user.name, daily.questId, dateRange!.start, dateRange!.end)
-        .then((result) => setDailies(result))
-        .finally(() => setIsLoading(false));
-    };
-    query_dailies();
+    queryDailies({
+      user: user.name,
+      quest_id: daily.questId,
+      end_date: formatDateTimeISO8601(dateRange!.end.toDate(LOCAL_TZ)).substring(0, 10),
+      start_date: formatDateTimeISO8601(dateRange!.start.toDate(LOCAL_TZ)).substring(0, 10),
+    })
+      .andTee((result) => setDailies(result))
+      .then(() => setIsLoading(false));
   }, [user, countRefreshDailies, dateRange]);
 
-  const triggerRefreshDailies = React.useCallback(async () => { setCountRefreshDailies((c) => c + 1); }, []);
+  const triggerRefreshDailies = React.useCallback(
+    async () => setCountRefreshDailies((c) => c + 1),
+    [],
+  );
 
   // TODO(ayvi): fix: updating note on a history card not immediately reflected on front-end
   // http://ayvi:3000/ayvi/dailies/issues/208
   const updateDaily = React.useCallback(
     (daily: Daily, patch: Partial<Daily>) =>
       updateDailyCallback(
-        user,
+        user.name,
         parseDate(daily.date),
         daily,
         patch,

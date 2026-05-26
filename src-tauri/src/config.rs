@@ -9,7 +9,7 @@ pub async fn get_key_as_bool(
     state: tauri::State<'_, Mutex<state::AppState>>,
     user_id: i64,
     key: String,
-) -> Result<Option<bool>, crate::errors::Error> {
+) -> Result<Option<bool>, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -31,7 +31,7 @@ pub async fn set_key_as_bool(
     user_id: i64,
     key: String,
     value: bool,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -53,7 +53,7 @@ pub async fn get_key_as_int(
     state: tauri::State<'_, Mutex<state::AppState>>,
     user_id: i64,
     key: String,
-) -> Result<Option<i64>, crate::errors::Error> {
+) -> Result<Option<i64>, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -75,7 +75,7 @@ pub async fn set_key_as_int(
     user_id: i64,
     key: String,
     value: i64,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -97,7 +97,7 @@ pub async fn get_key_as_float(
     state: tauri::State<'_, Mutex<state::AppState>>,
     user_id: i64,
     key: String,
-) -> Result<Option<f64>, crate::errors::Error> {
+) -> Result<Option<f64>, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -119,7 +119,7 @@ pub async fn set_key_as_float(
     user_id: i64,
     key: String,
     value: f64,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -141,7 +141,7 @@ pub async fn get_key_as_string(
     state: tauri::State<'_, Mutex<state::AppState>>,
     user_id: i64,
     key: String,
-) -> Result<Option<String>, crate::errors::Error> {
+) -> Result<Option<String>, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -163,7 +163,7 @@ pub async fn set_key_as_string(
     user_id: i64,
     key: String,
     value: String,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -184,7 +184,7 @@ pub async fn get_key_as_json(
     state: tauri::State<'_, Mutex<state::AppState>>,
     user_id: i64,
     key: String,
-) -> Result<Option<Json<Value>>, crate::errors::Error> {
+) -> Result<Option<Json<Value>>, crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
@@ -206,7 +206,7 @@ pub async fn set_key_as_json(
     user_id: i64,
     key: String,
     value: Json<Value>,
-) -> Result<(), crate::errors::Error> {
+) -> Result<(), crate::AppError> {
     let state: MutexGuard<'_, state::AppState> = state.lock().await;
     let mut pool: PoolConnection<Sqlite> = state.db.pool.acquire().await?;
     let conn: &mut SqliteConnection = pool.acquire().await?;
