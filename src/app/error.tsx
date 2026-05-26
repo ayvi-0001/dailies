@@ -2,8 +2,6 @@
 
 import { useEffect } from "react";
 
-import { toast } from "sonner";
-
 export default function Error({
   error,
   reset: _,
@@ -12,8 +10,5 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => console.error(error), [error]);
-
-  useEffect(() => { toast.error(error.message); }, [error]);
-
   return <></>;
 }

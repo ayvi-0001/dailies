@@ -27,6 +27,7 @@ All notable changes to this project will be documented in this file.
 
 - Error routing to login page after deleting active session.
 - Issue rendering quest list when no quests exist.
+- Doubled toast on error page.
 
 ## [v0.2.6]
 
