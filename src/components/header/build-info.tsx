@@ -66,23 +66,8 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
     },
   );
 
-  const Info = (): React.ReactElement => (
-    <span className="text-right text-[9px]/4 leading-none tracking-tighter text-white/50 select-none">
-      <p>
-        {appMeta.cargoTargetTriple && ` ${appMeta.cargoTargetTriple} `}
-        {appMeta.buildDate}
-      </p>
-      <p>
-        {appMeta.gitDescribe}
-        {appMeta.gitDescribe &&
-          appMeta.gitSha &&
-          !/g\w{7}/.test(appMeta.gitDescribe) &&
-          `-g${appMeta.gitSha.slice(0, 7)}`}
-        {appMeta.gitDirty}
-      </p>
-      {appMeta.buildInfo?.bundleType && <p>{appMeta.buildInfo?.bundleType}</p>}
-    </span>
-  );
+  const [buildDate, setBuildDate] = React.useState<string>("");
+  ReactUse.useUpdateEffect(() => { if (appMeta.buildDate !== null) setBuildDate(appMeta.buildDate.toString()); });
 
   switch (as) {
     case "header": {
@@ -99,7 +84,26 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
             id="app-build-info"
             onClick={handleClick}
           >
-            <Info />
+            <div
+              suppressHydrationWarning
+              className="text-right text-[9px]/4 leading-none tracking-tighter text-white/50 select-none"
+            >
+              <span className="[&:not(:empty)]:flex [&:not(:empty)]:gap-1">
+                <span>{appMeta.cargoTargetTriple}</span>
+                <span>{buildDate}</span>
+              </span>
+              <span>
+                {appMeta.gitDescribe}
+                {appMeta.gitDescribe &&
+                  appMeta.gitSha &&
+                  !/g\w{7}/.test(appMeta.gitDescribe) &&
+                  `-g${appMeta.gitSha.slice(0, 7)}`}
+                {appMeta.gitDirty}
+              </span>
+              {appMeta.buildInfo && appMeta.buildInfo.bundleType && (
+                <span className="[&:not(:empty)]:pl-1">{appMeta.buildInfo.bundleType}</span>
+              )}
+            </div>
           </header>
         </>
       );
@@ -118,7 +122,26 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
             id="app-build-info"
             onClick={handleClick}
           >
-            <Info />
+            <div
+              suppressHydrationWarning
+              className="text-right text-[9px]/4 leading-none tracking-tighter text-white/50 select-none"
+            >
+              <span className="[&:not(:empty)]:flex [&:not(:empty)]:gap-1">
+                <span>{appMeta.cargoTargetTriple}</span>
+                <span>{buildDate}</span>
+              </span>
+              <span>
+                {appMeta.gitDescribe}
+                {appMeta.gitDescribe &&
+                  appMeta.gitSha &&
+                  !/g\w{7}/.test(appMeta.gitDescribe) &&
+                  `-g${appMeta.gitSha.slice(0, 7)}`}
+                {appMeta.gitDirty}
+              </span>
+              {appMeta.buildInfo && appMeta.buildInfo.bundleType && (
+                <span className="[&:not(:empty)]:pl-1">{appMeta.buildInfo.bundleType}</span>
+              )}
+            </div>
           </footer>
         </>
       );

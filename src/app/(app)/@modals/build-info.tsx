@@ -20,9 +20,9 @@ export default function Modal(): React.ReactElement {
               <heroui.ModalHeader {...moveProps} className="text-md justify-center">
                 About
               </heroui.ModalHeader>
-              <heroui.ModalBody className="h-fit w-full overflow-hidden bg-black/90">
+              <heroui.ModalBody className="h-fit w-full items-center overflow-hidden bg-black/90 px-0">
                 <>
-                  <span className="text-xs">
+                  <div className="text-xs">
                     <p>App: {appMeta.buildInfo?.name}</p>
                     <p>Identifier: {appMeta.buildInfo?.identifier}</p>
                     <p>Version: {appMeta.buildInfo?.version}</p>
@@ -31,12 +31,12 @@ export default function Modal(): React.ReactElement {
                     )}
                     <heroui.Divider className="my-2" />
                     <p>Env: {appMeta.env}</p>
-                    <p>Build Date: {appMeta.buildTimestamp}</p>
+                    <p>Build Date: {appMeta.buildTimestamp?.toString().replace(/\[.*$/, "")}</p>
                     <p>Target Triple: {appMeta.cargoTargetTriple}</p>
                     <heroui.Divider className="my-2" />
                     <p>Git Describe: {appMeta.gitDescribe}</p>
                     <p>
-                      Git Sha: <span className="text-[10px]">{appMeta.gitSha}</span>
+                      Git Sha:<span className="text-[11px]"> {appMeta.gitSha}</span>
                     </p>
                     {appMeta.gitDirty && (
                       <p>
@@ -54,7 +54,7 @@ export default function Modal(): React.ReactElement {
                     <heroui.Divider className="my-2" />
                     <p>Nextjs Version: {appMeta.nextVersion}</p>
                     <p>Tauri Version: {appMeta?.buildInfo?.tauriVersion}</p>
-                  </span>
+                  </div>
                 </>
               </heroui.ModalBody>
               <heroui.ModalFooter />
@@ -63,7 +63,7 @@ export default function Modal(): React.ReactElement {
         }
       }
       modalContentProps={{ className: "flex border-1 border-gray-600 bg-black/95" }}
-      modalProps={{ className: "dark w-9/10 text-[#f0f0ff]" }}
+      modalProps={{ className: "dark w-9/10 text-[#f0f0ff]", backdrop: "blur" }}
       searchParamKey="modal"
     />
   );
