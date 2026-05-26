@@ -59,7 +59,7 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
   };
 
   const longPressEvent = ReactUse.useLongPress(
-    () => { updateParam(router, searchParams, [{ key: "modal", value: ModalParam.BuildInfo }]); },
+    () => updateParam(router, searchParams, [{ key: "modal", value: ModalParam.BuildInfo }]),
     {
       isPreventDefault: false,
       delay: 700,

@@ -87,49 +87,80 @@ export namespace Quest {
     QE = "q-e",
   }
 
-  // prettier-ignore
   export const NewQuestFormSchema = z.object({
-    accepted: z.coerce.date<Option<Date>>().nullable().transform((arg: Option<Date>) => (arg ? formatDateTimeISO8601(arg) : null)),
+    accepted: z.coerce
+      .date<Option<Date>>()
+      .nullable()
+      .transform((arg: Option<Date>) => (arg ? formatDateTimeISO8601(arg) : null)),
     chain: z.string().nonempty(),
-    days: z.preprocess<Option<number[]>, SomeType, Option<string[]>>(val => (val && val?.length > 0 ? val.map(v => parseInt(v)) : null), z.array(z.number()).nullable()),
+    days: z.preprocess<Option<number[]>, SomeType, Option<string[]>>(
+      (val) => (val && val?.length > 0 ? val.map((v) => parseInt(v)) : null),
+      z.array(z.number()).nullable(),
+    ),
     defaultPoints: z.coerce.number<number>().gte(0),
-    description: z.preprocess<Option<string>, SomeType, string>(val => (val === "" ? null : val), z.string().nullable()),
+    description: z.preprocess<Option<string>, SomeType, string>(
+      (val) => (val === "" ? null : val),
+      z.string().nullable(),
+    ),
     name: z.string().nonempty(),
-    requirements: z.preprocess<Option<unknown>, SomeType, unknown>(val => {
- if (!val) {
- return null 
-} else {
- return val 
-} 
-}, z.any().nullable()),
-    streakTarget: z.preprocess<Option<number>, SomeType, number>(val => (`${val}` === "" ? null : val), z.coerce.number<number>().nullable()),
-    timeEnd: z.preprocess<Option<string>, SomeType, string>(val => (`${val}` === "" ? null : val), z.iso.time().nullable()),
-    timeStart: z.preprocess<Option<string>, SomeType, string>(val => (`${val}` === "" ? null : val), z.iso.time().nullable()),
+    requirements: z.preprocess<Option<unknown>, SomeType, unknown>(
+      (val) => val ?? null,
+      z.any().nullable(),
+    ),
+    streakTarget: z.preprocess<Option<number>, SomeType, number>(
+      (val) => (`${val}` === "" ? null : val),
+      z.coerce.number<number>().nullable(),
+    ),
+    timeEnd: z.preprocess<Option<string>, SomeType, string>(
+      (val) => (`${val}` === "" ? null : val),
+      z.iso.time().nullable(),
+    ),
+    timeStart: z.preprocess<Option<string>, SomeType, string>(
+      (val) => (`${val}` === "" ? null : val),
+      z.iso.time().nullable(),
+    ),
     total: z.coerce.number<number>().gt(0),
     typeId: z.string(),
     userId: z.string().transform((arg: string, _: z.core.$RefinementCtx<string>) => parseInt(arg)),
     weight: z.coerce.number<number>().gt(0),
   });
 
-  // prettier-ignore
   export const EditQuestFormSchema = z.object({
-    archived: z.preprocess<Option<Date>, SomeType, Option<string>>(val => val ? parseDateTime(val).toDate(LOCAL_TZ) : null, z.coerce.date().nullable()),
+    archived: z.preprocess<Option<Date>, SomeType, Option<string>>(
+      (val) => (val ? parseDateTime(val).toDate(LOCAL_TZ) : null),
+      z.coerce.date().nullable(),
+    ),
     chain: z.string().nonempty(),
-    days: z.preprocess<Option<number[]>, SomeType, Option<string[]>>(val => (val && val?.length > 0 ? val.map(v => parseInt(v)) : null), z.array(z.number()).nullable()),
+    days: z.preprocess<Option<number[]>, SomeType, Option<string[]>>(
+      (val) => (val && val?.length > 0 ? val.map((v) => parseInt(v)) : null),
+      z.array(z.number()).nullable(),
+    ),
     defaultPoints: z.coerce.number<number>().gte(0),
-    description: z.preprocess<Option<string>, SomeType, string>(val => (val === "" ? null : val), z.string().nullable()),
+    description: z.preprocess<Option<string>, SomeType, string>(
+      (val) => (val === "" ? null : val),
+      z.string().nullable(),
+    ),
     name: z.string().nonempty(),
-    note: z.preprocess<Option<string>, SomeType, string>(val => (val === "" ? null : val), z.string().nullable()),
-    requirements: z.preprocess<Option<unknown>, SomeType, unknown>(val => {
- if (!val) {
- return null 
-} else {
- return val 
-} 
-}, z.any().nullable()),
-    streakTarget: z.preprocess<Option<number>, SomeType, number>(val => (`${val}` === "" ? null : val), z.coerce.number<number>().nullable()),
-    timeEnd: z.preprocess<Option<string>, SomeType, string>(val => (`${val}` === "" ? null : val), z.iso.time().nullable()),
-    timeStart: z.preprocess<Option<string>, SomeType, string>(val => (`${val}` === "" ? null : val), z.iso.time().nullable()),
+    note: z.preprocess<Option<string>, SomeType, string>(
+      (val) => (val === "" ? null : val),
+      z.string().nullable(),
+    ),
+    requirements: z.preprocess<Option<unknown>, SomeType, unknown>(
+      (val) => val ?? null,
+      z.any().nullable(),
+    ),
+    streakTarget: z.preprocess<Option<number>, SomeType, number>(
+      (val) => (`${val}` === "" ? null : val),
+      z.coerce.number<number>().nullable(),
+    ),
+    timeEnd: z.preprocess<Option<string>, SomeType, string>(
+      (val) => (`${val}` === "" ? null : val),
+      z.iso.time().nullable(),
+    ),
+    timeStart: z.preprocess<Option<string>, SomeType, string>(
+      (val) => (`${val}` === "" ? null : val),
+      z.iso.time().nullable(),
+    ),
     total: z.coerce.number<number>().gt(0),
     typeId: z.string(),
     weight: z.coerce.number<number>().gt(0),

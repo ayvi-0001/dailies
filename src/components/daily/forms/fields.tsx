@@ -65,8 +65,10 @@ export function TypeField(props: TypeFieldProps): React.ReactElement {
       type="text"
       value={questType ?? ""}
       variant="bordered"
-      onInputChange={(value: string) => { setQuestTypesAction(questTypes.find((type) => type.name == value)?.id || null); }}
-      onValueChange={(value: string) => { setQuestTypesAction(value); }}
+      onInputChange={(value: string) =>
+        setQuestTypesAction(questTypes.find((type) => type.name == value)?.id || null)
+      }
+      onValueChange={(value: string) => setQuestTypesAction(value)}
     >
       {(questType) => (
         <heroui.AutocompleteItem key={questType.id} className="dark">

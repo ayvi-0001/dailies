@@ -143,7 +143,7 @@ export function NumpadPopover(props: NumpadPopoverProps): React.ReactElement {
     pressTimerRef.current = setTimeout(() => setPressedKey(null), 120);
   };
 
-  React.useEffect(() => { return () => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }; }, []);
+  React.useEffect(() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }, []);
 
   React.useEffect(() => {
     if (!hotkeysEnabled || !open) return;

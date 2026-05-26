@@ -30,7 +30,10 @@ export default function ExpBar(): React.ReactNode {
 
   const previousTotalPoints = previousTotalPointsRef.current;
 
-  React.useEffect(() => { previousTotalPointsRef.current = dailiesState.totalPoints; }, [dailiesState.totalPoints]);
+  React.useEffect(
+    () => void (previousTotalPointsRef.current = dailiesState.totalPoints),
+    [dailiesState.totalPoints],
+  );
 
   const [percentChanges, setPercentChanges] = React.useState<PercentChangeItem[]>([]);
   const nextIdRef = React.useRef(0);
@@ -54,7 +57,10 @@ export default function ExpBar(): React.ReactNode {
     setPercentValue(y);
   }, [dailiesState.totalPoints, dailiesState.totalWeight]);
 
-  const dismissItem = React.useCallback((id: number) => { setPercentChanges((prev) => prev.filter((item) => item.id !== id)); }, []);
+  const dismissItem = React.useCallback(
+    (id: number) => setPercentChanges((prev) => prev.filter((item) => item.id !== id)),
+    [],
+  );
 
   const textClass: ClassValue = "text-xs font-bold text-[#f0f0ff]";
 

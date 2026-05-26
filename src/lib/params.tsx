@@ -16,4 +16,7 @@ export const updateParam = (
   router: AppRouterInstance,
   searchParams: ReadonlyURLSearchParams,
   values: Array<{ key: string; value: string }>,
-): void => { router.push(`?${createQueryString(searchParams, values)}`); };
+): void => {
+  const href = `?${createQueryString(searchParams, values)}`;
+  router.push(href);
+};

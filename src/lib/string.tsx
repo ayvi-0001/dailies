@@ -7,4 +7,7 @@ export const camelCaseToTitleCase = (str: string): string => {
     .trim();
 };
 
-export const camelCaseToSnakeCase = (str: string): string => { return str.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, "$1_$2").toLowerCase(); };
+export const camelCaseToSnakeCase = (str: string): string => {
+  str = str.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, "$1_$2");
+  return str.toLowerCase();
+};

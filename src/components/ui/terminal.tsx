@@ -88,7 +88,10 @@ export default function Terminal(props: TerminalProps) {
     return map;
   }, [commands, normalize]);
 
-  React.useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight }); }, [lines]);
+  React.useEffect(
+    () => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight }),
+    [lines],
+  );
 
   const print = React.useCallback((text: React.ReactNode, kind: TerminalLineKind = "output") => { setLines((prev) => [...prev, { id: nextId(), kind, text }]); }, []);
 
