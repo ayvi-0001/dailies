@@ -17,34 +17,21 @@ pub struct Daily {
     pub chain: String,
     pub name: String,
     pub r#type: QuestType,
-    #[serde_as(as = "Option<f64>")]
     pub points: Option<f64>,
     pub default_points: f64,
     pub total: f64,
     pub weight: f64,
-    #[serde_as(as = "Option<i64>")]
     pub streak_target: Option<i64>,
     pub requirements: Option<Requirements>,
-    #[serde_as(as = "Option<NaiveTime>")]
     pub time_start: Option<NaiveTime>,
-    #[serde_as(as = "Option<NaiveTime>")]
     pub time_end: Option<NaiveTime>,
-    #[serde_as(as = "NaiveDateTime")]
     pub accepted: NaiveDateTime,
-    #[serde_as(as = "Option<NaiveDateTime>")]
     pub archived: Option<NaiveDateTime>,
-    #[serde_as(as = "Option<Json<Vec<i64>>>")]
     pub days: Option<Json<Vec<i64>>>,
-    #[serde_as(as = "Option<String>")]
     pub description: Option<String>,
-    #[serde_as(as = "Option<String>")]
     pub note: Option<String>,
-    #[serde_as(as = "Option<i64>")]
     pub streak: Option<i64>,
-    #[serde_as(as = "Option<i64>")]
     pub previous_streak: Option<i64>,
-    #[serde_as(as = "Option<f64>")]
     pub complete: Option<f64>,
-    #[serde_as(as = "Option<f64>")]
     pub points_weighted: Option<f64>,
 }

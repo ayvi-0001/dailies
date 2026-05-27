@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Improved
+
+- Persisted computed values on points and removed view. Quest list query execution time reduced from 4~5s to <0.01s
+
 ## [v0.2.7]
 
 ### Added

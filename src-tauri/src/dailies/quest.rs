@@ -19,20 +19,13 @@ pub struct Quest {
     pub weight: f64,
     pub total: f64,
     pub default_points: f64,
-    #[serde_as(as = "NaiveDateTime")]
     pub accepted: NaiveDateTime,
-    #[serde_as(as = "Option<NaiveDateTime>")]
     pub archived: Option<NaiveDateTime>,
-    #[serde_as(as = "Option<i64>")]
     pub streak_target: Option<i64>,
     pub requirements: Option<Requirements>,
-    #[serde_as(as = "Option<NaiveTime>")]
     pub time_start: Option<NaiveTime>,
-    #[serde_as(as = "Option<NaiveTime>")]
     pub time_end: Option<NaiveTime>,
-    #[serde_as(as = "Option<Json<Vec<i64>>>")]
     pub days: Option<Json<Vec<i64>>>,
-    #[serde_as(as = "Option<String>")]
     pub description: Option<String>,
     #[serde(default = "chrono::offset::Local::now")]
     pub updated: DateTime<Local>,
@@ -55,20 +48,13 @@ pub struct NewQuest {
     pub weight: f64,
     pub total: f64,
     pub default_points: f64,
-    #[serde_as(as = "NaiveDateTime")]
     pub accepted: NaiveDateTime,
-    #[serde_as(as = "Option<NaiveDateTime>")]
     pub archived: Option<NaiveDateTime>,
-    #[serde_as(as = "Option<i64>")]
     pub streak_target: Option<i64>,
     pub requirements: Option<Requirements>,
-    #[serde_as(as = "Option<NaiveTime>")]
     pub time_start: Option<NaiveTime>,
-    #[serde_as(as = "Option<NaiveTime>")]
     pub time_end: Option<NaiveTime>,
-    #[serde_as(as = "Option<Json<Vec<i64>>>")]
     pub days: Option<Json<Vec<i64>>>,
-    #[serde_as(as = "Option<String>")]
     pub description: Option<String>,
     #[serde(default = "chrono::offset::Local::now")]
     pub updated: DateTime<Local>,
@@ -164,7 +150,6 @@ pub struct WeeklyQuestStats {
     pub quest_id: String,
     pub point_id: String,
     pub requirements: f64,
-    #[serde_as(as = "Option<NaiveTime>")]
     pub latest_complete_date: Option<NaiveDate>,
     pub rolling_points: f64,
     pub is_weekly_requirement_complete: bool,

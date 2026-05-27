@@ -58,7 +58,7 @@ pub async fn query_dailies(
                 complete AS "complete: f64",
                 points_weighted AS "points_weighted: f64"
             FROM
-                "dailies_weighted"
+                "dailies"
             WHERE
                 user = $1
                 AND ($2 = "" OR quest_id = $2)
@@ -128,7 +128,7 @@ pub async fn get_total_points(
                COALESCE(SUM(points_weighted), 0) AS "total_points!: f64",
                SUM(weight) AS "total_weight!: f64"
              FROM
-               "dailies_weighted"
+               "dailies"
              WHERE
                user = $1
                AND date = $2
@@ -174,22 +174,26 @@ pub async fn handle_point_change(
     state: tauri::State<'_, Mutex<state::AppState>>,
     daily: Daily,
 ) -> Result<(), crate::AppError> {
-    let state: MutexGuard<'_, state::AppState> = state.lock().await;
+    let guard: MutexGuard<'_, state::AppState> = state.lock().await;
+    let mut pool: PoolConnection<Sqlite> = guard.db.pool.acquire().await?;
+    let conn: &mut SqliteConnection = pool.acquire().await?;
 
     if let Some(points) = daily.points {
+        let complete = points / daily.total;
         sqlx::query!(
-            r#"UPDATE "dailies" SET points = $1 WHERE point_id = $2;"#,
+            r#"UPDATE "dailies" SET points = $1, complete = $2 WHERE point_id = $3;"#,
             points,
+            complete,
             daily.point_id
         )
-        .execute(&state.db.pool)
+        .execute(&mut *conn)
         .await?
     } else {
         sqlx::query!(
-            r#"UPDATE "dailies" SET points = NULL WHERE point_id = $1;"#,
+            r#"UPDATE "dailies" SET points = NULL, complete = NULL WHERE point_id = $1;"#,
             daily.point_id,
         )
-        .execute(&state.db.pool)
+        .execute(&mut *conn)
         .await?
     };
 
@@ -939,25 +943,25 @@ pub async fn insert_dailies(
 
     let mut tx: Transaction<'_, Sqlite> = conn.begin().await?;
 
-    sqlx::query!(
+    sqlx::query(
         r#"
-            DROP TABLE IF EXISTS _staging_dailies_added;
-            CREATE TABLE IF NOT EXISTS _staging_dailies_added AS
+           DROP TABLE IF EXISTS temp._staging_dailies_added;
+            CREATE TEMP TABLE IF NOT EXISTS _staging_dailies_added AS
             SELECT quest_id
             FROM
               "points"
             WHERE
               date = $1
         "#,
-        date,
     )
+    .bind(date)
     .execute(&mut *tx)
     .await?;
 
-    sqlx::query!(
+    sqlx::query(
         r#"
-            DROP TABLE IF EXISTS _staging_dailies_missing;
-            CREATE TABLE IF NOT EXISTS _staging_dailies_missing AS
+            DROP TABLE IF EXISTS temp._staging_dailies_missing;
+            CREATE TEMP TABLE IF NOT EXISTS _staging_dailies_missing AS
             SELECT *
             FROM
               "quests"
@@ -965,20 +969,21 @@ pub async fn insert_dailies(
               id NOT IN (
                 SELECT quest_id
                 FROM
-                  _staging_dailies_added
+                  temp._staging_dailies_added
               );
         "#,
     )
     .execute(&mut *tx)
     .await?;
 
-    sqlx::query!(
+    sqlx::query(
         r#"
-            DROP TABLE IF EXISTS _staging_dailies_to_add;
-            CREATE TABLE IF NOT EXISTS _staging_dailies_to_add AS
+            DROP TABLE IF EXISTS temp._staging_dailies_to_add;
+            CREATE TEMP TABLE IF NOT EXISTS _staging_dailies_to_add AS
             SELECT
               LOWER(SHA1_HEX(id || STRFTIME('%Y-%m-%d', $1))) AS point_id,
               id AS quest_id,
+              q.user_id,
               $1 AS date,
               CASE
                 WHEN archived IS NOT NULL THEN NULL
@@ -1066,19 +1071,53 @@ pub async fn insert_dailies(
               NULL AS note,
               $2 AS updated
             FROM
-              _staging_dailies_missing AS q
+              temp._staging_dailies_missing AS q
             ORDER BY
               "q".sequence;
         "#,
-        date,
-        datetime,
     )
+    .bind(date)
+    .bind(datetime)
     .execute(&mut *tx)
     .await?;
 
-    sqlx::query!(r#"INSERT INTO "points" SELECT * FROM _staging_dailies_to_add;"#,)
-        .execute(&mut *tx)
-        .await?;
+    sqlx::query(
+        r#"
+            INSERT INTO "points"(
+                id,
+                quest_id,
+                user_id,
+                date,
+                points,
+                weight,
+                total,
+                streak_target,
+                requirements,
+                time_start,
+                time_end,
+                note,
+                updated
+            )
+            SELECT
+                point_id,
+                quest_id,
+                user_id,
+                date,
+                points,
+                weight,
+                total,
+                streak_target,
+                requirements,
+                time_start,
+                time_end,
+                note,
+                updated
+            FROM
+                temp._staging_dailies_to_add;
+        "#,
+    )
+    .execute(&mut *tx)
+    .await?;
 
     tx.commit().await?;
 
@@ -1218,13 +1257,13 @@ pub async fn get_dailies_graph_data(
                       WHERE
                         "date" < DATE(DATE(CURRENT_TIMESTAMP, 'localtime'), 'start of year', '+12 months', '-1 day')
                     )
-                    SELECT SUM(dw.points_weighted) / SUM(dw.weight) AS "value: f64"
+                    SELECT SUM(d.points_weighted) / SUM(d.weight) AS "value: f64"
                     FROM
                       date_range dr
                     LEFT JOIN
-                        dailies_weighted dw
+                        "dailies" d
                     ON
-                        dw.date = dr.date
+                        d.date = dr.date
                     WHERE
                         user = $1
                         AND points IS NOT NULL
@@ -1250,13 +1289,13 @@ pub async fn get_dailies_graph_data(
                       WHERE
                         "date" <= DATE(CURRENT_TIMESTAMP, 'localtime')
                     )
-                    SELECT SUM(dw.points_weighted) / SUM(dw.weight) AS "value: f64"
+                    SELECT SUM(d.points_weighted) / SUM(d.weight) AS "value: f64"
                     FROM
                       date_range dr
                     LEFT JOIN
-                        dailies_weighted dw
+                        "dailies" d
                     ON
-                        dw.date = dr.date
+                        d.date = dr.date
                     WHERE
                         user = $1
                         AND points IS NOT NULL
@@ -1325,7 +1364,7 @@ pub async fn query_quest_chains_complete(
                 chain,
                 SUM(points_weighted) / SUM(weight) AS "value!: f64"
             FROM
-                "dailies_weighted"
+                "dailies"
             WHERE
                 user = $1
                 AND points IS NOT NULL
@@ -1385,7 +1424,7 @@ pub async fn query_dailies_complete(
                 date,
                 SUM(points_weighted) / SUM(weight) AS "value!: f64"
             FROM
-                "dailies_weighted"
+                "dailies"
             WHERE
                 user = $1
                 AND points IS NOT NULL
