@@ -344,10 +344,9 @@ export function NumpadInputCell(props: NumpadInputCellProps): React.ReactElement
     if (daily.points === daily.total) return;
 
     toggleLongPressed();
-    setPointsAction(`${daily.total}`);
+    await invoke<Daily[]>("handle_point_change", { daily: { ...daily, points: daily.total } });
     updateDailyAction(daily, { points: daily.total });
-    daily.points = daily.total;
-    await invoke<Daily[]>("handle_point_change", { daily });
+    setPointsAction(`${daily.total}`);
     if (!isPending) resetLongPressed();
   };
 
