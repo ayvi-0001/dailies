@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Date param dependency causing re-run of query dailies.
+- Card input long-press triggering context menu on Android.
 
 ### Improved
 

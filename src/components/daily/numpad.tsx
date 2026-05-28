@@ -374,7 +374,13 @@ export function NumpadInputCell(props: NumpadInputCellProps): React.ReactElement
           !disabled && "hover:outline-2 hover:outline-offset-2 hover:outline-dashed",
         )}
         role={disabled ? undefined : "button"}
+        style={{ WebkitTouchCallout: "none", WebkitUserSelect: "none" }}
         tabIndex={disabled ? -1 : 0}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
       >
         <div className="flex place-content-center items-center justify-self-center-safe">
           <span className={cn(textClassValue, "min-w-[1ch] text-center tabular-nums")}>
