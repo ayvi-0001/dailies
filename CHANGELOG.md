@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Date param dependency causing re-run of query dailies.
+
 ### Improved
 
 - Persisted computed values on points and removed view. Quest list query execution time reduced from 4~5s to <0.01s

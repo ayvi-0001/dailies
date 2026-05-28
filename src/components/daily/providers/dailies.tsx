@@ -73,16 +73,13 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
   const user: Result<User, Error> = useUser();
   const userName: Option<string> = user.map((t) => t.name).unwrapOr(null);
 
-  const [date, setDate] = React.useState<CalendarDate>(today(LOCAL_TZ));
-
-  ReactUse.useOnceEffect(() => { if (searchParams.has("date")) setDate(parseDate(searchParams.get("date")!)); }, []);
-
-  ReactUse.useOnceEffect(
-    () => updateParam(router, searchParams, [{ key: "date", value: date.toString() }]),
-    [date],
-  );
+  const [date, setDate] = React.useState<CalendarDate>(() => {
+    const d = searchParams.get("date");
+    return d ? parseDate(d) : today(LOCAL_TZ);
+  });
 
   ReactUse.useOnceEffect(() => {
+    updateParam(router, searchParams, [{ key: "date", value: date.toString() }]);
     setIsLoading(true);
     setTotalWeight(0);
     setTotalPoints(0);
