@@ -31,6 +31,8 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
   const router: AppRouterInstance = useRouter();
   const searchParams: ReadonlyURLSearchParams = useSearchParams();
 
+  const isMounted = ReactUse.useMountedState();
+
   const { value: devTerminalOpen, toggle: toggleOpen } = ReactUse.useBoolean(false);
 
   useHotkeys("F1", () => toggleOpen(), { preventDefault: true }, []);
@@ -67,7 +69,36 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
   );
 
   const [buildDate, setBuildDate] = React.useState<string>("");
-  ReactUse.useUpdateEffect(() => { if (appMeta.buildDate !== null) setBuildDate(appMeta.buildDate.toString()); });
+  React.useEffect(() => { if (appMeta.buildDate) setBuildDate(appMeta.buildDate.toString()); }, [appMeta.buildDate]);
+
+  const [gitDescribe, setGitDescribe] = React.useState<string>("");
+  React.useEffect(() => {
+    let value = appMeta.gitDescribe ? `${appMeta.gitDescribe}` : "";
+    if (appMeta.gitDescribe && appMeta.gitSha && !/g\w{7}/.test(appMeta.gitDescribe))
+      value = value + `-g${appMeta.gitSha.slice(0, 7)}`;
+    setGitDescribe(value);
+  }, [appMeta.gitDescribe, appMeta.gitSha]);
+
+  const Info = React.useMemo(
+    () => (
+      <div className="text-right text-[9px]/4 leading-none tracking-tighter text-white/50 select-none">
+        <span suppressHydrationWarning className="[&:not(:empty)]:flex [&:not(:empty)]:gap-1">
+          {appMeta.cargoTargetTriple && (
+            <span suppressHydrationWarning>{appMeta.cargoTargetTriple}</span>
+          )}
+          <span suppressHydrationWarning>{buildDate}</span>
+        </span>
+        <span suppressHydrationWarning>{gitDescribe}</span>
+        {appMeta.gitDirty && <span suppressHydrationWarning>{appMeta.gitDirty}</span>}
+        {appMeta.buildInfo && appMeta.buildInfo.bundleType && (
+          <span suppressHydrationWarning className="[&:not(:empty)]:pl-1">
+            {appMeta.buildInfo.bundleType}
+          </span>
+        )}
+      </div>
+    ),
+    [appMeta, buildDate, gitDescribe],
+  );
 
   switch (as) {
     case "header": {
@@ -84,26 +115,7 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
             id="app-build-info"
             onClick={handleClick}
           >
-            <div
-              suppressHydrationWarning
-              className="text-right text-[9px]/4 leading-none tracking-tighter text-white/50 select-none"
-            >
-              <span className="[&:not(:empty)]:flex [&:not(:empty)]:gap-1">
-                <span>{appMeta.cargoTargetTriple}</span>
-                <span>{buildDate}</span>
-              </span>
-              <span>
-                {appMeta.gitDescribe}
-                {appMeta.gitDescribe &&
-                  appMeta.gitSha &&
-                  !/g\w{7}/.test(appMeta.gitDescribe) &&
-                  `-g${appMeta.gitSha.slice(0, 7)}`}
-                {appMeta.gitDirty}
-              </span>
-              {appMeta.buildInfo && appMeta.buildInfo.bundleType && (
-                <span className="[&:not(:empty)]:pl-1">{appMeta.buildInfo.bundleType}</span>
-              )}
-            </div>
+            {isMounted() && Info}
           </header>
         </>
       );
@@ -122,26 +134,7 @@ export default function AppBuildInfo<E extends React.ElementType = typeof defaul
             id="app-build-info"
             onClick={handleClick}
           >
-            <div
-              suppressHydrationWarning
-              className="text-right text-[9px]/4 leading-none tracking-tighter text-white/50 select-none"
-            >
-              <span className="[&:not(:empty)]:flex [&:not(:empty)]:gap-1">
-                <span>{appMeta.cargoTargetTriple}</span>
-                <span>{buildDate}</span>
-              </span>
-              <span>
-                {appMeta.gitDescribe}
-                {appMeta.gitDescribe &&
-                  appMeta.gitSha &&
-                  !/g\w{7}/.test(appMeta.gitDescribe) &&
-                  `-g${appMeta.gitSha.slice(0, 7)}`}
-                {appMeta.gitDirty}
-              </span>
-              {appMeta.buildInfo && appMeta.buildInfo.bundleType && (
-                <span className="[&:not(:empty)]:pl-1">{appMeta.buildInfo.bundleType}</span>
-              )}
-            </div>
+            {isMounted() && Info}
           </footer>
         </>
       );
