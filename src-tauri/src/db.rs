@@ -28,6 +28,8 @@ impl Database {
             .foreign_keys(true)
             .auto_vacuum(sqlx::sqlite::SqliteAutoVacuum::Full)
             .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal)
+            .pragma("temp_store", "MEMORY")
+            .pragma("cache_size", "-16000")
             .optimize_on_close(true, None);
 
         let pool: SqlitePool = SqlitePoolOptions::new()
