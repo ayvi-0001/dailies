@@ -143,6 +143,7 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
         new Set([
           "points", // recalculate streaks
           "name", // updated ids
+          "typeId",
         ]),
         new Set([
           "weight", // recalculate weighted points/total weight
