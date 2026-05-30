@@ -141,10 +141,10 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
         setDailies,
         new Set([
           "points", // recalculate streaks
-          "name", // updated ids
           "typeId",
         ]),
         new Set([
+          "name", // updated ids
           "weight", // recalculate weighted points/total weight
           "archived", // recalculate total weight
         ]),
@@ -278,6 +278,15 @@ const updateDailyCallback = async (
 
   if (patchKeys.includes("chain")) triggerRefreshQuestChains();
 
+  if (fullRefreshKeys) {
+    // If any of the following keys are updated, pull all dailies.
+    const triggerKeysFull: string[] = patchKeys.filter((item) => fullRefreshKeys.has(item));
+    if (triggerKeysFull.length > 0 && !isDailiesRefreshPending) {
+      triggerRefreshDailies(`updated key(s): ${triggerKeysFull.join(", ")}`);
+      return;
+    }
+  }
+
   if (dailyRefreshKeys) {
     // If any of the following keys are updated, pull just this daily.
     const triggerKeys: string[] = patchKeys.filter((item) => dailyRefreshKeys.has(item));
@@ -293,14 +302,6 @@ const updateDailyCallback = async (
         .andTee((t) => { setDailies((prev) => prev.map((d) => (d.pointId === daily.pointId ? t[0] : d))); })
         .mapErr((e) => { toast.error(e.title, { description: e.message }); })
         .then(() => setIsPatching(false));
-    }
-  }
-
-  if (fullRefreshKeys) {
-    // If any of the following keys are updated, pull all dailies.
-    const triggerKeysFull: string[] = patchKeys.filter((item) => fullRefreshKeys.has(item));
-    if (triggerKeysFull.length > 0 && !isDailiesRefreshPending) {
-      triggerRefreshDailies(`updated key(s): ${triggerKeysFull.join(", ")}`);
     }
   }
 };

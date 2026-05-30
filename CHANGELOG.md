@@ -11,6 +11,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Issue where updating a quest type wouldn't trigger a refresh.
+- Issue where updating a quest name broke UI.
+
 ## [v0.3.0]
 
 ### Changed
