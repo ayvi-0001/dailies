@@ -116,7 +116,7 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
                 setPointsAction={setPoints}
                 toggleHistoryAction={toggleHistory}
                 updateDailyAction={updateDaily}
-                user_id={user.id}
+                userId={user.id}
               />
             )}
           </AnimatePresence>
@@ -218,7 +218,7 @@ type ContextMenuContentProps = {
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
   toggleHistoryAction?: () => void;
   updateDailyAction: (daily: Daily, patch: Partial<Daily>) => void;
-  user_id: number;
+  userId: number;
 };
 
 export function ContextMenuContent(props: ContextMenuContentProps): React.ReactElement {
@@ -228,7 +228,7 @@ export function ContextMenuContent(props: ContextMenuContentProps): React.ReactE
     setPointsAction,
     toggleHistoryAction,
     updateDailyAction,
-    user_id,
+    userId,
   } = props;
 
   return (
@@ -254,14 +254,14 @@ export function ContextMenuContent(props: ContextMenuContentProps): React.ReactE
             daily={daily}
             setPointsAction={setPointsAction}
             updateDaily={updateDailyAction}
-            user_id={user_id}
+            userId={userId}
           />
         ) : (
           <RestoreDailyMenuOption
             daily={daily}
             setPointsAction={setPointsAction}
             updateDaily={updateDailyAction}
-            user_id={user_id}
+            userId={userId}
           />
         )}
       </motion.div>

@@ -12,16 +12,16 @@ type MenuOptionProps = {
   menuTitle?: string;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
   updateDaily: (daily: Daily, patch: Partial<Daily>) => void;
-  user_id: number;
+  userId: number;
 };
 
 export default function RestoreDailyMenuOption(props: MenuOptionProps) {
-  const { daily, menuTitle, setPointsAction, updateDaily, user_id } = props;
+  const { daily, menuTitle, setPointsAction, updateDaily, userId } = props;
 
   return (
     <RadixContextMenu.Item
       className={CONTEXT_MENU_CLASSNAME as string}
-      onSelect={async () => await setDailyRestored(daily, setPointsAction, updateDaily, user_id)}
+      onSelect={async () => await setDailyRestored(daily, setPointsAction, updateDaily, userId)}
     >
       <div className="flex flex-row gap-2">
         <ArchiveRestoreIcon size={2} stroke="#e3e3e3" />
@@ -35,13 +35,13 @@ async function setDailyRestored(
   daily: Daily,
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>,
   updateDaily: (daily: Daily, patch: Partial<Daily>) => void,
-  user_id: number,
+  userId: number,
 ): Promise<void> {
   const patch: Partial<Daily> = { points: daily.defaultPoints, archived: null };
 
   await invoke("handle_point_change", { daily: { ...daily, ...patch } });
   await invoke(`update_archived`, {
-    user_id: user_id,
+    user_id: userId,
     quest_id: daily.questId,
     point_id: daily.pointId,
     value: null,

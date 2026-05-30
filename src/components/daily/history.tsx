@@ -301,7 +301,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
                 editOnOpenAction={editDisclosure.onOpen}
                 setPointsAction={setPoints}
                 updateDailyAction={updateDailyAction}
-                user_id={user.id}
+                userId={user.id}
               />
             )}
           </AnimatePresence>
