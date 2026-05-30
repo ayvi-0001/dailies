@@ -2,37 +2,38 @@
 
 import * as React from "react";
 
-import { useOnceEffect } from "@reactuses/core";
-import ok from "assert";
+import * as ReactUse from "@reactuses/core";
 import { ClassValue } from "clsx";
+import { Result, err, ok } from "neverthrow";
+import { toast } from "sonner";
 
-import { invoke } from "@/lib/tauri";
+import { queryQuestTypes } from "@/actions/query";
 
 export const dynamic = "force-dynamic";
 
-export const QuestTypesContext = React.createContext<QuestType[] | null>(null);
+const QuestTypesContext = React.createContext<Result<QuestType[], Error>>(
+  err(new Error("Quest Types was used outside of its Provider")),
+);
+
+export function useQuestTypes(): QuestType[] {
+  return React.useContext(QuestTypesContext).match(
+    (t) => t,
+    (e) => { throw e; },
+  );
+}
 
 export default function QuestTypesProvider({
   children,
 }: Readonly<{ children?: React.ReactNode }>): React.ReactElement {
   const [questTypes, setQuestTypes] = React.useState<QuestType[]>([]);
 
-  useOnceEffect(() => {
-    const get_quest_types = async (): Promise<void> => {
-      await invoke<QuestType[]>("get_quest_types", {})
-        .then((result) => setQuestTypes(result))
-        .catch(console.error);
-    };
-    get_quest_types();
+  ReactUse.useOnceEffect(() => {
+    queryQuestTypes()
+      .andTee((t) => setQuestTypes(t))
+      .mapErr((e) => { toast.error(e.title, { description: e.message }); });
   }, []);
 
-  return <QuestTypesContext.Provider value={questTypes}>{children}</QuestTypesContext.Provider>;
-}
-
-export function useQuestTypes(): QuestType[] {
-  const context: QuestType[] | null = React.useContext(QuestTypesContext);
-  ok(context, new Error("useQuestTypes was used outside of its Provider"));
-  return context;
+  return <QuestTypesContext.Provider value={ok(questTypes)}>{children}</QuestTypesContext.Provider>;
 }
 
 export type QuestType = {

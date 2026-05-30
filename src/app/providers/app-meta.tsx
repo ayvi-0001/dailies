@@ -6,7 +6,7 @@ import * as ReactUse from "@reactuses/core";
 import { CalendarDate } from "@heroui/react";
 import { ZonedDateTime, parseAbsoluteToLocal, parseDate } from "@internationalized/date";
 import { type Platform, platform as getPlatform } from "@tauri-apps/plugin-os";
-import ok from "assert";
+import { Result, err, ok } from "neverthrow";
 
 import { AppBuildInfo, getAppBuild, invoke } from "@/lib/tauri";
 import { call } from "@/lib/utils";
@@ -28,7 +28,16 @@ export type AppMetaState = {
   width: Option<number>;
 };
 
-const AppMetaContext = React.createContext<AppMetaState | null>(null);
+const AppMetaContext = React.createContext<Result<AppMetaState, Error>>(
+  err(new Error("App Meta Context was used outside of its Provider")),
+);
+
+export function useAppMetaState(): AppMetaState {
+  return React.useContext(AppMetaContext).match(
+    (t) => t,
+    (e) => { throw e; },
+  );
+}
 
 export default function AppMetaProvider({
   children,
@@ -47,20 +56,28 @@ export default function AppMetaProvider({
   const { width, height } = ReactUse.useWindowSize();
   const [orientationState] = ReactUse.useOrientation();
 
-  React.useEffect((): void => {
-    call(async () => setBuildInfo(await getAppBuild()));
-    invoke<string>("vergen_build_date").then((result) => setBuildDate(parseDate(result)));
-    invoke<string>("vergen_build_timestamp").then((result) =>
-      setBuildTimestamp(parseAbsoluteToLocal(result)),
-    );
-    invoke<string>("vergen_cargo_target_triple").then(setCargoTargetTriple);
-    invoke<string>("vergen_git_describe").then(setGitDescribe);
-    invoke<string>("vergen_git_dirty").then(setGitDirty);
-    invoke<string>("vergen_git_sha").then(setGitSha);
-  }, []);
-
+  React.useEffect(() => void call(async () => setBuildInfo(await getAppBuild())), []);
+  React.useEffect(() => void invoke<string>("vergen_git_describe").then(setGitDescribe), []);
+  React.useEffect(() => void invoke<string>("vergen_git_dirty").then(setGitDirty), []);
+  React.useEffect(() => void invoke<string>("vergen_git_sha").then(setGitSha), []);
   // Must happen in useEffect otherwise window might not be defined.
-  ReactUse.useOnceEffect(() => setPlatform(getPlatform()));
+  React.useEffect(() => void setPlatform(getPlatform()), []);
+  React.useEffect(
+    () =>
+      void invoke<string>("vergen_build_date").then((result) => setBuildDate(parseDate(result))),
+    [],
+  );
+  React.useEffect(
+    () =>
+      void invoke<string>("vergen_build_timestamp").then((result) =>
+        setBuildTimestamp(parseAbsoluteToLocal(result)),
+      ),
+    [],
+  );
+  React.useEffect(
+    () => void invoke<string>("vergen_cargo_target_triple").then(setCargoTargetTriple),
+    [],
+  );
 
   const value: AppMetaState = {
     buildDate,
@@ -78,11 +95,5 @@ export default function AppMetaProvider({
     width,
   };
 
-  return <AppMetaContext.Provider value={value}>{children}</AppMetaContext.Provider>;
-}
-
-export function useAppMetaState(): AppMetaState {
-  const context = React.useContext(AppMetaContext);
-  ok(context, new Error("AppMeta state was used outside of its Provider"));
-  return context;
+  return <AppMetaContext.Provider value={ok(value)}>{children}</AppMetaContext.Provider>;
 }

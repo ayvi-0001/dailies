@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { ResultAsync } from "neverthrow";
 
+import { QuestType } from "@/components/daily/providers/quest-types";
 import type { Daily, QuestChain } from "@/components/daily/types";
 import { AppError, AppErrorContent } from "@/types/errors";
 import { Option } from "@/types/option";
@@ -28,6 +29,13 @@ export function queryQuestChains(
 ): ResultAsync<QuestChain[], AppError> {
   return ResultAsync.fromPromise(
     invoke<QuestChain[]>("query_quest_chains", params),
+    (e: unknown) => new AppError(e as AppErrorContent),
+  );
+}
+
+export function queryQuestTypes<T = QuestType[]>(): ResultAsync<T, AppError> {
+  return ResultAsync.fromPromise(
+    invoke<T>("get_quest_types"),
     (e: unknown) => new AppError(e as AppErrorContent),
   );
 }

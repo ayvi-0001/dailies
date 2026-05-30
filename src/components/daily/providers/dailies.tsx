@@ -41,7 +41,7 @@ export type DailiesState = {
 };
 
 const DailiesContext = React.createContext<Result<DailiesState, Error>>(
-  err(new Error("Dailies state was used outside of its Provider")),
+  err(new Error("Dailies State was used outside of its Provider")),
 );
 
 export function useDailies(): DailiesState {
