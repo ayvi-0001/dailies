@@ -8,14 +8,14 @@ import { Option } from "@/types/option";
 
 type queryDailiesParams = {
   user: Option<string>;
-  quest_id: Option<string>;
+  quest_id?: Option<string>;
   start_date: string;
   end_date: string;
 };
 
 export function queryDailies<T = Daily[]>(params: queryDailiesParams): ResultAsync<T, AppError> {
   return ResultAsync.fromPromise(
-    invoke<T>("query_dailies", params),
+    invoke<T>("query_dailies", { ...{ quest_id: null }, ...params }),
     (e: unknown) => new AppError(e as AppErrorContent),
   );
 }

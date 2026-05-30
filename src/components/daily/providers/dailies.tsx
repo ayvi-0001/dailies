@@ -89,7 +89,6 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
     setIsPatching(true);
     queryDailies({
       user: userName,
-      quest_id: null, // pull all dailies
       start_date: date.toString(),
       end_date: date.toString(),
     })
@@ -168,7 +167,6 @@ export default function DailiesProvider(props: DailiesProviderProps): React.Reac
 
       const dailies: Daily[] = await queryDailies({
         user: userName,
-        quest_id: null, // pull all dailies
         start_date: date.toString(),
         end_date: date.toString(),
       })
