@@ -11,6 +11,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Override editable option on weekly/raid type quests that have passed.
+- Re-added completion % in quest chain header.
+
+### Changed
+
+- Removed archive/restore context menu items from history cards.
+
 ### Fixed
 
 - Issue where updating a quest type wouldn't trigger a refresh.

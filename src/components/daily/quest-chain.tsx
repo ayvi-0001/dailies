@@ -39,6 +39,7 @@ import {
 
 import { User } from "@/app/providers/user";
 import { LOCAL_TZ } from "@/lib/dates";
+import { roundTo } from "@/lib/number";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
 
@@ -199,15 +200,19 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
     else get_collapsed();
   }, [isAllQuestChainsCollapsed, user.id, chain, isQuestChainCollapsed]);
 
-  // let questChainCompletion: Option<number> =
-  //   filteredDailies.map(d => d.points || 0).reduce((sum, current) => sum + current, 0) /
-  //   filteredDailies.map(d => d.total || 0).reduce((sum, current) => sum + current, 0);
+  const filteredDailies = React.useMemo(
+    () => dailies.filter((daily) => isDailyFilteredAction(daily)),
+    [dailies, isDailyFilteredAction],
+  );
 
-  // if (!Number.isNaN(questChainCompletion)) {
-  //   questChainCompletion = roundTo(questChainCompletion * 100, 2);
-  // } else {
-  //   questChainCompletion = null;
-  // }
+  const questChainCompletion: Option<number> = React.useMemo(() => {
+    const v: Option<number> =
+      filteredDailies.map((d) => d.points || 0).reduce((sum, current) => sum + current, 0) /
+      filteredDailies.map((d) => d.total || 0).reduce((sum, current) => sum + current, 0);
+
+    if (!Number.isNaN(v)) return roundTo(v * 100, 2);
+    else return null;
+  }, [filteredDailies]);
 
   return (
     <heroui.Accordion
@@ -260,9 +265,9 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
             }
           >
             <span>{chain}</span>
-            {/* <span className="ml-1 text-xs font-bold text-[#f0f0ff] opacity-80">
+            <span className="ml-1 text-xs font-bold text-[#f0f0ff] opacity-80">
               {questChainCompletion !== null && `[${questChainCompletion.toFixed(2)}%]`}
-            </span> */}
+            </span>
           </div>
         }
         textValue={chain}
@@ -281,24 +286,22 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
               items={dailies.map((d) => d.sequence)}
               strategy={verticalListSortingStrategy}
             >
-              {dailies
-                .filter((daily) => isDailyFilteredAction(daily))
-                .map((daily) => (
-                  <SortableItem
-                    key={`${daily.pointId}-${daily.sequence}`}
-                    className="max-w-full min-w-full flex-shrink-0"
-                    // @ts-expect-error: overwrite assigning number to id - req for onDragEnd
-                    id={daily.sequence}
-                  >
-                    <DailyCard
-                      daily={daily}
-                      minutelyRefresh={minutelyRefresh}
-                      totalWeight={totalWeight}
-                      updateDaily={updateDaily}
-                      user={user}
-                    />
-                  </SortableItem>
-                ))}
+              {filteredDailies.map((daily) => (
+                <SortableItem
+                  key={`${daily.pointId}-${daily.sequence}`}
+                  className="max-w-full min-w-full flex-shrink-0"
+                  // @ts-expect-error: overwrite assigning number to id - req for onDragEnd
+                  id={daily.sequence}
+                >
+                  <DailyCard
+                    daily={daily}
+                    minutelyRefresh={minutelyRefresh}
+                    totalWeight={totalWeight}
+                    updateDaily={updateDaily}
+                    user={user}
+                  />
+                </SortableItem>
+              ))}
             </SortableContext>
           </DndContext>
         </div>
