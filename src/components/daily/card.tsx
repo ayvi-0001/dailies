@@ -261,21 +261,22 @@ export function ContextMenuContent(props: ContextMenuContentProps): React.ReactE
         )}
         <EditMenuOption onOpen={editOnOpenAction} />
         {toggleHistoryAction && <HistoryMenuOption toggleHistory={toggleHistoryAction} />}
-        {!daily.archived ? (
-          <ArchiveDailyMenuOption
-            daily={daily}
-            setPointsAction={setPointsAction}
-            updateDaily={updateDailyAction}
-            userId={userId}
-          />
-        ) : (
-          <RestoreDailyMenuOption
-            daily={daily}
-            setPointsAction={setPointsAction}
-            updateDaily={updateDailyAction}
-            userId={userId}
-          />
-        )}
+        {toggleHistoryAction &&
+          (!daily.archived ? (
+            <ArchiveDailyMenuOption
+              daily={daily}
+              setPointsAction={setPointsAction}
+              updateDaily={updateDailyAction}
+              userId={userId}
+            />
+          ) : (
+            <RestoreDailyMenuOption
+              daily={daily}
+              setPointsAction={setPointsAction}
+              updateDaily={updateDailyAction}
+              userId={userId}
+            />
+          ))}
         {overrideEditable !== undefined &&
           toggleOverrideEditableAction !== undefined &&
           !isEditable && (
