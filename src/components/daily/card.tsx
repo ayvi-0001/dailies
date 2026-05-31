@@ -14,6 +14,7 @@ import {
   AbandonDailyMenuOption,
   ArchiveDailyMenuOption,
   EditMenuOption,
+  EditableLockMenuOption,
   HistoryMenuOption,
   RestoreDailyMenuOption,
 } from "./context-menu/items";
@@ -62,6 +63,7 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   React.useEffect(() => setIsLoading(false), [daily]);
 
+  const { value: overrideEditable, toggle: toggleOverrideEditable } = ReactUse.useBoolean(false);
   const isEditable: boolean = React.useMemo(
     () => isDailyEditable(daily, minutelyRefresh),
     [daily, minutelyRefresh],
@@ -74,7 +76,7 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
           <CardBorder
             daily={daily}
             divProps={{ className: questTypeStyles.borderClass as string }}
-            isEditable={isEditable}
+            isEditable={overrideEditable ?? isEditable}
             minutelyRefresh={minutelyRefresh}
           >
             <AnimatePresence>
@@ -97,7 +99,7 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
                 />
                 <CardStats
                   daily={daily}
-                  disabled={!isEditable}
+                  disabled={overrideEditable ? false : !isEditable}
                   points={points}
                   setPointsAction={setPoints}
                   totalWeight={totalWeight}
@@ -113,8 +115,11 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
               <ContextMenuContent
                 daily={daily}
                 editOnOpenAction={editDisclosure.onOpen}
+                isEditable={isEditable}
+                overrideEditable={overrideEditable}
                 setPointsAction={setPoints}
                 toggleHistoryAction={toggleHistory}
+                toggleOverrideEditableAction={toggleOverrideEditable}
                 updateDailyAction={updateDaily}
                 userId={user.id}
               />
@@ -137,6 +142,7 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
           daily={daily}
           isOpen={historyIsOpen}
           minutelyRefresh={minutelyRefresh}
+          overrideEditable={overrideEditable}
           setHistoryIsOpenAction={toggleHistory}
           totalWeight={totalWeight}
           user={user}
@@ -215,8 +221,11 @@ export function CardStats(props: CardStatsProps): React.ReactElement {
 type ContextMenuContentProps = {
   daily: Daily;
   editOnOpenAction: () => void;
+  isEditable?: boolean;
+  overrideEditable?: boolean;
   setPointsAction: React.Dispatch<React.SetStateAction<Option<string>>>;
   toggleHistoryAction?: () => void;
+  toggleOverrideEditableAction?: () => void;
   updateDailyAction: (daily: Daily, patch: Partial<Daily>) => void;
   userId: number;
 };
@@ -225,8 +234,11 @@ export function ContextMenuContent(props: ContextMenuContentProps): React.ReactE
   const {
     daily,
     editOnOpenAction,
+    isEditable,
+    overrideEditable,
     setPointsAction,
     toggleHistoryAction,
+    toggleOverrideEditableAction,
     updateDailyAction,
     userId,
   } = props;
@@ -264,6 +276,14 @@ export function ContextMenuContent(props: ContextMenuContentProps): React.ReactE
             userId={userId}
           />
         )}
+        {overrideEditable !== undefined &&
+          toggleOverrideEditableAction !== undefined &&
+          !isEditable && (
+            <EditableLockMenuOption
+              overrideEditable={overrideEditable}
+              toggleOverrideEditableAction={toggleOverrideEditableAction}
+            />
+          )}
       </motion.div>
     </RadixContextMenu.Content>
   );

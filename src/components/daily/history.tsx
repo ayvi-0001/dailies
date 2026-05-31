@@ -30,13 +30,22 @@ type HistoryDrawerProps = {
   daily: Daily;
   isOpen: boolean;
   minutelyRefresh: Date;
+  overrideEditable?: boolean;
   setHistoryIsOpenAction: React.Dispatch<React.SetStateAction<boolean>>;
   totalWeight: number;
   user: User;
 };
 
 export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactElement {
-  const { daily, isOpen, minutelyRefresh, setHistoryIsOpenAction, totalWeight, user } = props;
+  const {
+    daily,
+    isOpen,
+    minutelyRefresh,
+    overrideEditable,
+    setHistoryIsOpenAction,
+    totalWeight,
+    user,
+  } = props;
 
   const questAcceptedDate: CalendarDate = parseDate(daily.accepted.substring(0, 10));
   const dateRangeEnd: CalendarDate = parseDate(daily.date).subtract({ days: 1 });
@@ -98,6 +107,7 @@ export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactEle
                       daily={daily}
                       dateRange={dateRange}
                       minutelyRefresh={minutelyRefresh}
+                      overrideEditable={overrideEditable}
                       totalWeight={totalWeight}
                       user={user}
                     />
@@ -135,13 +145,13 @@ type HistoryCardsProps = {
   daily: Daily;
   dateRange: Option<heroui.RangeValue<CalendarDate>>;
   minutelyRefresh: Date;
+  overrideEditable?: boolean;
   totalWeight: number;
   user: User;
 };
 
-// TODO(ayvi): infinite scroll history http://ayvi:3000/ayvi/dailies/issues/33
 export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
-  const { daily, dateRange, minutelyRefresh, totalWeight, user } = props;
+  const { daily, dateRange, minutelyRefresh, overrideEditable, totalWeight, user } = props;
 
   const questTypes: QuestType[] = useQuestTypes();
 
@@ -208,6 +218,7 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
                 daily={daily}
                 index={index}
                 minutelyRefresh={minutelyRefresh}
+                parentOverrideEditable={overrideEditable}
                 questTypes={questTypes}
                 totalWeight={totalWeight}
                 updateDailyAction={updateDaily}
@@ -225,6 +236,7 @@ type HistoryDailyCardProps = {
   daily: Daily;
   index: number;
   minutelyRefresh: Date;
+  parentOverrideEditable?: boolean;
   questTypes: QuestType[];
   totalWeight: number;
   updateDailyAction: (daily: Daily, patch: Partial<Daily>) => void;
@@ -232,7 +244,16 @@ type HistoryDailyCardProps = {
 };
 
 export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactElement {
-  const { daily, index, minutelyRefresh, questTypes, totalWeight, updateDailyAction, user } = props;
+  const {
+    daily,
+    index,
+    minutelyRefresh,
+    parentOverrideEditable,
+    questTypes,
+    totalWeight,
+    updateDailyAction,
+    user,
+  } = props;
 
   const questType: Option<QuestType> =
     questTypes.find((type) => `${type.id}` == `${daily.type}`) || null;
@@ -259,7 +280,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
           <CardBorder
             daily={daily}
             divProps={{ className: questTypeStyles.borderClass as string }}
-            isEditable={isEditable}
+            isEditable={parentOverrideEditable ?? isEditable}
             minutelyRefresh={minutelyRefresh}
           >
             <AnimatePresence>
@@ -283,7 +304,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
                 />
                 <CardStats
                   daily={daily}
-                  disabled={!isEditable}
+                  disabled={parentOverrideEditable ? false : !isEditable}
                   points={points}
                   setPointsAction={setPoints}
                   totalWeight={totalWeight}
@@ -299,6 +320,7 @@ export function HistoryDailyCard(props: HistoryDailyCardProps): React.ReactEleme
               <ContextMenuContent
                 daily={daily}
                 editOnOpenAction={editDisclosure.onOpen}
+                isEditable={isEditable}
                 setPointsAction={setPoints}
                 updateDailyAction={updateDailyAction}
                 userId={user.id}
