@@ -438,10 +438,9 @@ const HeatmapCell: React.FC<Partial<HeatmapCellProps>> = ({
   );
 
   const renderedSymbol = React.useMemo((): React.ReactElement => {
-    if (!(rect.current && data)) return <text />;
-
-    const box: DOMRect = rect.current.getBBox();
-
+    if (!data) return <text />;
+    const w = Number(rest.width ?? 0);
+    const h = Number(rest.height ?? 0);
     return (
       <text
         key={data.key?.toString()}
@@ -451,8 +450,8 @@ const HeatmapCell: React.FC<Partial<HeatmapCellProps>> = ({
           .darken(2)
           .hex()}
         textAnchor="middle"
-        x={+`${x}` + +`${box.width}` / 2}
-        y={+`${y}` + +`${box.height}` / 2}
+        x={Number(x) + w / 2}
+        y={Number(y) + h / 2}
         onClick={onMouseClick}
         onPointerOut={pointerOut}
         onPointerOver={pointerOver}
@@ -460,7 +459,7 @@ const HeatmapCell: React.FC<Partial<HeatmapCellProps>> = ({
         {(+`${data.value}`).toFixed(0)}%
       </text>
     );
-  }, [data, appliedStroke, x, y, onMouseClick, pointerOut, pointerOver]);
+  }, [data, appliedStroke, x, y, rest.width, rest.height, onMouseClick, pointerOut, pointerOver]);
 
   return (
     <React.Fragment>

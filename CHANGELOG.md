@@ -24,6 +24,7 @@ All notable changes to this project will be documented in this file.
 
 - Issue where updating a quest type wouldn't trigger a refresh.
 - Issue where updating a quest name broke UI.
+- Issue where cells in heat map visual would not display % values on first render.
 
 ## [v0.3.0]
 
