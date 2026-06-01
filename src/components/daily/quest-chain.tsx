@@ -206,13 +206,21 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
   );
 
   const questChainCompletion: Option<number> = React.useMemo(() => {
-    const v: Option<number> =
-      filteredDailies.map((d) => d.points || 0).reduce((sum, current) => sum + current, 0) /
-      filteredDailies.map((d) => d.total || 0).reduce((sum, current) => sum + current, 0);
+    const include = (d: Daily): boolean => d.archived === null && d.points !== null;
+    const pointsWeighted = dailies
+      .filter(include)
+      .map((d) => d.pointsWeighted || 0)
+      .reduce((sum, current) => sum + current, 0);
+    const weight = dailies
+      .filter(include)
+      .map((d) => d.weight || 0)
+      .reduce((sum, current) => sum + current, 0);
 
-    if (!Number.isNaN(v)) return roundTo(v * 100, 2);
+    const completion: Option<number> = pointsWeighted / weight;
+
+    if (!Number.isNaN(completion)) return roundTo(completion * 100, 2);
     else return null;
-  }, [filteredDailies]);
+  }, [dailies]);
 
   return (
     <heroui.Accordion
