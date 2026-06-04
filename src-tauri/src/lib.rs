@@ -17,6 +17,7 @@ pub fn run() {
     // Must be mutable if either of the following 2 cfg's apply.
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
+        .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_os::init())
