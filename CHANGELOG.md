@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - Re-added completion % in quest chain header.
 - Stay-logged-in functionality on login/signup pages.
 - Date filters on stats page.
+- Countdown timers on raid type quests.
 
 ### Changed
 

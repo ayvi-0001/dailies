@@ -1,11 +1,19 @@
 import * as React from "react";
 
 import * as motion from "motion/react-client";
+import { CalendarDate } from "@internationalized/date";
 import clsx, { ClassValue } from "clsx";
 
 import { cn } from "@/lib/utils";
 
-import { RaidStatus, WeeklyStatus, getRaidStatus, getWeeklyStatus } from "./editability";
+import {
+  RaidStatus,
+  WeeklyStatus,
+  getRaidStatus,
+  getWeeklyStatus,
+  toCalendarDateLocal,
+} from "./editability";
+import RaidCountdown from "./raid-countdown";
 import { Daily } from "./types";
 
 type CardBorderProps = Readonly<{
@@ -19,9 +27,10 @@ type CardBorderProps = Readonly<{
 const MemoizedCardBorder = React.memo(CardBorder);
 export default MemoizedCardBorder;
 
-// TODO(ayvi): display days or hours until quest available http://ayvi:3000/ayvi/dailies/issues/159
 function CardBorder(props: CardBorderProps): React.ReactElement {
   const { children, divProps, daily, isEditable, minutelyRefresh } = props;
+
+  const today: CalendarDate = toCalendarDateLocal(new Date());
 
   const raidStatus: RaidStatus = React.useMemo(
     () => getRaidStatus(daily, minutelyRefresh),
@@ -86,6 +95,20 @@ function CardBorder(props: CardBorderProps): React.ReactElement {
             clsx([!!daily.archived && "bg-black/70"]),
           )}
           id="uneditable-card-cover"
+        />
+      )}
+      {raidStatus.isUpcoming && !daily.archived && (
+        <RaidCountdown
+          daily={daily}
+          minutelyRefresh={minutelyRefresh}
+          prefix="Time until raid opens: "
+        />
+      )}
+      {raidStatus.isOver && daily.date == today.toString() && (
+        <RaidCountdown
+          daily={daily}
+          minutelyRefresh={minutelyRefresh}
+          prefix="Time until next raid: "
         />
       )}
       <div className={cn("flex size-full")}>{children}</div>

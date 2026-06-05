@@ -26,11 +26,11 @@ const WEEKLY_INACTIVE: WeeklyStatus = {
   isAvailable: false,
 };
 
-function toCalendarDateLocal(d: Date): CalendarDate {
+export function toCalendarDateLocal(d: Date): CalendarDate {
   return new CalendarDate(d.getFullYear(), d.getMonth() + 1, d.getDate());
 }
 
-function toTimeLocal(d: Date): Time {
+export function toTimeLocal(d: Date): Time {
   return new Time(d.getHours(), d.getMinutes(), d.getSeconds());
 }
 
