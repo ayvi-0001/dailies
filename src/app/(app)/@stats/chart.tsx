@@ -7,10 +7,17 @@ import DailiesLineChart from "@/components/stats/dailies-line-chart";
 
 export default function App(): React.ReactElement {
   return (
-    <div className="flex h-full flex-col items-center justify-center">
-      <div className="h-80 w-screen">{<DailiesHeatmap />}</div>
-      <div className="max-h-20 w-full grow" />
-      <div className="h-80 w-screen">{<DailiesLineChart />}</div>
+    <div className="scrollbar-hide flex h-full flex-col items-center overflow-x-auto whitespace-nowrap">
+      <span className="mb-4 items-start self-center text-xs text-[#f0f0ff]/60 italic underline underline-offset-6">
+        This feature is still under construction
+      </span>
+      <div className="w-screen">
+        <DailiesHeatmap />
+      </div>
+      <div className="max-h-5 grow" />
+      <div className="w-screen">
+        <DailiesLineChart />
+      </div>
     </div>
   );
 }

@@ -15,16 +15,20 @@ All notable changes to this project will be documented in this file.
 
 - Override editable option on weekly/raid type quests that have passed.
 - Re-added completion % in quest chain header.
+- Stay-logged-in functionality on login/signup pages.
+- Date filters on stats page.
 
 ### Changed
 
 - Removed archive/restore context menu items from history cards.
+- Fixed max scale in Heat Map visual to 100%.
 
 ### Fixed
 
 - Issue where updating a quest type wouldn't trigger a refresh.
 - Issue where updating a quest name broke UI.
 - Issue where cells in heat map visual would not display % values on first render.
+- Loading visuals on stats page.
 
 ## [v0.3.0]
 

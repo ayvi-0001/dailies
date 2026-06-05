@@ -4,116 +4,209 @@ import * as React from "react";
 
 import * as heroui from "@heroui/react";
 import * as ReactUse from "@reactuses/core";
+import * as log from "@tauri-apps/plugin-log";
 import * as reaviz from "reaviz";
 import { flip, offset } from "@floating-ui/dom";
-import { Skeleton } from "@heroui/skeleton";
-import { now, parseDate } from "@internationalized/date";
+import { CalendarDate, today } from "@internationalized/date";
 import chroma from "chroma-js";
+import clsx from "clsx";
 import type { ScaleBand } from "d3";
 import { motion } from "motion/react";
-import { Result } from "neverthrow";
+import { Result, ResultAsync } from "neverthrow";
 import { CloneElement } from "reablocks";
 
 import { type User, useUser } from "@/app/providers/user";
+import { DailiesState, useDailies } from "@/components/daily/providers/dailies";
 import { LOCAL_TZ } from "@/lib/dates";
 import { invoke } from "@/lib/tauri";
 import { Option } from "@/types/option";
+import { UseBoolean } from "@/types/props";
+
+const ROLLING_FILTER_KEY = "rolling-365";
+
+const HEATMAP_SCALE_MAX = 100;
+
+const LEGEND_SCALE_DATA: reaviz.ChartShallowDataShape[] = [
+  { key: "min", data: 0 },
+  { key: "max", data: HEATMAP_SCALE_MAX },
+];
 
 export default function DailiesHeatmap(): React.ReactElement {
-  const today = now(LOCAL_TZ);
-  const defaultGraphData = Array.from({ length: 365 }, (_: unknown, k: number) => ({
-    key: today.subtract({ days: k }).toDate(),
-  })) as reaviz.ChartShallowDataShape[];
-
-  // TODO(ayvi): add year filter
-  const start_date: string = now(LOCAL_TZ).subtract({ days: 365 }).toString().substring(0, 10);
-  const end_date: string = now(LOCAL_TZ).toString().substring(0, 10);
+  const dailiesState: DailiesState = useDailies();
+  const todayDate: CalendarDate = React.useMemo(() => today(LOCAL_TZ), []);
 
   const user: Result<User, Error> = useUser();
   const userName: Option<string> = user.map((t) => t.name).unwrapOr(null);
 
-  const [data, setData] = React.useState<reaviz.ChartShallowDataShape[]>(defaultGraphData);
-  ReactUse.useOnceEffect(() => {
-    const query_dailies_complete = async (): Promise<void> => {
-      await invoke<DailiesCompleteDataPoint[]>("query_dailies_complete", {
+  const [filterKey, setFilterKey] = React.useState<string>(ROLLING_FILTER_KEY);
+
+  const availableYears: number[] = React.useMemo(() => {
+    const currentYear = todayDate.year;
+    let earliest = currentYear;
+    for (const d of dailiesState.dailies) {
+      if (!d.accepted) continue;
+      const y = Number(d.accepted.substring(0, 4));
+      if (!Number.isNaN(y) && y < earliest) earliest = y;
+    }
+    const years: number[] = [];
+    for (let y = currentYear; y >= earliest; y--) years.push(y);
+    return years;
+  }, [dailiesState.dailies, todayDate.year]);
+
+  const { startDate, endDate, startIso, endIso } = React.useMemo<{
+    startDate: CalendarDate;
+    endDate: CalendarDate;
+    startIso: string;
+    endIso: string;
+  }>(() => {
+    let s: CalendarDate;
+    let e: CalendarDate;
+    if (filterKey === ROLLING_FILTER_KEY) {
+      s = todayDate.subtract({ days: 365 });
+      e = todayDate.add({ days: 1 });
+    } else {
+      const year = Number(filterKey);
+      s = new CalendarDate(year, 1, 1);
+      const yearEnd = new CalendarDate(year, 12, 31);
+      e = yearEnd.compare(todayDate) > 0 ? todayDate : yearEnd;
+    }
+    return { startDate: s, endDate: e, startIso: s.toString(), endIso: e.toString() };
+  }, [filterKey, todayDate]);
+
+  const placeholderRange = React.useMemo(
+    () => buildPlaceholderRange(startDate, endDate),
+    [startDate, endDate],
+  );
+
+  const placeholderData = React.useMemo<reaviz.ChartShallowDataShape[]>(
+    () => placeholderRange.map((p) => ({ key: p.key }) as reaviz.ChartShallowDataShape),
+    [placeholderRange],
+  );
+
+  const [data, setData] = React.useState<reaviz.ChartShallowDataShape[]>(placeholderData);
+  const loading: UseBoolean = ReactUse.useBoolean();
+  const { setTrue: startLoading, setFalse: stopLoading } = loading;
+
+  React.useEffect(() => {
+    let cancelled = false;
+    setData(placeholderData);
+    startLoading();
+    ResultAsync.fromPromise(
+      invoke<DailiesCompleteDataPoint[]>("query_dailies_complete", {
         user: userName,
-        start_date: start_date,
-        end_date: end_date,
+        start_date: startIso,
+        end_date: endIso,
+      }),
+      (e) => log.error(`${e}`),
+    )
+      .andTee((t) => {
+        if (cancelled) return;
+        const byDate = new Map<string, number>(t.map((v) => [v.date, v.value * 100]));
+        setData(
+          placeholderRange.map((p) => {
+            const value = byDate.get(p.iso);
+            return value === undefined
+              ? ({ key: p.key } as reaviz.ChartShallowDataShape)
+              : ({ key: p.key, data: value } as reaviz.ChartShallowDataShape);
+          }),
+        );
       })
-        .then((result: DailiesCompleteDataPoint[]) =>
-          setData(
-            Array.from(result, (v: DailiesCompleteDataPoint) => ({
-              key: parseDate(v.date).toDate(LOCAL_TZ),
-              data: v.value * 100,
-            })),
-          ),
-        )
-        .catch(console.error);
-    };
-    query_dailies_complete();
-  }, [userName]);
+      .then(() => stopLoading());
+    return () => { cancelled = true; };
+  }, [
+    userName,
+    dailiesState.dailies,
+    startIso,
+    endIso,
+    placeholderRange,
+    placeholderData,
+    startLoading,
+    stopLoading,
+  ]);
 
-  const { value: visible, setTrue } = ReactUse.useBoolean(false);
-  ReactUse.useUpdateEffect(() => {
-    const toggle_visible = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setTrue();
-    };
-    toggle_visible();
-  }, [data, setTrue]);
-
-  return visible ? (
-    <div className="m-5">
-      <div className="flex flex-row items-center">
-        <heroui.ScrollShadow
-          hideScrollBar
-          className="flex w-full flex-row-reverse"
-          offset={50}
-          orientation="horizontal"
-          size={10}
-          visibility="both"
+  return (
+    <div className="mx-5 h-80">
+      <div className="mb-2 flex flex-col items-center">
+        <p className="self-center text-xs font-bold text-[#f0f0ff]">Year Filter</p>
+        <heroui.Select
+          disallowEmptySelection
+          aria-label="heatmap date filter"
+          className="dark mt-1 w-56 text-xs"
+          classNames={{
+            popoverContent: "dark",
+            listbox: "dark text-[#f0f0ff]",
+            listboxWrapper: "dark text-xs",
+            innerWrapper: "text-[0.55rem]",
+          }}
+          selectedKeys={new Set([filterKey])}
+          selectionMode="single"
+          size="sm"
+          onSelectionChange={(keys) => {
+            const next = Array.from(keys as Set<React.Key>)[0];
+            if (typeof next === "string") setFilterKey(next);
+          }}
         >
-          <div className="flex p-2">
-            <CalendarHeatmap
-              data={data}
-              height={250}
-              margins={[5, 5]}
-              series={
-                <HeatmapSeries
-                  cell={
-                    <HeatmapCell
-                      tooltip={
-                        <reaviz.ChartTooltip
-                          className="text-xs"
-                          content={(d: reaviz.HeatmapCellProps) =>
-                            d &&
-                            `${reaviz.formatValue(d.data.metadata.date)} ∙ ${d.data?.value ? reaviz.formatValue(d.data.value) : ""}%`
-                          }
-                        />
-                      }
-                    />
-                  }
-                  colorScheme={"RdYlGn"}
-                  emptyColor="transparent"
-                  padding={0.3}
-                />
-              }
-              view="year"
-              width={1850}
-            />
-          </div>
-        </heroui.ScrollShadow>
-        <reaviz.SequentialLegend
-          className="!h-[180px]"
-          colorScheme={reaviz.schemes.RdYlGn}
-          data={data}
-          gradientClassName="!w-[20px]"
-        />
+          {[
+            <heroui.SelectItem key={ROLLING_FILTER_KEY} className="text-[0.45rem]">
+              Last 365 days
+            </heroui.SelectItem>,
+            ...availableYears.map((y: number) => (
+              <heroui.SelectItem key={String(y)}>{String(y)}</heroui.SelectItem>
+            )),
+          ]}
+        </heroui.Select>
       </div>
-    </div>
-  ) : (
-    <div className="flex size-full cursor-wait place-items-center opacity-50">
-      <Skeleton className="dark m-5 size-full rounded-2xl" />
+      <heroui.Skeleton
+        className={clsx(loading.value && "dark rounded-2xl opacity-30")}
+        isLoaded={!loading.value}
+      >
+        <div className="flex flex-row items-center">
+          <heroui.ScrollShadow
+            hideScrollBar
+            className="flex w-full flex-row-reverse"
+            offset={50}
+            orientation="horizontal"
+            size={10}
+            visibility="both"
+          >
+            <div className="flex p-2">
+              <CalendarHeatmap
+                data={data}
+                height={250}
+                margins={[5, 5]}
+                series={
+                  <HeatmapSeries
+                    cell={
+                      <HeatmapCell
+                        tooltip={
+                          <reaviz.ChartTooltip
+                            className="text-xs"
+                            content={(d: reaviz.HeatmapCellProps) =>
+                              d &&
+                              `${reaviz.formatValue(d.data.metadata.date)} ∙ ${d.data?.value ? reaviz.formatValue(d.data.value) : ""}%`
+                            }
+                          />
+                        }
+                      />
+                    }
+                    colorScheme={"RdYlGn"}
+                    emptyColor="transparent"
+                    padding={0.3}
+                  />
+                }
+                view="year"
+                width={1850}
+              />
+            </div>
+          </heroui.ScrollShadow>
+          <reaviz.SequentialLegend
+            className="!h-[180px] text-transparent"
+            colorScheme={reaviz.schemes.RdYlGn}
+            data={LEGEND_SCALE_DATA}
+            gradientClassName="!w-[20px]"
+          />
+        </div>
+      </heroui.Skeleton>
     </div>
   );
 }
@@ -248,8 +341,16 @@ const HeatmapSeries: React.FC<Partial<HeatmapSeriesProps>> = (props) => {
     selections,
   } = reaviz.mergeDefaultProps(HEATMAP_SERIES_DEFAULT_PROPS, props);
 
+  const scaleData = [
+    ...data,
+    {
+      key: "__scale__",
+      data: [{ value: 0 }, { value: HEATMAP_SCALE_MAX }],
+    },
+  ] as reaviz.ChartInternalNestedDataShape[];
+
   const valueScales = reaviz.createColorSchemeValueScales(
-    data,
+    scaleData,
     colorScheme,
     emptyColor,
     selections,
@@ -456,7 +557,7 @@ const HeatmapCell: React.FC<Partial<HeatmapCellProps>> = ({
         onPointerOut={pointerOut}
         onPointerOver={pointerOver}
       >
-        {(+`${data.value}`).toFixed(0)}%
+        {data.value !== undefined ? (+`${data.value}`).toFixed(0) + "%" : ""}
       </text>
     );
   }, [data, appliedStroke, x, y, rest.width, rest.height, onMouseClick, pointerOut, pointerOver]);
@@ -507,3 +608,16 @@ const HEATMAP_SERIES_DEFAULT_PROPS: Partial<HeatmapSeriesProps> = {
   colorScheme: ["rgba(28, 107, 86, 0.5)", "#2da283"],
   cell: <HeatmapCell />,
 };
+
+function buildPlaceholderRange(
+  start: CalendarDate,
+  end: CalendarDate,
+): Array<{ iso: string; key: Date }> {
+  const days: Array<{ iso: string; key: Date }> = [];
+  let cur = start;
+  while (cur.compare(end) <= 0) {
+    days.push({ iso: cur.toString(), key: cur.toDate(LOCAL_TZ) });
+    cur = cur.add({ days: 1 });
+  }
+  return days;
+}
