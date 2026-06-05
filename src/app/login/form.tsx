@@ -11,18 +11,20 @@ import { FormFieldErrors, FormState, PasswordField } from "@/lib/forms";
 import { UseBoolean } from "@/types/props";
 
 export default function LoginForm(): React.ReactElement {
+  const loading: UseBoolean = ReactUse.useBoolean();
+  const passwordVisibility: UseBoolean = ReactUse.useBoolean();
+  const stayLoggedIn: UseBoolean = ReactUse.useBoolean();
+
   const [state, action, pending] = React.useActionState(
     async (state: FormState, formData: FormData) => {
-      return (await login(state, formData))
+      return (await login(state, formData, stayLoggedIn.value))
         .andThen((_) => redirect("/", RedirectType.replace))
         .unwrapOr({});
     },
     {},
   );
-  const [isLoading, setIsLoading] = React.useState<boolean>(pending);
-  const passwordVisibility: UseBoolean = ReactUse.useBoolean();
 
-  React.useEffect(() => setIsLoading(pending), [pending]);
+  React.useEffect(() => loading.setValue(pending), [loading, pending]);
 
   return (
     <div className="rounded-large flex w-full max-w-sm flex-col gap-4">
@@ -61,15 +63,20 @@ export default function LoginForm(): React.ReactElement {
           setIsVisible={passwordVisibility.toggle}
         />
         <FormFieldErrors formKey="password" state={state} />
-        {/* // TODO(ayvi): add stay logged-in functionality http://ayvi:3000/ayvi/dailies/issues/109 */}
-        <heroui.Checkbox className="place-self-center" name="remember" size="sm">
+        <heroui.Checkbox
+          className="place-self-center"
+          isSelected={stayLoggedIn.value}
+          name="remember"
+          size="sm"
+          onValueChange={stayLoggedIn.toggle}
+        >
           Stay logged-in
         </heroui.Checkbox>
         <heroui.Button
           className="w-full"
           color="primary"
           disabled={pending}
-          isLoading={isLoading}
+          isLoading={loading.value}
           type="submit"
         >
           Sign In

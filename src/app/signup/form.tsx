@@ -11,19 +11,21 @@ import { FormFieldErrors, FormState, PasswordField } from "@/lib/forms";
 import { UseBoolean } from "@/types/props";
 
 export default function SignupForm(): React.ReactElement {
+  const loading: UseBoolean = ReactUse.useBoolean();
+  const passwordVisibility: UseBoolean = ReactUse.useBoolean();
+  const confirmPasswordVisibility: UseBoolean = ReactUse.useBoolean();
+  const stayLoggedIn: UseBoolean = ReactUse.useBoolean();
+
   const [state, action, pending] = React.useActionState(
     async (state: FormState, formData: FormData) => {
-      return (await signup(state, formData))
+      return (await signup(state, formData, stayLoggedIn.value))
         .andThen((_) => redirect("/", RedirectType.replace))
         .unwrapOr({});
     },
     {},
   );
-  const [isLoading, setIsLoading] = React.useState<boolean>(pending);
-  const passwordVisibility: UseBoolean = ReactUse.useBoolean();
-  const confirmPasswordVisibility: UseBoolean = ReactUse.useBoolean();
 
-  React.useEffect(() => setIsLoading(pending), [pending]);
+  React.useEffect(() => loading.setValue(pending), [loading, pending]);
 
   return (
     <div className="rounded-large flex w-full max-w-sm flex-col gap-4 text-[#f0f0ff]">
@@ -81,14 +83,20 @@ export default function SignupForm(): React.ReactElement {
           setIsVisible={confirmPasswordVisibility.toggle}
         />
         <FormFieldErrors formKey="currentPassword" state={state} />
-        <heroui.Checkbox className="place-self-center" name="remember" size="sm">
+        <heroui.Checkbox
+          className="place-self-center"
+          isSelected={stayLoggedIn.value}
+          name="remember"
+          size="sm"
+          onValueChange={stayLoggedIn.toggle}
+        >
           Stay logged-in
         </heroui.Checkbox>
         <heroui.Button
           className="w-full"
           color="primary"
           disabled={pending}
-          isLoading={isLoading}
+          isLoading={loading.value}
           type="submit"
         >
           Sign Up

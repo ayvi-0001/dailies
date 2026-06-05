@@ -1,9 +1,10 @@
-import { Result, err, ok } from "neverthrow";
+import { Result, ResultAsync, err, ok, okAsync } from "neverthrow";
 import { z } from "zod";
 
 import { FormState } from "@/lib/forms";
 import { createSession } from "@/lib/session";
 
+import { setStore } from "./store";
 import { createUser } from "./user";
 
 export const SignupFormSchema = z
@@ -33,6 +34,7 @@ export const SignupFormSchema = z
 export default async function signup(
   state: FormState,
   formData: FormData,
+  stayLoggedIn: boolean,
 ): Promise<Result<FormState, FormState>> {
   const validatedFields = SignupFormSchema.safeParse({
     username: formData.get("username"),
@@ -64,8 +66,15 @@ export default async function signup(
 
   const session = await createSession(user.value.name);
 
-  return session.match(
-    (_) => ok(state),
-    (e) => err({ errors: { other: [e.message] } }),
-  );
+  if (session.isErr()) {
+    return err({ errors: { other: [session.error.message] } } as FormState);
+  }
+
+  setStore("settings.json", "stay-logged-in", { value: stayLoggedIn })
+    .map<ResultAsync<void, Error>>(
+      async (t): Promise<ResultAsync<void, Error>> => okAsync(await t.save()),
+    )
+    .mapErr((e) => console.log(e));
+
+  return ok(state);
 }

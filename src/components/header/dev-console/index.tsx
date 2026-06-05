@@ -10,6 +10,7 @@ import logout from "@/actions/logout";
 import { AppMetaState, useAppMetaState } from "@/app/providers/app-meta";
 import Terminal from "@/components/ui/terminal";
 import type { TerminalCommand, TerminalContext } from "@/components/ui/terminal";
+import { invoke } from "@/lib/tauri";
 import { cn } from "@/lib/utils";
 
 import dataCommands from "./commands/data";
@@ -54,18 +55,12 @@ export default function DevConsole({
     },
     {
       name: "logout",
-      run: async () =>
-        logout().match(
-          (_) => {},
-          (e) => e.message,
-        ),
+      run: async () => logout(),
     },
     {
       name: "change-password",
       run: async (ctx: TerminalContext) => {
-        return await (
-          await import("@tauri-apps/api/core")
-        ).invoke("update_password", {
+        return await invoke("update_password", {
           user_id: ctx.args.at(0),
           current_password: ctx.args.at(1),
           new_password: ctx.args.at(2),

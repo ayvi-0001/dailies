@@ -1,4 +1,4 @@
-import { Result, err, ok } from "neverthrow";
+import { Result, ResultAsync, err, ok, okAsync } from "neverthrow";
 import { z } from "zod";
 
 import { User } from "@/app/providers/user";
@@ -6,6 +6,7 @@ import { FormState } from "@/lib/forms";
 import { createSession } from "@/lib/session";
 
 import { DecodedToken, getSessionDecoded } from "./session";
+import { setStore } from "./store";
 import { verifyUser } from "./user";
 
 export const LoginFormSchema = z.object({
@@ -16,6 +17,7 @@ export const LoginFormSchema = z.object({
 export default async function login(
   state: FormState,
   formData: FormData,
+  stayLoggedIn: boolean,
 ): Promise<Result<FormState, FormState>> {
   const validatedFields = LoginFormSchema.safeParse({
     username: formData.get("username"),
@@ -53,6 +55,12 @@ export default async function login(
       return err({ errors: { other: [newSession.error.message] } } as FormState);
     }
   }
+
+  setStore("settings.json", "stay-logged-in", { value: stayLoggedIn })
+    .map<ResultAsync<void, Error>>(
+      async (t): Promise<ResultAsync<void, Error>> => okAsync(await t.save()),
+    )
+    .mapErr((e) => console.log(e));
 
   return ok(state);
 }

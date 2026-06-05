@@ -4,7 +4,7 @@ import { RedirectType, redirect } from "next/navigation";
 import { invoke } from "@/lib/tauri";
 import { AppError, AppErrorContent } from "@/types/errors";
 
-export function truncate_sessions(): ResultAsync<void, AppError> {
+export function truncateSessions(): ResultAsync<void, AppError> {
   return ResultAsync.fromPromise(
     invoke<void>("truncate_sessions", {}),
     (e: unknown) => new AppError(e as AppErrorContent),
@@ -15,8 +15,15 @@ type logoutParams = {
   redirectPath?: string;
 };
 
-export default function logout(opts?: logoutParams): ResultAsync<never, AppError> {
-  return truncate_sessions().andThen((_) =>
+export default function logout(opts?: logoutParams): void {
+  truncateSessions().map((_) =>
     redirect(opts && opts.redirectPath ? opts.redirectPath : "/login", RedirectType.replace),
+  );
+}
+
+export function setStayLoggedIn(value: boolean): ResultAsync<boolean, AppError> {
+  return ResultAsync.fromPromise(
+    invoke<boolean>("set_stay_logged_in", { value: value }),
+    (e: unknown) => new AppError(e as AppErrorContent),
   );
 }
