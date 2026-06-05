@@ -105,7 +105,9 @@ export default function ExpBar(): React.ReactNode {
               ) : (
                 <span className={cn(textClass, "opacity-80")}>0</span>
               )}
-              <span className={cn(textClass, "opacity-80")}>{`/${dailiesState.totalWeight}]`}</span>
+              <span
+                className={cn(textClass, "opacity-80")}
+              >{`/${dailiesState.totalWeight.toFixed(2)}]`}</span>
               <Counter
                 className={cn(textClass, "px-1")}
                 direction="up"
