@@ -20,10 +20,3 @@ export default function logout(opts?: logoutParams): void {
     redirect(opts && opts.redirectPath ? opts.redirectPath : "/login", RedirectType.replace),
   );
 }
-
-export function setStayLoggedIn(value: boolean): ResultAsync<boolean, AppError> {
-  return ResultAsync.fromPromise(
-    invoke<boolean>("set_stay_logged_in", { value: value }),
-    (e: unknown) => new AppError(e as AppErrorContent),
-  );
-}
