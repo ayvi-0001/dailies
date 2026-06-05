@@ -1,7 +1,6 @@
 import * as React from "react";
 
 import * as heroui from "@heroui/react";
-import clsx from "clsx";
 
 import editQuest from "@/actions/edit-quest";
 import { User } from "@/app/providers/user";
@@ -81,12 +80,11 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
         ref={draggableRef}
         disableAnimation
         hideCloseButton
-        isKeyboardDismissDisabled
+        isDismissable
         shouldBlockScroll
         backdrop="transparent"
         className="dark w-9/10 text-white select-none"
-        isDismissable={false}
-        isOpen={disclosure.isOpen}
+        defaultOpen={true}
         motionProps={{
           variants: {
             enter: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" } },
@@ -104,26 +102,22 @@ export default function EditModal(props: EditModalProps): React.ReactNode {
             <>
               <heroui.ModalHeader
                 {...moveProps}
-                className="text-md flex flex-col gap-1 justify-self-center"
+                className="text-md flex flex-col gap-1 self-center"
               >
                 {title}
               </heroui.ModalHeader>
-              <heroui.ModalBody className="h-[50vh] bg-black/90 text-white">
-                <heroui.ScrollShadow
-                  hideScrollBar
-                  className={clsx("h-[calc(100vh-50vh)]", historic && "h-[calc(100vh-75h)]")}
-                  offset={100}
-                >
+              <heroui.ModalBody className="bg-black/90 text-white">
+                <div className="scrollbar-hide flex h-full flex-col overflow-x-auto whitespace-nowrap">
                   <EditDailyForm
                     action={action}
                     daily={daily}
                     formRef={formRef}
                     historic={historic}
                   />
-                </heroui.ScrollShadow>
+                </div>
               </heroui.ModalBody>
               <heroui.ModalFooter className="my-4 flex justify-center gap-2 leading-none font-medium select-none">
-                <heroui.Button color="danger" size="sm" variant="light" onPress={onClose}>
+                <heroui.Button color="danger" size="sm" variant="flat" onPress={onClose}>
                   close
                 </heroui.Button>
                 <heroui.Button

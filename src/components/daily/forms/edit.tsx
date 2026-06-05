@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import * as heroui from "@heroui/react";
-import { /* DateValue, */ Time /* , parseDateTime */, parseTime } from "@internationalized/date";
+import { Time, parseTime } from "@internationalized/date";
 
 import type { Option } from "@/types/option";
 
@@ -50,14 +50,11 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
 
   // TODO(ayvi): feat: add live validation/error msgs on RequirementsField http://ayvi:3000/ayvi/dailies/issues/230
 
-  // const [archivedDate, setArchivedDate] = React.useState<Option<DateValue>>(null);
-
   const [days, setDays] = React.useState<string[]>([]);
 
   React.useEffect(() => {
     setName(daily.name);
     setDays(daily.days?.map((v) => `${v}`) || []);
-    // setArchivedDate(daily.archived ? parseDateTime(daily.archived.toString()) : null);
     setQuestType(daily.type);
     setTotal(daily.total);
     setDefaultPoints(daily.defaultPoints);
@@ -133,12 +130,6 @@ export default function EditDailyForm(props: EditDailyFormProps): React.ReactEle
       )}
       {!historic && <DailyForm.DescriptionField daily={daily} />}
       {<DailyForm.NoteField daily={daily} />}
-      {/* !historic && (
-        <DailyForm.ArchivedField
-          archivedDate={archivedDate}
-          setArchivedDateAction={setArchivedDate}
-        />
-      ) */}
     </heroui.Form>
   );
 }
