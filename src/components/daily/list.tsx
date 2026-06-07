@@ -111,6 +111,7 @@ export function UserQuestList({ title, user }: { title: string; user: User }): R
               minutelyRefresh={minutelyRefresh}
               setDailiesAction={dailiesState.setDailies}
               totalWeight={dailiesState.totalWeight}
+              triggerRefreshDailies={dailiesState.triggerRefreshDailies}
               updateDaily={dailiesState.updateDaily}
               user={user}
             />

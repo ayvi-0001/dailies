@@ -121,6 +121,7 @@ export type QuestChainProps = {
   minutelyRefresh: Date;
   setDailiesAction: React.Dispatch<React.SetStateAction<Daily[]>>;
   totalWeight: number;
+  triggerRefreshDailies: () => void;
   updateDaily: (daily: Daily, patch: Partial<Daily>) => void;
   user: User;
 };
@@ -138,6 +139,7 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
     setDailiesAction,
     totalWeight,
     updateDaily,
+    triggerRefreshDailies,
     user,
   } = props;
 
@@ -305,6 +307,7 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
                     daily={daily}
                     minutelyRefresh={minutelyRefresh}
                     totalWeight={totalWeight}
+                    triggerRefreshDailies={triggerRefreshDailies}
                     updateDaily={updateDaily}
                     user={user}
                   />

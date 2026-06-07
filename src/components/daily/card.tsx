@@ -36,6 +36,7 @@ type DailyCardProps = {
   daily: Daily;
   minutelyRefresh: Date;
   totalWeight: number;
+  triggerRefreshDailies: () => void;
   updateDaily: (daily: Daily, patch: Partial<Daily>) => void;
   user: User;
 };
@@ -44,7 +45,7 @@ const MemoizedDailyCard = React.memo(DailyCard);
 export default MemoizedDailyCard;
 
 function DailyCard(props: DailyCardProps): React.ReactNode {
-  const { daily, minutelyRefresh, totalWeight, updateDaily, user } = props;
+  const { daily, minutelyRefresh, totalWeight, triggerRefreshDailies, updateDaily, user } = props;
 
   const [points, setPoints] = React.useState<Option<string>>(
     daily.points !== null ? `${daily.points}` : null,
@@ -145,6 +146,7 @@ function DailyCard(props: DailyCardProps): React.ReactNode {
           overrideEditable={overrideEditable}
           setHistoryIsOpenAction={toggleHistory}
           totalWeight={totalWeight}
+          updateParentDaily={triggerRefreshDailies}
           user={user}
         />
       )}

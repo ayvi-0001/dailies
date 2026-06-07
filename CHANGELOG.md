@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file.
 - Issue where updating a quest name broke UI.
 - Issue where cells in heat map visual would not display % values on first render.
 - Loading visuals on stats page.
+- Updating history cards now refreshes parent card.
 
 ## [v0.3.0]
 

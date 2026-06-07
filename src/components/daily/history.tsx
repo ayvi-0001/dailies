@@ -33,6 +33,7 @@ type HistoryDrawerProps = {
   overrideEditable?: boolean;
   setHistoryIsOpenAction: React.Dispatch<React.SetStateAction<boolean>>;
   totalWeight: number;
+  updateParentDaily: () => void;
   user: User;
 };
 
@@ -44,6 +45,7 @@ export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactEle
     overrideEditable,
     setHistoryIsOpenAction,
     totalWeight,
+    updateParentDaily,
     user,
   } = props;
 
@@ -109,6 +111,7 @@ export default function HistoryDrawer(props: HistoryDrawerProps): React.ReactEle
                       minutelyRefresh={minutelyRefresh}
                       overrideEditable={overrideEditable}
                       totalWeight={totalWeight}
+                      updateParentDaily={updateParentDaily}
                       user={user}
                     />
                   </div>
@@ -147,11 +150,20 @@ type HistoryCardsProps = {
   minutelyRefresh: Date;
   overrideEditable?: boolean;
   totalWeight: number;
+  updateParentDaily: () => void;
   user: User;
 };
 
 export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
-  const { daily, dateRange, minutelyRefresh, overrideEditable, totalWeight, user } = props;
+  const {
+    daily,
+    dateRange,
+    minutelyRefresh,
+    overrideEditable,
+    totalWeight,
+    updateParentDaily,
+    user,
+  } = props;
 
   const questTypes: QuestType[] = useQuestTypes();
 
@@ -177,10 +189,9 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
     [],
   );
 
-  // TODO(ayvi): fix: updating note on a history card not immediately reflected on front-end
-  // http://ayvi:3000/ayvi/dailies/issues/208
   const updateDaily = React.useCallback(
-    (daily: Daily, patch: Partial<Daily>) =>
+    (daily: Daily, patch: Partial<Daily>) => {
+      updateParentDaily();
       updateDailyCallback(
         user.name,
         parseDate(daily.date),
@@ -194,8 +205,9 @@ export function HistoryCards(props: HistoryCardsProps): React.ReactElement {
           "archived", // recalculate total weight
         ]),
         triggerRefreshDailies,
-      ),
-    [user, triggerRefreshDailies],
+      );
+    },
+    [user, updateParentDaily, triggerRefreshDailies],
   );
 
   return (
