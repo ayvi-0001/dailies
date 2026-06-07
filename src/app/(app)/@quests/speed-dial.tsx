@@ -10,6 +10,7 @@ import {
   BoxIcon,
   CircleXIcon,
   LogOutIcon,
+  SettingsIcon,
 } from "lucide-react";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ReadonlyURLSearchParams, useRouter, useSearchParams } from "next/navigation";
@@ -30,6 +31,13 @@ export default function App(): React.ReactElement {
       key: "user",
       buttonAction: () =>
         updateParam(router, searchParams, [{ key: "modal", value: ModalParam.User }]),
+    },
+    {
+      icon: <SettingsIcon size={14} stroke="#f0f0ff" />,
+      label: <p className="text-xs">Settings</p>,
+      key: "settings",
+      buttonAction: () =>
+        updateParam(router, searchParams, [{ key: "modal", value: ModalParam.Settings }]),
     },
     {
       icon: <BookMarkedIcon size={14} stroke="#f0f0ff" />,

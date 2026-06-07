@@ -9,7 +9,7 @@ import { RedirectType, redirect } from "next/navigation";
 
 import { truncateSessions } from "@/actions/logout";
 import { DecodedToken, getSessionDecoded } from "@/actions/session";
-import { getStore } from "@/actions/store";
+import { getStoreObject } from "@/actions/store";
 import { getUser } from "@/actions/user";
 import { Option } from "@/types/option";
 
@@ -54,7 +54,7 @@ export default function UserProvider({
       getUser({ name: t.userName, id: null }).andTee((t) => setUser(t)),
     );
 
-    const stayLoggedIn = getStore<{ value: boolean }>("settings.json", "stay-logged-in");
+    const stayLoggedIn = getStoreObject<{ value: boolean }>("settings.json", "stay-logged-in");
     stayLoggedIn
       .map((t) => { if (t.value === false) truncateSessions(); })
       .mapErr((e) => console.log(e));

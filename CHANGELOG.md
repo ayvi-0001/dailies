@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 - Stay-logged-in functionality on login/signup pages.
 - Date filters on stats page.
 - Countdown timers on raid type quests.
+- Parallax/multiple backgrounds.
 
 ### Changed
 

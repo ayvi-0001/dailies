@@ -20,20 +20,7 @@ export default function App() {
     <heroui.Navbar
       isBordered
       className="fixed inset-x-0 bottom-2 flex max-h-15 min-h-15 w-screen self-end bg-transparent"
-      classNames={{
-        item: [
-          "flex relative items-center",
-          "data-[active=true]:after:content-['']",
-          "data-[active=true]:after:absolute",
-          "data-[active=true]:after:bottom-0",
-          "data-[active=true]:after:left-0",
-          "data-[active=true]:after:right-0",
-          "data-[active=true]:after:h-[2px]",
-          "data-[active=true]:after:rounded-[2px]",
-          "data-[active=true]:after:bg-primary",
-        ],
-        content: ["items-center w-full align-center h-full"],
-      }}
+      classNames={{ content: ["items-center w-full align-center h-full"] }}
       id="navbar"
       isBlurred={false}
       maxWidth="full"

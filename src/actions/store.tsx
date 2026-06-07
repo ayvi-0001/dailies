@@ -1,22 +1,23 @@
 import { Store, StoreOptions, load } from "@tauri-apps/plugin-store";
 import { ResultAsync, err, ok } from "neverthrow";
 
-export function loadStore(path: string, options?: StoreOptions): ResultAsync<Store, Error> {
+export function loadStore(path: string, options?: Partial<StoreOptions>): ResultAsync<Store, Error> {
   return ResultAsync.fromPromise(
-    load(path, { ...options, ...{ defaults: {}, autoSave: false } }),
+    load(path, { ...{ defaults: {}, autoSave: false }, ...options }),
     (e: unknown) => new Error(`${e}`),
   );
 }
 
-export function getStore<T>(
+export function getStoreObject<T>(
   path: string,
   key: string,
-  options?: StoreOptions,
+  options?: Partial<StoreOptions>,
+  saveFirst?: boolean,
 ): ResultAsync<T, Error> {
   const store: ResultAsync<Store, Error> = loadStore(path, options);
   return store
     .map<ResultAsync<T, Error>>(async (t): Promise<ResultAsync<T, Error>> => {
-      await t.save();
+      if (saveFirst) await t.save();
       const value: Awaited<T> | undefined = await t.get<T>(key);
       if (value === undefined || value === null) {
         return err(new Error("Key not found in store."));
@@ -27,11 +28,11 @@ export function getStore<T>(
     .andThen((t) => t);
 }
 
-export function setStore<T>(
+export function setStoreObject<T>(
   path: string,
   key: string,
   value: T,
-  options?: StoreOptions,
+  options?: Partial<StoreOptions>,
 ): ResultAsync<Store, Error> {
   const store: ResultAsync<Store, Error> = loadStore(path, options);
   return store.map(async (t) => {

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { FormState } from "@/lib/forms";
 import { createSession } from "@/lib/session";
 
-import { setStore } from "./store";
+import { setStoreObject } from "./store";
 import { createUser } from "./user";
 
 export const SignupFormSchema = z
@@ -70,7 +70,7 @@ export default async function signup(
     return err({ errors: { other: [session.error.message] } } as FormState);
   }
 
-  setStore("settings.json", "stay-logged-in", { value: stayLoggedIn })
+  setStoreObject("settings.json", "stay-logged-in", { value: stayLoggedIn })
     .map<ResultAsync<void, Error>>(
       async (t): Promise<ResultAsync<void, Error>> => okAsync(await t.save()),
     )

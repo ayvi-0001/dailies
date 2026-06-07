@@ -56,7 +56,7 @@ export default function RootLayout(pages: Pages): React.ReactNode {
           <div className="fixed z-1 flex h-screen w-screen bg-transparent py-15" id="layout">
             {children}
           </div>
-          <BackgroundImage src="/images/background.png" />
+          <BackgroundImage />
         </Providers>
       </body>
     </html>

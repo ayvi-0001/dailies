@@ -2,11 +2,14 @@
 
 import * as React from "react";
 
+import { emit } from "@tauri-apps/api/event";
 import clsx from "clsx";
+import { okAsync } from "neverthrow";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useRouter } from "next/navigation";
 
 import logout from "@/actions/logout";
+import { setStoreObject } from "@/actions/store";
 import { AppMetaState, useAppMetaState } from "@/app/providers/app-meta";
 import Terminal from "@/components/ui/terminal";
 import type { TerminalCommand, TerminalContext } from "@/components/ui/terminal";
@@ -56,6 +59,14 @@ export default function DevConsole({
     {
       name: "logout",
       run: async () => logout(),
+    },
+    {
+      name: "set-bg",
+      run: async (ctx: TerminalContext) =>
+        setStoreObject("settings.json", "background", { source: ctx.args.at(0) ?? null })
+          .map(async (t) => okAsync(await t.save()))
+          .map(async () => await emit("background-changed", { source: ctx.args.at(0) ?? null }))
+          .mapErr((e) => console.log(e)),
     },
     {
       name: "change-password",

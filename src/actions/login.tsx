@@ -6,7 +6,7 @@ import { FormState } from "@/lib/forms";
 import { createSession } from "@/lib/session";
 
 import { DecodedToken, getSessionDecoded } from "./session";
-import { setStore } from "./store";
+import { setStoreObject } from "./store";
 import { verifyUser } from "./user";
 
 export const LoginFormSchema = z.object({
@@ -56,7 +56,7 @@ export default async function login(
     }
   }
 
-  setStore("settings.json", "stay-logged-in", { value: stayLoggedIn })
+  setStoreObject("settings.json", "stay-logged-in", { value: stayLoggedIn })
     .map<ResultAsync<void, Error>>(
       async (t): Promise<ResultAsync<void, Error>> => okAsync(await t.save()),
     )

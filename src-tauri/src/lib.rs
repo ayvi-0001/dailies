@@ -4,7 +4,9 @@ use tauri::Manager;
 use tokio::sync::Mutex;
 
 pub(crate) mod macros;
-crate::mod_flat!(build_info, config, dailies, data, db, errors, state, utils);
+crate::mod_flat!(
+    build_info, config, dailies, data, db, errors, state, store, utils
+);
 
 use crate::errors::AppError;
 
@@ -62,6 +64,8 @@ pub fn run() {
                 .expect("failed to get app dir");
 
             std::fs::create_dir_all(&app_dir).expect("failed to ensure app dir");
+
+            store::init_store(app.app_handle(), "settings.json")?;
 
             #[cfg(desktop)]
             {
