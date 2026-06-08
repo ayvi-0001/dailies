@@ -11,6 +11,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v0.3.1]
+
 ### Added
 
 - Override editable option on weekly/raid type quests that have passed.
