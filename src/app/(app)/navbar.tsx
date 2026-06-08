@@ -15,11 +15,19 @@ export default function App() {
     (newPathname: string): string => `${newPathname}?${searchParams.toString()}`,
     [searchParams],
   );
+  const goToRoot = React.useCallback(
+    () => router.push(getNewPath("/"), { scroll: false }),
+    [router, getNewPath],
+  );
+  const goToStats = React.useCallback(
+    () => router.push(getNewPath("/stats"), { scroll: false }),
+    [router, getNewPath],
+  );
 
   return (
     <heroui.Navbar
       isBordered
-      className="fixed inset-x-0 bottom-2 flex max-h-15 min-h-15 w-screen self-end bg-transparent"
+      className="fixed inset-x-0 bottom-2 flex max-h-15 min-h-15 w-screen self-end border-none bg-transparent"
       classNames={{ content: ["items-center w-full align-center h-full"] }}
       id="navbar"
       isBlurred={false}
@@ -28,18 +36,12 @@ export default function App() {
     >
       <heroui.NavbarContent className="" id="navbar-content" justify="center">
         <heroui.NavbarItem isActive={pathname === "/" && [...searchParams.keys()].length === 1}>
-          <heroui.Link
-            color="foreground"
-            onClick={() => router.push(getNewPath("/"), { scroll: false })}
-          >
+          <heroui.Link color="foreground" onClick={goToRoot}>
             <span className="text-xs text-white">Quests</span>
           </heroui.Link>
         </heroui.NavbarItem>
         <heroui.NavbarItem isActive={pathname === "/stats"}>
-          <heroui.Link
-            aria-current="page"
-            onClick={() => router.push(getNewPath("/stats"), { scroll: false })}
-          >
+          <heroui.Link aria-current="page" onClick={goToStats}>
             <span className="text-xs text-white">Stats</span>
           </heroui.Link>
         </heroui.NavbarItem>
