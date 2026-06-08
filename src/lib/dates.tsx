@@ -1,4 +1,10 @@
-import { CalendarDate, getLocalTimeZone, now, parseDate } from "@internationalized/date";
+import {
+  CalendarDate,
+  ZonedDateTime,
+  getLocalTimeZone,
+  now,
+  parseDate,
+} from "@internationalized/date";
 
 import { isNumeric } from "./number";
 import Utils from "./utils";
@@ -70,14 +76,12 @@ export function formatDateISO8601(date: Date | string): string {
 }
 
 export const getMsToMidnight = (): number => {
-  const currentDateTime = now(LOCAL_TZ);
+  const currentDateTime: ZonedDateTime = now(LOCAL_TZ);
   const midnight = currentDateTime
     .cycle("day", 1)
     .cycle("hour", 24 - currentDateTime.hour)
     .cycle("minute", 60 - currentDateTime.minute)
     .cycle("second", 60 - currentDateTime.second)
     .cycle("millisecond", 1000 - currentDateTime.millisecond);
-  const timeToMidnight = midnight.compare(currentDateTime);
-
-  return timeToMidnight;
+  return midnight.compare(currentDateTime);
 };

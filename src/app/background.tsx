@@ -47,18 +47,33 @@ export default function BackgroundImage(background_props: BackgroundProps): Reac
   React.useEffect(() => {
     if (src) return;
 
-    const updateTimeOfDay = async () => {
+    const updateBackground = async () => {
       getStoreObject<{ source: string | null }>("settings.json", "background")
         .map((t) => t.source ?? getTimeOfDay())
         .andTee((source) => setBackGroundImageSource(source))
         .mapErr(() => setBackGroundImageSource(getTimeOfDay()));
     };
 
-    updateTimeOfDay();
+    // Run update once before timeout.
+    updateBackground();
 
-    const interval = setInterval(updateTimeOfDay, 60 * 1000);
+    const currentDateTime = now(LOCAL_TZ);
+    const timeoutId = setTimeout(
+      () => {
+        updateBackground();
+        const intervalId = setInterval(updateBackground, 60 * 1000);
+        return () => clearInterval(intervalId);
+      },
+      // Set delay to next hour.
+      now(LOCAL_TZ)
+        .cycle("hour", 1)
+        .cycle("minute", 60 - currentDateTime.minute)
+        .cycle("second", 60 - currentDateTime.second)
+        .cycle("millisecond", 1000 - currentDateTime.millisecond)
+        .compare(currentDateTime),
+    );
 
-    return () => clearInterval(interval);
+    return () => clearTimeout(timeoutId);
   }, [src, setBackGroundImageSource]);
 
   const resolvedSrc: string = src ?? getBackgroundSrc(srcState);

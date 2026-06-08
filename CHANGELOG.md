@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Set background image update from every minute to every hour.
+
 ## [v0.3.1]
 
 ### Added
