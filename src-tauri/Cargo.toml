@@ -29,7 +29,7 @@ serde_with = "3.14.1"
 sqlite-hashes = { version = "0.10.7", default-features = false, features = ["hex", "sha1"] }
 sqlx = { version = "0.8.6", features = ["derive", "chrono", "macros", "runtime-tokio", "sqlite", "migrate"] }
 strum = { version = "0.27.2", features = ["derive"] }
-tauri = { version = "2.8.5", features = ["protocol-asset", "config-toml"] }
+tauri = { version = "2.11.2", features = ["protocol-asset", "config-toml"] }
 tauri-plugin-android-fs = "24.0.0"
 tauri-plugin-dialog = "~2.4.2"
 tauri-plugin-fs = "2.4.2"

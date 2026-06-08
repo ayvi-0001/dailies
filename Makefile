@@ -50,13 +50,13 @@ build:
 	# TODO(ayvi): move nsis/msi bundle
 
 build-android-apk-debug:
-	npm run tauri android build -- --debug --apk true
+	npm run tauri android build -- --debug --apk
 
 build-android-apk-universal-release:
-	npm run tauri android build -- --apk true
+	npm run tauri android build -- --apk
 
 build-android-apk-aarch64-release:
-	npm run tauri android build -- --apk true --target aarch64
+	npm run tauri android build -- --apk --target aarch64
 	DIST=dist/android
 	mkdir -p "$$DIST"
 	cp src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk "$$DIST/"
