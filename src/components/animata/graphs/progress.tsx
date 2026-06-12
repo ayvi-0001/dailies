@@ -41,9 +41,9 @@ export default function Progress<T>(props: ProgressProps<T>): React.ReactElement
           <div
             key={`bar_${index}`}
             className={cn("h-full w-[2px] rounded-[1px] transition-all", {
-              "bg-green-600 duration-75 group-hover:rounded group-hover:bg-zinc-50 group-active:rounded group-active:bg-zinc-50":
+              "bg-green-500 duration-75 group-hover:rounded group-hover:bg-zinc-50 group-active:rounded group-active:bg-zinc-50":
                 highlight,
-              "bg-[#404445] duration-300 group-hover:scale-75 group-hover:bg-zinc-900/15 group-active:scale-75 group-active:bg-zinc-900/15":
+              "bg-black opacity-90 duration-300 group-hover:scale-75 group-hover:bg-zinc-900/15 group-active:scale-75 group-active:bg-zinc-900/15":
                 !highlight,
             })}
             style={{
