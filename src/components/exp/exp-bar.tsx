@@ -7,6 +7,7 @@ import type { CalendarDate } from "@internationalized/date";
 import clsx, { ClassValue } from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 
+import { AppMetaState, useAppMetaState } from "@/app/providers/app-meta";
 import Progress from "@/components/animata/graphs/progress";
 import Counter from "@/components/animata/text/counter";
 import { DailiesState, useDailies } from "@/components/daily/providers/dailies";
@@ -19,6 +20,7 @@ import { Option } from "@/types/option";
 
 export default function ExpBar(): React.ReactNode {
   const dailiesState: DailiesState = useDailies();
+  const appMeta: AppMetaState = useAppMetaState();
 
   const previousTotalPointsRef = React.useRef<number | undefined>(undefined);
   const previousDateRef = React.useRef<CalendarDate>(dailiesState.date);
@@ -85,37 +87,33 @@ export default function ExpBar(): React.ReactNode {
           <heroui.Skeleton className="dark size-full rounded-sm" id="exp-bar-skeleton" />
         </div>
       ) : (
-        <div className="flex max-h-10 min-h-10 items-center gap-3 rounded pr-1 pl-2" id="exp-bar">
-          <div className="flex w-full flex-col">
-            <div className="w-full grow">
-              <Progress<number>
-                deps={[dailiesState.totalPoints, dailiesState.totalWeight]}
-                progress={percentValue ?? 0}
-              />
-            </div>
-            <div className="mt-1 flex w-full grow flex-row justify-end">
-              <span className={cn(textClass, "opacity-80")}>[</span>
-              {dailiesState.totalPoints > 0 ? (
-                <Counter
-                  className={cn(textClass, "opacity-80")}
-                  direction="up"
-                  format={(value: number): string => `${value.toFixed(2)}`}
-                  targetValue={dailiesState.totalPoints}
-                />
-              ) : (
-                <span className={cn(textClass, "opacity-80")}>0</span>
-              )}
-              <span
-                className={cn(textClass, "opacity-80")}
-              >{`/${dailiesState.totalWeight.toFixed(2)}]`}</span>
+        <div className="flex max-h-10 min-h-10 w-full flex-col px-3" id="exp-bar">
+          <Progress<Option<number>>
+            deps={[dailiesState.totalPoints, dailiesState.totalWeight, appMeta.width]}
+            progress={percentValue ?? 0}
+          />
+          <div className="mt-1 flex w-full grow flex-row justify-end">
+            <span className={cn(textClass, "opacity-80")}>[</span>
+            {dailiesState.totalPoints > 0 ? (
               <Counter
-                className={cn(textClass, "px-1")}
+                className={cn(textClass, "opacity-80")}
                 direction="up"
-                format={(value: number): string => `${value.toFixed(2)}%`}
-                springOptions={{ damping: 10, stiffness: 80 }}
-                targetValue={percentValue ?? 0}
+                format={(value: number): string => `${value.toFixed(2)}`}
+                targetValue={dailiesState.totalPoints}
               />
-            </div>
+            ) : (
+              <span className={cn(textClass, "opacity-80")}>0</span>
+            )}
+            <span
+              className={cn(textClass, "opacity-80")}
+            >{`/${dailiesState.totalWeight.toFixed(2)}]`}</span>
+            <Counter
+              className={cn(textClass, "px-1")}
+              direction="up"
+              format={(value: number): string => `${value.toFixed(2)}%`}
+              springOptions={{ damping: 10, stiffness: 80 }}
+              targetValue={percentValue ?? 0}
+            />
           </div>
         </div>
       )}
