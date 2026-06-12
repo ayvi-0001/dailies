@@ -34,10 +34,10 @@ import {
   ListChevronsDownUpIcon,
   ListChevronsUpDownIcon,
   ListFilterIcon,
-  ScrollTextIcon,
 } from "lucide-react";
 
 import { User } from "@/app/providers/user";
+import { AppIcon } from "@/components/svgs";
 import { LOCAL_TZ } from "@/lib/dates";
 import { roundTo } from "@/lib/number";
 import { invoke } from "@/lib/tauri";
@@ -80,13 +80,10 @@ export function QuestsHeader(props: QuestsHeaderProps): React.ReactNode {
   } = props;
 
   return (
-    <div
-      className="bg-opacity-60 relative mx-2 h-9 bg-slate-400/80 bg-blend-overlay select-none"
-      id="dailies-list-header"
-    >
+    <div className="relative mx-2 h-9 bg-[#d2d2e6]/80 select-none" id="dailies-list-header">
       <div className="flex flex-row items-center justify-items-stretch gap-2">
-        <div className="box-content flex aspect-square size-9 place-items-center justify-items-center bg-yellow-400 shadow-md">
-          <ScrollTextIcon className="size-8 w-full opacity-20" />
+        <div className="box-content flex aspect-square size-9 place-items-center justify-center bg-[#9146ff]/80 shadow-md">
+          <AppIcon className="flex size-8" />
         </div>
         <div className="flex grow">
           <p className="text-xl leading-none font-bold text-black text-shadow-md">{title}</p>
@@ -244,7 +241,7 @@ function QuestChain(props: QuestChainProps): React.ReactElement {
         classNames={{
           base: "px-0 shadow-medium rounded-medium relative bg-transparent items-center",
           startContent:
-            "flex max-w-full min-w-full items-center border-3 border-[#ece5d8] bg-[#2d3b4a]/70",
+            "flex max-w-full min-w-full items-center border-3 border-[#f0f0ff]/80 bg-[#2d3b4a]/70",
           indicator: "z-11 justify-self-start absolute ml-4",
           content: "bg-white/20 py-4 place-content-center px-4",
           heading: "leading-none",
@@ -440,9 +437,10 @@ function QuestListDatePicker(props: QuestListDatePickerProps): React.ReactElemen
   return (
     <heroui.DatePicker
       aria-label="quest list date picker"
-      className="dark"
+      className="dark bg-none"
       classNames={{
-        inputWrapper: "w-fit bg-transparent hover:bg-transparent focus-within:hover:bg-transparent",
+        inputWrapper:
+          "w-fit bg-transparent shadow-none hover:bg-transparent focus-within:hover:bg-transparent",
         segment:
           "text-xs font-bold text-black transition-colors focus:bg-slate-900/40 data-[editable=true]:text-black data-[editable=true]:focus:text-black data-[editable=true]:data-[placeholder=true]:text-black",
         calendarContent: "dark",
@@ -459,7 +457,7 @@ function QuestListDatePicker(props: QuestListDatePickerProps): React.ReactElemen
           size={18}
           stroke={clsx(
             listDate.compare(currentDate) !== 0 && "#000000",
-            listDate.compare(currentDate) === 0 && "#fcc800",
+            listDate.compare(currentDate) === 0 && "#9146ff",
           )}
         />
       }

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" zoomAndPan="magnify"
+    viewBox="0 0 384 391.91998" height="512" preserveAspectRatio="xMidYMid meet" version="1.0">
+    <defs>
+        <clipPath id="73905e44ef">
+            <path
+                d="M 86.421875 86.382812 L 297.578125 86.382812 L 297.578125 297.539062 L 86.421875 297.539062 Z M 86.421875 86.382812 "
+                clip-rule="nonzero" />
+        </clipPath>
+        <clipPath id="5c9be05797">
+            <path d="M 192 86.382812 L 297.578125 191.960938 L 192 297.539062 L 86.421875 191.960938 Z M 192 86.382812 "
+                clip-rule="nonzero" />
+        </clipPath>
+        <clipPath id="ab4ae059c3">
+            <path
+                d="M 0.421875 0.382812 L 211.578125 0.382812 L 211.578125 211.539062 L 0.421875 211.539062 Z M 0.421875 0.382812 "
+                clip-rule="nonzero" />
+        </clipPath>
+        <clipPath id="7e438fb517">
+            <path d="M 106 0.382812 L 211.578125 105.960938 L 106 211.539062 L 0.421875 105.960938 Z M 106 0.382812 "
+                clip-rule="nonzero" />
+        </clipPath>
+        <clipPath id="97b9da9a66">
+            <rect x="0" width="212" y="0" height="212" />
+        </clipPath>
+    </defs>
+    <g clip-path="url(#73905e44ef)">
+        <g clip-path="url(#5c9be05797)">
+            <g transform="matrix(1, 0, 0, 1, 86, 86)">
+                <g clip-path="url(#97b9da9a66)">
+                    <g clip-path="url(#ab4ae059c3)">
+                        <g clip-path="url(#7e438fb517)">
+                            <path fill="#000000"
+                                d="M 0.421875 0.382812 L 211.578125 0.382812 L 211.578125 211.539062 L 0.421875 211.539062 Z M 0.421875 0.382812 "
+                                fill-opacity="1" fill-rule="nonzero" />
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

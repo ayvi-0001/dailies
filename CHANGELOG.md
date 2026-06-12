@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Replaced default App Icon.
+
 ### Fixed
 
 - Set background image update from every minute to every hour.

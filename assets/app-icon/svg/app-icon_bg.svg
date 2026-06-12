@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" zoomAndPan="magnify"
+    viewBox="0 0 384 391.91998" height="512" preserveAspectRatio="xMidYMid meet" version="1.0">
+    <defs>
+        <clipPath id="43313320ca">
+            <path
+                d="M 38.429688 38.390625 L 345.570312 38.390625 L 345.570312 345.53125 L 38.429688 345.53125 Z M 38.429688 38.390625 "
+                clip-rule="nonzero" />
+        </clipPath>
+        <clipPath id="e2402633ab">
+            <path
+                d="M 192 38.390625 C 107.1875 38.390625 38.429688 107.148438 38.429688 191.960938 C 38.429688 276.773438 107.1875 345.53125 192 345.53125 C 276.8125 345.53125 345.570312 276.773438 345.570312 191.960938 C 345.570312 107.148438 276.8125 38.390625 192 38.390625 Z M 192 38.390625 "
+                clip-rule="nonzero" />
+        </clipPath>
+        <clipPath id="ffbc741df7">
+            <path
+                d="M 0.429688 0.390625 L 307.570312 0.390625 L 307.570312 307.53125 L 0.429688 307.53125 Z M 0.429688 0.390625 "
+                clip-rule="nonzero" />
+        </clipPath>
+        <clipPath id="c26c0a7e83">
+            <path
+                d="M 154 0.390625 C 69.1875 0.390625 0.429688 69.148438 0.429688 153.960938 C 0.429688 238.773438 69.1875 307.53125 154 307.53125 C 238.8125 307.53125 307.570312 238.773438 307.570312 153.960938 C 307.570312 69.148438 238.8125 0.390625 154 0.390625 Z M 154 0.390625 "
+                clip-rule="nonzero" />
+        </clipPath>
+        <clipPath id="2b350856bd">
+            <rect x="0" width="308" y="0" height="308" />
+        </clipPath>
+    </defs>
+    <g clip-path="url(#43313320ca)">
+        <g clip-path="url(#e2402633ab)">
+            <g transform="matrix(1, 0, 0, 1, 38, 38)">
+                <g clip-path="url(#2b350856bd)">
+                    <g clip-path="url(#ffbc741df7)">
+                        <g clip-path="url(#c26c0a7e83)">
+                            <path fill="#9146ff"
+                                d="M 0.429688 0.390625 L 307.570312 0.390625 L 307.570312 307.53125 L 0.429688 307.53125 Z M 0.429688 0.390625 "
+                                fill-opacity="1" fill-rule="nonzero" />
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
