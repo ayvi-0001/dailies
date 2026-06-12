@@ -15,10 +15,12 @@ import { motion } from "motion/react";
 import { Result, ResultAsync } from "neverthrow";
 import { CloneElement } from "reablocks";
 
+import { VisualsClassNames } from "@/app/(app)/@stats/chart";
 import { type User, useUser } from "@/app/providers/user";
 import { DailiesState, useDailies } from "@/components/daily/providers/dailies";
 import { LOCAL_TZ } from "@/lib/dates";
 import { invoke } from "@/lib/tauri";
+import { cn } from "@/lib/utils";
 import { Option } from "@/types/option";
 import { UseBoolean } from "@/types/props";
 
@@ -31,7 +33,11 @@ const LEGEND_SCALE_DATA: reaviz.ChartShallowDataShape[] = [
   { key: "max", data: HEATMAP_SCALE_MAX },
 ];
 
-export default function DailiesHeatmap(): React.ReactElement {
+type DailiesHeatmapProps = {
+  classNames?: VisualsClassNames;
+};
+
+export default function DailiesHeatmap(props: DailiesHeatmapProps): React.ReactElement {
   const dailiesState: DailiesState = useDailies();
   const todayDate: CalendarDate = React.useMemo(() => today(LOCAL_TZ), []);
 
@@ -125,7 +131,7 @@ export default function DailiesHeatmap(): React.ReactElement {
   ]);
 
   return (
-    <div className="mx-5 h-80">
+    <div className={cn("mx-5 h-80", props.classNames?.bg, props.classNames?.outline)}>
       <div className="mb-2 flex flex-col items-center">
         <p className="self-center text-xs font-bold text-[#f0f0ff]">Year Filter</p>
         <heroui.Select

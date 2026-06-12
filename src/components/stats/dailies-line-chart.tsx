@@ -11,14 +11,20 @@ import clsx from "clsx";
 import { CalendarCogIcon } from "lucide-react";
 import { Result, ResultAsync } from "neverthrow";
 
+import { VisualsClassNames } from "@/app/(app)/@stats/chart";
 import { type User, useUser } from "@/app/providers/user";
 import { DailiesState, useDailies } from "@/components/daily/providers/dailies";
 import { LOCAL_TZ } from "@/lib/dates";
 import { invoke } from "@/lib/tauri";
+import { cn } from "@/lib/utils";
 import { Option } from "@/types/option";
 import { UseBoolean } from "@/types/props";
 
-export default function DailiesLineChart(): React.ReactElement {
+type DailiesLineChartProps = {
+  classNames?: VisualsClassNames;
+};
+
+export default function DailiesLineChart(props: DailiesLineChartProps): React.ReactElement {
   const todayDate: CalendarDate = today(LOCAL_TZ);
   const dailiesState: DailiesState = useDailies();
 
@@ -100,7 +106,7 @@ export default function DailiesLineChart(): React.ReactElement {
   );
 
   return (
-    <div className="mx-5 h-80">
+    <div className={cn("mx-5 h-full", props.classNames?.bg, props.classNames?.outline)}>
       <div className="mb-5 flex flex-row items-center text-sm">
         <div className="mb-5 flex flex-col items-center text-sm">
           <p className="self-center text-xs font-bold text-[#f0f0ff]">Date Range</p>
