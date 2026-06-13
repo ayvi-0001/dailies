@@ -59,7 +59,7 @@ export default function Modal(): React.ReactElement {
         function modalContent() {
           return (
             <>
-              <heroui.ModalHeader {...moveProps} className="text-md justify-self-center">
+              <heroui.ModalHeader {...moveProps} className="text-md justify-center">
                 Quest Chains
               </heroui.ModalHeader>
               <heroui.ModalBody className="h-fit w-full overflow-hidden bg-black/90 text-white">

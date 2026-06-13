@@ -25,16 +25,23 @@ export default function App(): React.ReactElement {
       );
       return <Modal />;
     }
-    case ModalParam.QuestChains: {
+    case ModalParam.Settings: {
       const Modal: React.ComponentType = dynamic(
-        () => import(`./quest-chains`).then((mod) => mod.default),
+        () => import(`./settings`).then((mod) => mod.default),
         { ssr: false },
       );
       return <Modal />;
     }
-    case ModalParam.Settings: {
+    case ModalParam.QuestTypes: {
       const Modal: React.ComponentType = dynamic(
-        () => import(`./settings`).then((mod) => mod.default),
+        () => import(`./quest-types`).then((mod) => mod.default),
+        { ssr: false },
+      );
+      return <Modal />;
+    }
+    case ModalParam.QuestChains: {
+      const Modal: React.ComponentType = dynamic(
+        () => import(`./quest-chains`).then((mod) => mod.default),
         { ssr: false },
       );
       return <Modal />;

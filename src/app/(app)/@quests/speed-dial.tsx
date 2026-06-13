@@ -6,6 +6,7 @@ import { exit } from "@tauri-apps/plugin-process";
 import {
   BookMarkedIcon,
   BookPlusIcon,
+  BookTypeIcon,
   BookUserIcon,
   BoxIcon,
   CircleXIcon,
@@ -38,6 +39,13 @@ export default function App(): React.ReactElement {
       key: "settings",
       buttonAction: () =>
         updateParam(router, searchParams, [{ key: "modal", value: ModalParam.Settings }]),
+    },
+    {
+      icon: <BookTypeIcon size={14} stroke="#f0f0ff" />,
+      label: <p className="text-xs">Quest Types</p>,
+      key: "quest-types",
+      buttonAction: () =>
+        updateParam(router, searchParams, [{ key: "modal", value: ModalParam.QuestTypes }]),
     },
     {
       icon: <BookMarkedIcon size={14} stroke="#f0f0ff" />,

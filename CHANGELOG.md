@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Quest Type information modal.
+
 ### Changed
 
 - Replaced default App Icon.
