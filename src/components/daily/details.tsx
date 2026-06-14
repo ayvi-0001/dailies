@@ -81,34 +81,36 @@ export default function Details(props: DetailsProps): React.ReactElement {
     }
   }, [daily.date, daily.questId, daily.requirements, daily.type, daily.archived, daily.points]);
 
-  const description = React.useRef<React.ReactElement>(<> </>);
+  const description = React.useMemo(() => {
+    let text: React.ReactNode = null;
+    if (weeklyQuestStats)
+      text = (
+        <span>
+          {nextRequiredCompletionDate.current && (
+            <>
+              <span>Next req. date: {`${nextRequiredCompletionDate.current} `}</span>
+              <br></br>
+            </>
+          )}
+          <span>Last completed: {`${weeklyQuestStats?.latestCompleteDate} `}</span>
+          <br></br>
+          <span>Weekly points: {`${weeklyQuestStats?.rollingPoints} `}</span>
+        </span>
+      );
+    else text = descriptionContent == "note" ? daily.note : daily.description;
 
-  let text: React.ReactNode = null;
-  if (weeklyQuestStats)
-    text = (
-      <span>
-        {nextRequiredCompletionDate.current && (
-          <>
-            <span>Next req. date: {`${nextRequiredCompletionDate.current} `}</span>
-            <br></br>
-          </>
-        )}
-        <span>Last completed: {`${weeklyQuestStats?.latestCompleteDate} `}</span>
-        <br></br>
-        <span>Weekly points: {`${weeklyQuestStats?.rollingPoints} `}</span>
-      </span>
-    );
-  else text = descriptionContent == "note" ? daily.note : daily.description;
-
-  description.current = (
-    <PopoverText
-      maxLines={2}
-      popoverContentProps={{ className: "rounded-none border-1 border-white bg-black/60" }}
-      popoverTextProps={{ className: "text-xs text-white" }}
-      text={text}
-      textClassValue={cn("pt-[2] text-[0.60rem]", textClassValue)}
-    />
-  );
+    if (text === "") return text;
+    else
+      return (
+        <PopoverText
+          maxLines={2}
+          popoverContentProps={{ className: "rounded-none border-1 border-white bg-black/60" }}
+          popoverTextProps={{ className: "text-xs text-white" }}
+          text={text}
+          textClassValue={cn("pt-[2] text-[0.60rem]", textClassValue)}
+        />
+      );
+  }, [daily.description, daily.note, descriptionContent, weeklyQuestStats]);
 
   const elements: React.ReactElement[] = [];
 
@@ -128,7 +130,7 @@ export default function Details(props: DetailsProps): React.ReactElement {
         </div>
       </div>
       <heroui.Divider />
-      {description.current}
+      {description}
     </>
   );
 }
