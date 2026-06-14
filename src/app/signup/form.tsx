@@ -35,13 +35,14 @@ export default function SignupForm(): React.ReactElement {
       </div>
       <heroui.Form
         action={action}
-        className="flex flex-col gap-3"
+        className="flex flex-col gap-3 text-sm"
         style={{
           WebkitUserSelect: "none",
           MozUserSelect: "none",
           msUserSelect: "none",
           userSelect: "none",
         }}
+        validationBehavior="native"
       >
         <heroui.Input
           fullWidth
@@ -49,7 +50,7 @@ export default function SignupForm(): React.ReactElement {
           aria-autocomplete="none"
           classNames={{
             inputWrapper:
-              "rounded-b-none data-[hover=true]:z-10 group-data-[focus-visible=true]:z-10",
+              "rounded-b-none data-[hover=true]:z-10 group-data-[focus-visible=true]:z-10 border-medium border-slate-400 data-[hover=true]:border-white group-data-[focus=true]:border-slate-300",
           }}
           label="Username"
           name="username"
@@ -62,7 +63,7 @@ export default function SignupForm(): React.ReactElement {
           classNames={{
             input: "text-sm",
             inputWrapper:
-              "rounded-none data-[hover=true]:z-10 group-data-[focus-visible=true]:z-10",
+              "rounded-none data-[hover=true]:z-10 group-data-[focus-visible=true]:z-10 border-medium border-slate-400 data-[hover=true]:border-white group-data-[focus=true]:border-slate-300",
           }}
           isVisible={passwordVisibility.value}
           label="Password"
@@ -74,7 +75,8 @@ export default function SignupForm(): React.ReactElement {
         <PasswordField
           classNames={{
             input: "text-sm",
-            inputWrapper: "rounded-t-none",
+            inputWrapper:
+              "rounded-t-none data-[hover=true]:z-10 group-data-[focus-visible=true]:z-10 border-medium border-slate-400 data-[hover=true]:border-white group-data-[focus=true]:border-slate-300",
           }}
           isVisible={confirmPasswordVisibility.value}
           label="Confirm Password"
@@ -85,6 +87,9 @@ export default function SignupForm(): React.ReactElement {
         <FormFieldErrors formKey="currentPassword" state={state} />
         <heroui.Checkbox
           className="place-self-center"
+          classNames={{
+            wrapper: "bg-default-700 group-data-[hover=true]:before:bg-default-500",
+          }}
           isSelected={stayLoggedIn.value}
           name="remember"
           size="sm"
@@ -105,7 +110,7 @@ export default function SignupForm(): React.ReactElement {
       <div className="flex items-center py-2">
         <heroui.Divider className="flex-1" />
       </div>
-      <p className="text-center text-sm text-[#f0f0ff]/50">
+      <p className="text-default-500 text-center text-sm">
         Already have an account?&nbsp;
         <heroui.Link href="/login" size="sm">
           Log In

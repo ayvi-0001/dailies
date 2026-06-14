@@ -27,22 +27,29 @@ export default function LoginForm(): React.ReactElement {
   React.useEffect(() => loading.setValue(pending), [loading, pending]);
 
   return (
-    <div className="rounded-large flex w-full max-w-sm flex-col gap-4">
+    <div className="rounded-large flex w-full max-w-sm flex-col gap-4 text-[#f0f0ff]">
       <div className="flex w-full flex-col items-center pb-6">
-        <p className="text-default-500 text-xl font-medium">Welcome Back</p>
-        <p className="text-small text-default-500">Log in to continue</p>
+        <p className="text-xl font-medium">Welcome Back</p>
+        <p className="text-default-500 text-sm">Log in to continue</p>
       </div>
       <heroui.Form
         action={action}
-        className="flex flex-col gap-3 text-sm text-[#f0f0ff]"
+        className="flex flex-col gap-3"
+        style={{
+          WebkitUserSelect: "none",
+          MozUserSelect: "none",
+          msUserSelect: "none",
+          userSelect: "none",
+        }}
         validationBehavior="native"
       >
         <heroui.Input
+          fullWidth
           isRequired
           aria-autocomplete="none"
           classNames={{
             inputWrapper:
-              "rounded-none data-[hover=true]:z-10 group-data-[focus-visible=true]:z-10",
+              "rounded-none data-[hover=true]:z-10 group-data-[focus-visible=true]:z-10 border-medium border-slate-400 data-[hover=true]:border-white group-data-[focus=true]:border-slate-300",
           }}
           label="Username"
           name="username"
@@ -54,7 +61,8 @@ export default function LoginForm(): React.ReactElement {
         <PasswordField
           classNames={{
             input: "text-sm",
-            inputWrapper: "rounded-none",
+            inputWrapper:
+              "rounded-none data-[hover=true]:z-10 group-data-[focus-visible=true]:z-10 border-medium border-slate-400 data-[hover=true]:border-white group-data-[focus=true]:border-slate-300",
           }}
           isVisible={passwordVisibility.value}
           label="Password"
@@ -65,6 +73,9 @@ export default function LoginForm(): React.ReactElement {
         <FormFieldErrors formKey="password" state={state} />
         <heroui.Checkbox
           className="place-self-center"
+          classNames={{
+            wrapper: "bg-default-700 group-data-[hover=true]:before:bg-default-500",
+          }}
           isSelected={stayLoggedIn.value}
           name="remember"
           size="sm"
@@ -85,7 +96,7 @@ export default function LoginForm(): React.ReactElement {
       <div className="flex items-center py-2">
         <heroui.Divider className="flex-1" />
       </div>
-      <p className="text-small text-center text-white/50">
+      <p className="text-default-500 text-center text-sm">
         Need to create an account?&nbsp;
         <heroui.Link href="/signup" size="sm">
           Sign up
