@@ -24,7 +24,7 @@ export type UseUserParams = {
   fallbackPath: string;
 };
 
-const UserContext = React.createContext<Result<Option<User>, Error>>(
+export const UserContext = React.createContext<Result<Option<User>, Error>>(
   err(new Error("User state was used outside of its Provider")),
 );
 
