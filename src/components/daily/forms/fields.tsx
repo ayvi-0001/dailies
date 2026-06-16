@@ -116,9 +116,9 @@ export function WeightField({ daily }: { daily?: Daily }): React.ReactElement {
       isRequired
       className="text-sm text-white"
       classNames={{ innerWrapper: "text-xs" }}
-      defaultValue={daily?.weight ?? 1}
+      defaultValue={daily ? daily.weight : 0}
       label="Weight"
-      minValue={1}
+      minValue={0.0001}
       name="weight"
       radius="none"
       type="number"
