@@ -196,6 +196,8 @@ export function StreakTargetField({ daily }: { daily?: Daily }): React.ReactElem
   );
 }
 
+const timeFieldClassNames = { innerWrapper: "text-xs", errorMessage: "text-wrap" } as const;
+
 type TimeStartFieldProps = {
   timeStart: Option<Time>;
   setTimeStartAction: React.Dispatch<React.SetStateAction<Option<Time>>>;
@@ -209,7 +211,7 @@ export function TimeStartField(props: TimeStartFieldProps): React.ReactElement {
     <heroui.TimeInput
       isRequired
       className="text-sm text-white"
-      classNames={{ innerWrapper: "text-xs" }}
+      classNames={{ ...timeFieldClassNames }}
       errorMessage={(_: ValidationResult) => mapErrors(timeStartErrors)}
       isInvalid={timeStartErrors?.length > 0}
       label="Start"
@@ -235,7 +237,7 @@ export function TimeEndField(props: TimeEndFieldProps): React.ReactElement {
     <heroui.TimeInput
       isRequired
       className="text-sm text-white"
-      classNames={{ innerWrapper: "text-xs" }}
+      classNames={{ ...timeFieldClassNames }}
       errorMessage={(_: ValidationResult) => mapErrors(timeEndErrors)}
       isInvalid={timeEndErrors?.length > 0}
       label="End"
@@ -403,11 +405,13 @@ export function DaysField(props: DaysFieldProps): React.ReactElement {
 }
 
 const mapErrors = (errArr: React.ReactNode[]): React.ReactElement => (
-  <ul>
-    {errArr.map((error, i) => (
-      <li key={i} className="text-xs text-red-500">
-        {error}
-      </li>
-    ))}
-  </ul>
+  <div className="min-w-0 flex-1">
+    <ul>
+      {errArr.map((error, i) => (
+        <li key={i} className="text-xs text-red-500">
+          {error}
+        </li>
+      ))}
+    </ul>
+  </div>
 );
