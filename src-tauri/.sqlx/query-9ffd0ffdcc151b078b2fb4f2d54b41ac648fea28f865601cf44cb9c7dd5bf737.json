@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT DISTINCT FIRST_VALUE(date) OVER(\n                PARTITION BY quest_id\n                ORDER BY\n                    CASE WHEN date IS NULL THEN 1 ELSE 0 END,\n                    CASE WHEN complete = 1 THEN 0 ELSE 1 END,\n                    date desc) AS \"last_complete_date!: NaiveDate\"\n            FROM\n                \"dailies\"\n            WHERE\n                quest_id = $1\n            LIMIT 1;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "last_complete_date!: NaiveDate",
+        "ordinal": 0,
+        "type_info": "Null"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "9ffd0ffdcc151b078b2fb4f2d54b41ac648fea28f865601cf44cb9c7dd5bf737"
+}

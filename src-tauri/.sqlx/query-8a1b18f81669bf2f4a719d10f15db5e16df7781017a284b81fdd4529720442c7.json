@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE \"dailies\" SET total = $3 WHERE quest_id = $1 AND point_id = $2;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "8a1b18f81669bf2f4a719d10f15db5e16df7781017a284b81fdd4529720442c7"
+}

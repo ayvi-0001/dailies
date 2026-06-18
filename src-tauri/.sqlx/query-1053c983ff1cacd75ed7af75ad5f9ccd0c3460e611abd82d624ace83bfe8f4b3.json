@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT \"boolean\" AS \"boolean!: bool\" FROM \"config\" WHERE user_id = $1 AND key = $2;",
+  "describe": {
+    "columns": [
+      {
+        "name": "boolean!: bool",
+        "ordinal": 0,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "1053c983ff1cacd75ed7af75ad5f9ccd0c3460e611abd82d624ace83bfe8f4b3"
+}

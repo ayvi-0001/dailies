@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                    WITH RECURSIVE date_range(\"date\") AS (\n                      VALUES(DATE(DATE(CURRENT_TIMESTAMP, 'localtime'), 'start of year'))\n                      UNION ALL\n                      SELECT DATE(\"date\", '+1 day')\n                      FROM\n                        date_range\n                      WHERE\n                        \"date\" < DATE(DATE(CURRENT_TIMESTAMP, 'localtime'), 'start of year', '+12 months', '-1 day')\n                    )\n                    SELECT SUM(d.points_weighted) / SUM(d.weight) AS \"value: f64\"\n                    FROM\n                      date_range dr\n                    LEFT JOIN\n                        \"dailies\" d\n                    ON\n                        d.date = dr.date\n                    WHERE\n                        user = $1\n                        AND points IS NOT NULL\n                    GROUP BY\n                        dr.date\n                    ORDER BY\n                        dr.date DESC;\n                ",
+  "describe": {
+    "columns": [
+      {
+        "name": "value: f64",
+        "ordinal": 0,
+        "type_info": "Null"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "c5d48973f7767efd564eda157d3363bf1886f8b4e8ab1532f9a9d57b2dba0ce8"
+}

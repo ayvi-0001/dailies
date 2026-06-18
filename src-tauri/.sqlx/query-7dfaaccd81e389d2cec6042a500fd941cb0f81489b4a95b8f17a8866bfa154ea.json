@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE \"dailies\" SET note = $1 WHERE point_id = $2;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "7dfaaccd81e389d2cec6042a500fd941cb0f81489b4a95b8f17a8866bfa154ea"
+}

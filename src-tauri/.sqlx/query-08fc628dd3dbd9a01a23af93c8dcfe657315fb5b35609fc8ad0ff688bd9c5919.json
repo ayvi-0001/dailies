@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE \"dailies\" SET archived = $1 WHERE quest_id = $2;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "08fc628dd3dbd9a01a23af93c8dcfe657315fb5b35609fc8ad0ff688bd9c5919"
+}

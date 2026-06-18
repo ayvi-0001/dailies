@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT \"float\" AS \"float!: f64\" FROM \"config\" WHERE user_id = $1 AND key = $2;",
+  "describe": {
+    "columns": [
+      {
+        "name": "float!: f64",
+        "ordinal": 0,
+        "type_info": "Float"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "106f3938175048e30599265cf55a38f2e4ad957269065ccb3d46263cea303dfc"
+}

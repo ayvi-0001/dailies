@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, name, created, updated FROM \"users\" WHERE name = $1 LIMIT 1;",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "created",
+        "ordinal": 2,
+        "type_info": "Datetime"
+      },
+      {
+        "name": "updated",
+        "ordinal": 3,
+        "type_info": "Datetime"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ff49cd4e731a086f7e1a40952c010e2e96025e02250edc17dd1e4ebfa6dd9a83"
+}

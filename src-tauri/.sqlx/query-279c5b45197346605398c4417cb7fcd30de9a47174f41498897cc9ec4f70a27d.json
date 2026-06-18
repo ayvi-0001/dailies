@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                INSERT OR IGNORE INTO \"quests\"(\n                    id,\n                    user_id,\n                    sequence,\n                    chain,\n                    name,\n                    type_id,\n                    weight,\n                    total,\n                    default_points,\n                    accepted,\n                    archived,\n                    streak_target,\n                    requirements,\n                    time_start,\n                    time_end,\n                    days,\n                    description,\n                    updated\n                )\n                VALUES (\n                    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18\n                );\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 18
+    },
+    "nullable": []
+  },
+  "hash": "279c5b45197346605398c4417cb7fcd30de9a47174f41498897cc9ec4f70a27d"
+}

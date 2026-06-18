@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                    UPDATE \"quests\" AS q\n                    SET\n                        sequence = n.row_n\n                    FROM (\n                        SELECT id, ROW_NUMBER() OVER(PARTITION BY user_id, chain ORDER BY q.sequence, q.updated ASC) row_n\n                        FROM\n                            quests q\n                        WHERE\n                            chain = $1\n                            AND user_id = $2\n                        ORDER BY\n                            chain,\n                            row_n\n                    ) AS n\n                    WHERE\n                        n.id = q.id;\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "9aad2aa43d7340241526cbbd97d9d0145dcf8093b0135308953a1992b33a86a1"
+}

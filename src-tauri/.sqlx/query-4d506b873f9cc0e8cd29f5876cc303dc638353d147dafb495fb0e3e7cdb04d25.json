@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                SELECT DISTINCT date\n                FROM \"points\"\n                LEFT JOIN\n                    \"quests\"\n                ON\n                    \"quests\".id = \"points\".quest_id\n                WHERE\n                    \"quests\".user_id  = $1\n                ORDER BY\n                    date DESC\n                LIMIT 1 OFFSET 1;\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "date",
+        "ordinal": 0,
+        "type_info": "Date"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4d506b873f9cc0e8cd29f5876cc303dc638353d147dafb495fb0e3e7cdb04d25"
+}

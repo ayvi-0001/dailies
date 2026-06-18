@@ -1,0 +1,44 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT\n              id AS \"id!: i64\",\n              user_id AS \"user_id!: i64\",\n              chain AS \"chain!: String\",\n              sequence AS \"sequence!: i64\",\n              collapsed AS \"collapsed!: bool\"\n            FROM\n              \"quest_chains\"\n            WHERE\n              user_id = $1\n            ORDER BY\n              sequence;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!: i64",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "user_id!: i64",
+        "ordinal": 1,
+        "type_info": "Integer"
+      },
+      {
+        "name": "chain!: String",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "sequence!: i64",
+        "ordinal": 3,
+        "type_info": "Integer"
+      },
+      {
+        "name": "collapsed!: bool",
+        "ordinal": 4,
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "1028916315d4edff5478e61a88d3d6042a47285788e53b228e9459fbc4d1cc9e"
+}

@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT\n                id,\n                sequence\n            FROM\n                \"quests\"\n            WHERE\n                chain = $1\n                AND user_id = $2\n            ORDER BY\n                sequence;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "sequence",
+        "ordinal": 1,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "13e767d027ca244d2a395eddb8931ad4f6c0a3201f36695cdefba00e2995409c"
+}

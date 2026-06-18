@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE \"quest_chains\" SET collapsed = $1 WHERE user_id = $2 AND chain = $3;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "fef4c3fd225e5ce7aba402dcacc6827a6a337f2deb1e9617d8cb542530c6ff39"
+}

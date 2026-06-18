@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE \"quests\" SET type_id = $1 WHERE id = $2;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "a6be8deeada875f81c9188b552a56ac14bc78c6bf0ce51b56fe5b9d48151b697"
+}

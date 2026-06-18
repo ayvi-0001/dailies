@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO \"config\" (\"user_id\", \"key\", \"type\", \"boolean\")\nVALUES\n  ($1, 'quest-list--is-archived-quests-filtered', 0, FALSE),\n  ($1, 'quest-list--is-completed-quests-filtered', 0, FALSE),\n  ($1, 'quest-list--is-optional-quests-filtered', 0, FALSE),\n  ($1, 'quest-list--is-quest-chains-collapsed', 0, FALSE)\n;\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "2f5193ead1aa7931a1560c9a576e38449041089430076aeb285a69db75a0e982"
+}

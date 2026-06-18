@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT collapsed AS \"collapsed!: bool\" FROM \"quest_chains\" WHERE user_id = $1 AND chain = $2;",
+  "describe": {
+    "columns": [
+      {
+        "name": "collapsed!: bool",
+        "ordinal": 0,
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "4246405850431bfa81192a0a7619935f872d89cacf6bf44a90dbbeb49c1ff866"
+}

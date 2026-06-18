@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                UPDATE \"quest_chains\"\n                SET sequence = $1\n                WHERE id = $2;\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "3823f787952ee0c72f4e674f0ed162f272a0e0ff1a1c033c306ea57fe30431b9"
+}

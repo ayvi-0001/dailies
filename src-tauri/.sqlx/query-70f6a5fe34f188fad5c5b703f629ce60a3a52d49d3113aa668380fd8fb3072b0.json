@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE \"dailies\" SET streak_target = NULL WHERE quest_id = $1 AND point_id = $2;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "70f6a5fe34f188fad5c5b703f629ce60a3a52d49d3113aa668380fd8fb3072b0"
+}

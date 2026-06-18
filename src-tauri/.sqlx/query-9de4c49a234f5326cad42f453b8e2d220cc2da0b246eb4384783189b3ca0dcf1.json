@@ -1,0 +1,56 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            WITH dailies_L AS (\n              SELECT\n                date,\n                quest_id,\n                point_id,\n                requirements,\n                LAST_VALUE(CASE WHEN complete = 1 THEN date ELSE NULL END) OVER(\n                  PARTITION BY quest_id ORDER BY date DESC\n                ) AS last_complete_date\n              FROM\n                \"dailies\"\n              WHERE\n                quest_id = $1\n              ),\n              weekly_sum_requirements as (\n                SELECT\n                  point_id,\n                  date,\n                  SUM(CASE WHEN points IS NOT NULL THEN points ELSE 0 END) OVER(ORDER BY date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS weekly_sum_rolling\n                FROM\n                  \"dailies\"\n                WHERE\n                  quest_id = $1\n              )\n            SELECT\n              \"d\".date AS \"date!: NaiveDate\",\n              \"d\".quest_id AS \"quest_id!: String\",\n              \"d\".point_id AS \"point_id!: String\",\n              CAST(\"d\".requirements ->> '$' AS REAL) AS \"requirements!: f64\",\n              (\n                SELECT MAX(last_complete_date)\n                FROM\n                  \"dailies_L\"\n                WHERE\n                  quest_id = \"d\".quest_id\n                  AND date <= \"d\".date\n              ) AS \"latest_complete_date!: Option<NaiveDate>\",\n              \"wsr\".weekly_sum_rolling AS \"rolling_points!: f64\",\n              \"wsr\".weekly_sum_rolling >= CAST(\"d\".requirements ->> '$' AS REAL) AS \"is_weekly_requirement_complete!: bool\"\n            FROM\n              \"dailies_L\" AS \"d\"\n            LEFT JOIN\n            \tweekly_sum_requirements \"wsr\"\n            ON\n              \"d\".point_id = \"wsr\".point_id\n              AND \"wsr\".date >= DATE(\"d\".date, '-7 days')\n            WHERE\n              \"d\".date = $2;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "date!: NaiveDate",
+        "ordinal": 0,
+        "type_info": "Date"
+      },
+      {
+        "name": "quest_id!: String",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "point_id!: String",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "requirements!: f64",
+        "ordinal": 3,
+        "type_info": "Null"
+      },
+      {
+        "name": "latest_complete_date!: Option<NaiveDate>",
+        "ordinal": 4,
+        "type_info": "Null"
+      },
+      {
+        "name": "rolling_points!: f64",
+        "ordinal": 5,
+        "type_info": "Null"
+      },
+      {
+        "name": "is_weekly_requirement_complete!: bool",
+        "ordinal": 6,
+        "type_info": "Null"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "9de4c49a234f5326cad42f453b8e2d220cc2da0b246eb4384783189b3ca0dcf1"
+}

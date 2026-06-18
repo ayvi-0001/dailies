@@ -1,0 +1,164 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT\n                user AS \"user!\",\n                date AS \"date!\",\n                point_id AS \"point_id!\",\n                quest_id AS \"quest_id!\",\n                sequence AS \"sequence!\",\n                chain AS \"chain!\",\n                name AS \"name!\",\n                type AS \"type!: QuestType\",\n                points AS \"points: f64\",\n                default_points AS \"default_points!: f64\",\n                total AS \"total!: f64\",\n                weight AS \"weight!: f64\",\n                streak_target AS \"streak_target: i64\",\n                requirements AS \"requirements: Requirements\",\n                time_start AS \"time_start: NaiveTime\",\n                time_end AS \"time_end: NaiveTime\",\n                accepted AS \"accepted!: NaiveDateTime\",\n                archived AS \"archived: NaiveDateTime\",\n                days AS \"days: Json<Vec<i64>>\",\n                description,\n                note,\n                streak AS \"streak: i64\",\n                previous_streak AS \"previous_streak: i64\",\n                complete AS \"complete: f64\",\n                points_weighted AS \"points_weighted: f64\"\n            FROM\n                \"dailies\"\n            WHERE\n                user = $1\n                AND ($2 = \"\" OR quest_id = $2)\n                AND date >= $3\n                AND date <= $4\n            ORDER BY\n                date DESC,\n                sequence;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "user!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "date!",
+        "ordinal": 1,
+        "type_info": "Date"
+      },
+      {
+        "name": "point_id!",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "quest_id!",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "sequence!",
+        "ordinal": 4,
+        "type_info": "Integer"
+      },
+      {
+        "name": "chain!",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "name!",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "type!: QuestType",
+        "ordinal": 7,
+        "type_info": "Text"
+      },
+      {
+        "name": "points: f64",
+        "ordinal": 8,
+        "type_info": "Float"
+      },
+      {
+        "name": "default_points!: f64",
+        "ordinal": 9,
+        "type_info": "Float"
+      },
+      {
+        "name": "total!: f64",
+        "ordinal": 10,
+        "type_info": "Float"
+      },
+      {
+        "name": "weight!: f64",
+        "ordinal": 11,
+        "type_info": "Float"
+      },
+      {
+        "name": "streak_target: i64",
+        "ordinal": 12,
+        "type_info": "Integer"
+      },
+      {
+        "name": "requirements: Requirements",
+        "ordinal": 13,
+        "type_info": "Null"
+      },
+      {
+        "name": "time_start: NaiveTime",
+        "ordinal": 14,
+        "type_info": "Time"
+      },
+      {
+        "name": "time_end: NaiveTime",
+        "ordinal": 15,
+        "type_info": "Time"
+      },
+      {
+        "name": "accepted!: NaiveDateTime",
+        "ordinal": 16,
+        "type_info": "Datetime"
+      },
+      {
+        "name": "archived: NaiveDateTime",
+        "ordinal": 17,
+        "type_info": "Datetime"
+      },
+      {
+        "name": "days: Json<Vec<i64>>",
+        "ordinal": 18,
+        "type_info": "Text"
+      },
+      {
+        "name": "description",
+        "ordinal": 19,
+        "type_info": "Text"
+      },
+      {
+        "name": "note",
+        "ordinal": 20,
+        "type_info": "Text"
+      },
+      {
+        "name": "streak: i64",
+        "ordinal": 21,
+        "type_info": "Integer"
+      },
+      {
+        "name": "previous_streak: i64",
+        "ordinal": 22,
+        "type_info": "Integer"
+      },
+      {
+        "name": "complete: f64",
+        "ordinal": 23,
+        "type_info": "Float"
+      },
+      {
+        "name": "points_weighted: f64",
+        "ordinal": 24,
+        "type_info": "Float"
+      }
+    ],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "3647c4955e1923f01606c9d1b7249ac8fa82d0633d76479f86d72121160b2fd4"
+}

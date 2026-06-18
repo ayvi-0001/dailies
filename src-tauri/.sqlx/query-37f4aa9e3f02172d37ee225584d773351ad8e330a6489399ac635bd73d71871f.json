@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT\n                date,\n                chain,\n                SUM(points_weighted) / SUM(weight) AS \"value!: f64\"\n            FROM\n                \"dailies\"\n            WHERE\n                user = $1\n                AND points IS NOT NULL\n                AND date >= $2\n                AND date <= $3\n            GROUP BY\n                date,\n                chain\n            ORDER BY\n                date DESC;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "date",
+        "ordinal": 0,
+        "type_info": "Date"
+      },
+      {
+        "name": "chain",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "value!: f64",
+        "ordinal": 2,
+        "type_info": "Null"
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "37f4aa9e3f02172d37ee225584d773351ad8e330a6489399ac635bd73d71871f"
+}

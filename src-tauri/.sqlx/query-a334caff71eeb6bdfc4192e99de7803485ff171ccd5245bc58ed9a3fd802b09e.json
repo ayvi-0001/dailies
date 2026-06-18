@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE \"config\" SET \"boolean\" = $3 WHERE user_id = $1 AND key = $2;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "a334caff71eeb6bdfc4192e99de7803485ff171ccd5245bc58ed9a3fd802b09e"
+}

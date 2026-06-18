@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT session_id AS id FROM \"sessions\" ORDER BY id DESC LIMIT 1;",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "495542386a7d6788c6b2718126471768f7c1be0b2ad32d25bcfdacd7952baf61"
+}

@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "PRAGMA user_version;",
+  "describe": {
+    "columns": [
+      {
+        "name": "user_version",
+        "ordinal": 0,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "c62def1d7112c6f3e8bf1432f8cf2582a05ce640b851b10c1c3c8af39ce756c9"
+}

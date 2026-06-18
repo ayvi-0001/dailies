@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT\n               COALESCE(SUM(points_weighted), 0) AS \"total_points!: f64\",\n               SUM(weight) AS \"total_weight!: f64\"\n             FROM\n               \"dailies\"\n             WHERE\n               user = $1\n               AND date = $2\n               AND points IS NOT NULL;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "total_points!: f64",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "total_weight!: f64",
+        "ordinal": 1,
+        "type_info": "Null"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "ce630625d6deb25a17b348820aa79c5cf89fa209baeb0222685fcf28e346b7a9"
+}

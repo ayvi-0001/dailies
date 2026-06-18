@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE \"config\" SET \"integer\" = $3 WHERE user_id = $1 AND key = $2;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "2fe461bc52f667f623caae271675d52ab8d94696dee76fad342dc5576ee66897"
+}

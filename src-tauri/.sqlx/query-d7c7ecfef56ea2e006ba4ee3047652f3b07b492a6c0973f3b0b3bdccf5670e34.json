@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE \"config\" SET \"float\" = $3 WHERE user_id = $1 AND key = $2;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "d7c7ecfef56ea2e006ba4ee3047652f3b07b492a6c0973f3b0b3bdccf5670e34"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                INSERT INTO \"quest_chains\"(user_id, chain, sequence, collapsed)\n                SELECT $1, $2, $3, $4\n                WHERE NOT EXISTS (\n                    SELECT 1 FROM \"quest_chains\" WHERE user_id = $1 AND chain = $2\n                );\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "8398568eb51b8eb7148ac8932e18fd1bf767728e4554b9b6221fc9b278f8353d"
+}

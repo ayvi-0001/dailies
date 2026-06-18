@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            UPDATE \"quests\"\n            SET\n                chain = $3,\n                sequence = (SELECT COALESCE((SELECT MAX(sequence) + 1 FROM \"quests\" WHERE user_id = $1 AND chain = $3 GROUP BY chain), 1))\n            WHERE id = $2;\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "5058fc37ca338bc59940a6b969a0084fb528ba176e96763f7387f8c9ef72871a"
+}
