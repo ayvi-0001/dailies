@@ -89,11 +89,11 @@ export default function Details(props: DetailsProps): React.ReactElement {
           {nextRequiredCompletionDate.current && (
             <>
               <span>Next req. date: {`${nextRequiredCompletionDate.current} `}</span>
-              <br></br>
+              <br />
             </>
           )}
           <span>Last completed: {`${weeklyQuestStats?.latestCompleteDate} `}</span>
-          <br></br>
+          <br />
           <span>Weekly points: {`${weeklyQuestStats?.rollingPoints} `}</span>
         </span>
       );

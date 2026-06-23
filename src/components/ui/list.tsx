@@ -5,16 +5,12 @@ export default function ComponentList({
   separator,
 }: {
   elements: React.ReactElement[];
-  separator: React.ReactElement;
-}): React.ReactElement {
-  return (
-    <>
-      {elements.map((item, index, arr) => (
-        <React.Fragment key={item.key || index}>
-          {index < arr.length && index >= 1 && separator}
-          {item}
-        </React.Fragment>
-      ))}
-    </>
-  );
+  separator?: React.ReactElement;
+}): React.ReactElement[] {
+  return elements.map((item, index, arr) => (
+    <React.Fragment key={item.key || index}>
+      {index < arr.length && index >= 1 && (separator ?? <></>)}
+      {item}
+    </React.Fragment>
+  ));
 }

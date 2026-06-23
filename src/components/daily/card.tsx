@@ -203,11 +203,11 @@ export function CardStats(props: CardStatsProps): React.ReactElement {
   const { daily, disabled, points, totalWeight, updateDailyAction, setPointsAction } = props;
 
   return (
-    <div className="flex flex-none flex-col justify-between gap-1">
-      <div className="place-items-end justify-self-end-safe">
+    <div className="flex flex-col justify-between">
+      <div className="place-items-end justify-self-end">
         <PointsDisplay daily={daily} totalWeight={totalWeight} />
       </div>
-      <div className="place-items-end justify-self-end-safe">
+      <div className="place-items-end justify-self-end">
         <PointsInput
           daily={daily}
           disabled={disabled}
