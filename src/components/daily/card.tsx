@@ -254,6 +254,8 @@ export function ContextMenuContent(props: ContextMenuContentProps): React.ReactE
         initial={{ opacity: 0, scale: 0.9 }}
         transition={{ duration: 0.2 }}
       >
+        <EditMenuOption onOpen={editOnOpenAction} />
+        {toggleHistoryAction && <HistoryMenuOption toggleHistory={toggleHistoryAction} />}
         {daily.points !== null && (
           <AbandonDailyMenuOption
             daily={daily}
@@ -261,8 +263,6 @@ export function ContextMenuContent(props: ContextMenuContentProps): React.ReactE
             updateDaily={updateDailyAction}
           />
         )}
-        <EditMenuOption onOpen={editOnOpenAction} />
-        {toggleHistoryAction && <HistoryMenuOption toggleHistory={toggleHistoryAction} />}
         {toggleHistoryAction &&
           (!daily.archived ? (
             <ArchiveDailyMenuOption
