@@ -24,7 +24,7 @@ export function NameField(props: NameFieldProps): React.ReactElement {
     <heroui.Input
       isRequired
       aria-autocomplete="none"
-      className="text-sm text-white"
+      className="min-w-0 text-sm text-white"
       classNames={{ innerWrapper: "text-xs" }}
       errorMessage={(_: ValidationResult) => mapErrors(nameErrors)}
       isInvalid={nameErrors?.length > 0}
@@ -52,7 +52,7 @@ export function TypeField(props: TypeFieldProps): React.ReactElement {
   return (
     <heroui.Autocomplete
       isRequired
-      className="text-sm text-white"
+      className="min-w-0 text-sm text-white"
       classNames={{ base: "text-sm" }}
       defaultInputValue={
         daily &&
@@ -91,7 +91,7 @@ export function ChainField(props: ChainFieldProps): React.ReactElement {
     <heroui.Autocomplete
       allowsCustomValue
       isRequired
-      className="text-sm text-white"
+      className="min-w-0 text-sm text-white"
       classNames={{ base: "text-sm" }}
       defaultInputValue={daily?.chain ?? ""}
       defaultItems={questChains.map((questChain) => { return { key: questChain, name: questChain }; })}
@@ -114,7 +114,7 @@ export function WeightField({ daily }: { daily?: Daily }): React.ReactElement {
   return (
     <heroui.NumberInput
       isRequired
-      className="text-sm text-white"
+      className="min-w-0 text-sm text-white"
       classNames={{ innerWrapper: "text-xs" }}
       defaultValue={daily ? daily.weight : 0}
       label="Weight"
@@ -138,7 +138,7 @@ export function TotalField(props: TotalFieldProps): React.ReactElement {
   return (
     <heroui.NumberInput
       isRequired
-      className="text-sm text-white"
+      className="min-w-0 text-sm text-white"
       classNames={{ innerWrapper: "text-xs" }}
       label="Total"
       minValue={1}
@@ -164,7 +164,7 @@ export function DefaultPointsField(props: DefaultPointsFieldProps): React.ReactE
   return (
     <heroui.NumberInput
       isRequired
-      className="text-sm text-white"
+      className="min-w-0 text-sm text-white"
       classNames={{ innerWrapper: "text-xs", label: "text-xs" }}
       errorMessage={(_: ValidationResult) => mapErrors(defaultPointsErrors)}
       isInvalid={defaultPointsErrors?.length > 0}
@@ -183,7 +183,7 @@ export function DefaultPointsField(props: DefaultPointsFieldProps): React.ReactE
 export function StreakTargetField({ daily }: { daily?: Daily }): React.ReactElement {
   return (
     <heroui.NumberInput
-      className="text-sm text-white"
+      className="min-w-0 text-sm text-white"
       classNames={{ innerWrapper: "text-xs", label: "text-xs" }}
       defaultValue={daily?.streakTarget ?? undefined}
       label="Streak Target"
@@ -210,7 +210,7 @@ export function TimeStartField(props: TimeStartFieldProps): React.ReactElement {
   return (
     <heroui.TimeInput
       isRequired
-      className="text-sm text-white"
+      className="min-w-0 text-sm text-white"
       classNames={{ ...timeFieldClassNames }}
       errorMessage={(_: ValidationResult) => mapErrors(timeStartErrors)}
       isInvalid={timeStartErrors?.length > 0}
@@ -236,7 +236,7 @@ export function TimeEndField(props: TimeEndFieldProps): React.ReactElement {
   return (
     <heroui.TimeInput
       isRequired
-      className="text-sm text-white"
+      className="min-w-0 text-sm text-white"
       classNames={{ ...timeFieldClassNames }}
       errorMessage={(_: ValidationResult) => mapErrors(timeEndErrors)}
       isInvalid={timeEndErrors?.length > 0}
@@ -255,7 +255,7 @@ export function DescriptionField({ daily }: { daily?: Daily }): React.ReactEleme
     <heroui.Textarea
       disableAutosize
       isClearable
-      className="text-sm text-white"
+      className="min-w-0 text-sm text-white"
       classNames={{
         base: "text-sm",
         innerWrapper: "text-xs",
@@ -276,7 +276,7 @@ export function NoteField({ daily }: { daily?: Daily }): React.ReactElement {
     <heroui.Textarea
       disableAutosize
       isClearable
-      className="text-sm text-white"
+      className="min-w-0 text-sm text-white"
       classNames={{
         base: "text-sm",
         innerWrapper: "text-xs",
@@ -405,7 +405,7 @@ export function DaysField(props: DaysFieldProps): React.ReactElement {
 }
 
 const mapErrors = (errArr: React.ReactNode[]): React.ReactElement => (
-  <div className="min-w-0 flex-1">
+  <div className="min-w-0 flex-1 text-wrap">
     <ul>
       {errArr.map((error, i) => (
         <li key={i} className="text-xs text-red-500">
