@@ -1,8 +1,8 @@
-import { FlatCompat } from "@eslint/eslintrc";
+import * as eslint from "@eslint/eslintrc";
 import stylistic from "@stylistic/eslint-plugin";
 import react from "eslint-plugin-react";
 
-const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
+const compat = new eslint.FlatCompat({ baseDirectory: import.meta.dirname });
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
